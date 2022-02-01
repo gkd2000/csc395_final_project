@@ -1,0 +1,11 @@
+{
+  "C_Cpp.intelliSenseEngine": "Default",
+  "files.associations": {
+    "*.hh": "cpp",
+    "*.cc": "cpp",
+    "*.t": "ignore",
+    "stdint.h": "c",
+    "stivale2.h": "c",
+    "stddef.h": "c"
+  }
+}
