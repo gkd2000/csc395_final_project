@@ -4,6 +4,7 @@
 #include "stivale2.h"
 #include "util.h"
 
+
 // Reserve space for the stack
 static uint8_t stack[8192];
 
