@@ -125,15 +125,47 @@ void _start(struct stivale2_struct *hdr)
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
 
+  // find physical memory
+  struct stivale2_struct_tag_hhdm *physicalmem = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
+  kprint_x(physicalmem->addr);
+
+  struct stivale2_struct_tag_memmap *vir = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
+  term_write("\n", 1);
+
+  kprint_x(vir->memmap[0].base);
+  term_write("\n", 1);
+
+  // struct stivale2_struct_tag_kernel_base_address *test = find_tag(hdr, 0x060d78874a2a8af0);
+  // term_write("physical: ", 10);
+  // kprint_x(test->physical_base_address);
+
+  // term_write("physical: ", 10);
+  // kprint_x(test->virtual_base_address);
+
+  for (int i = 0; i < vir->entries; i++) {
+    if (vir->memmap[i].type == 1) {
+
+      kprint_s("0x");
+      kprint_x(vir->memmap[i].base);
+      kprint_s("-0x");
+      kprint_x(vir->memmap[i].base + vir->memmap[i].length);
+
+      kprint_s(" at 0x");
+      kprint_x(vir->memmap[i].base + physicalmem->addr);
+      kprint_s("-0x");
+      kprint_x(vir->memmap[i].base + vir->memmap[i].length + physicalmem->addr);
+      kprint_c('\n');
+    }
+  }
+
   // Print a greeting
-  term_write("Hello Kernel!\n", 14);
 
-  char *a = "Asdasdasd ";
-  kprint_s(a);
+  // char *a = "Asdasdasd ";
+  // kprint_s(a);
 
-  uint64_t i = 153123123;
-  kprint_x(i);
-  kprint_p(a);
+  // uint64_t i = 153123123;
+  // kprint_x(i);
+  // kprint_p(a);
   // We're done, just hang...
   halt();
 }
