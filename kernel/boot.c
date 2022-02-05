@@ -3,6 +3,7 @@
 
 #include "stivale2.h"
 #include "util.h"
+#include "kprint.h"
 
 // Reserve space for the stack
 static uint8_t stack[8192];
@@ -54,8 +55,6 @@ void *find_tag(struct stivale2_struct *hdr, uint64_t id)
   return NULL;
 }
 
-typedef void (*term_write_t)(const char *, size_t);
-term_write_t term_write = NULL;
 
 void term_setup(struct stivale2_struct *hdr)
 {
@@ -67,58 +66,9 @@ void term_setup(struct stivale2_struct *hdr)
     halt();
 
   // Save the term_write function pointer
-  term_write = (term_write_t)tag->term_write;
+  set_term_write((term_write_t)tag->term_write);
 }
 
-void kprint_c(char c)
-{
-  term_write(&c, 1);
-}
-
-uint32_t count(const char *str)
-{
-  uint32_t length = 0;
-  char *temp = str;
-  while (*temp != '\0')
-  {
-    length++;
-    temp++;
-  }
-
-  return length;
-}
-void kprint_s(const char *str)
-{
-  uint32_t length = count(str);
-  term_write(str, length);
-}
-
-void kprint_d(uint64_t value)
-{
-  if (value != 0)
-  {
-    kprint_d(value / 10);
-
-    kprint_c(value % 10 + 48);
-  }
-}
-
-void kprint_x(uint64_t value)
-{
-  char table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-  if (value != 0)
-  {
-    kprint_x(value / 16);
-
-    kprint_c(table[value % 16]);
-  };
-}
-
-void kprint_p(void *ptr)
-{
-  term_write("0x", 2);
-  kprint_x((uint64_t)ptr);
-}
 
 void _start(struct stivale2_struct *hdr)
 {
@@ -127,45 +77,22 @@ void _start(struct stivale2_struct *hdr)
 
   // find physical memory
   struct stivale2_struct_tag_hhdm *physicalmem = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
-  kprint_x(physicalmem->addr);
+
+
 
   struct stivale2_struct_tag_memmap *vir = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
-  term_write("\n", 1);
 
-  kprint_x(vir->memmap[0].base);
-  term_write("\n", 1);
 
-  // struct stivale2_struct_tag_kernel_base_address *test = find_tag(hdr, 0x060d78874a2a8af0);
-  // term_write("physical: ", 10);
-  // kprint_x(test->physical_base_address);
-
-  // term_write("physical: ", 10);
-  // kprint_x(test->virtual_base_address);
 
   for (int i = 0; i < vir->entries; i++) {
     if (vir->memmap[i].type == 1) {
 
-      kprint_s("0x");
-      kprint_x(vir->memmap[i].base);
-      kprint_s("-0x");
-      kprint_x(vir->memmap[i].base + vir->memmap[i].length);
-
-      kprint_s(" at 0x");
-      kprint_x(vir->memmap[i].base + physicalmem->addr);
-      kprint_s("-0x");
-      kprint_x(vir->memmap[i].base + vir->memmap[i].length + physicalmem->addr);
-      kprint_c('\n');
+      kprintf("0x%d-0x%d mapped at 0x%d-0x%d\n", vir->memmap[i].base,
+              vir->memmap[i].base + vir->memmap[i].length, vir->memmap[i].base + physicalmem->addr,
+              vir->memmap[i].base + vir->memmap[i].length + physicalmem->addr);
     }
   }
 
-  // Print a greeting
-
-  // char *a = "Asdasdasd ";
-  // kprint_s(a);
-
-  // uint64_t i = 153123123;
-  // kprint_x(i);
-  // kprint_p(a);
   // We're done, just hang...
   halt();
 }
