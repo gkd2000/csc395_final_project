@@ -8,12 +8,21 @@
 // Reserve space for the stack
 static uint8_t stack[8192];
 
+
+static struct stivale2_tag unmap_null_hdr_tag = {
+  .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
+  .next = 0
+};
+
+
 // Request a terminal from the bootloader
 static struct stivale2_header_tag_terminal terminal_hdr_tag = {
     .tag = {
         .identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
-        .next = 0},
+        .next = (uintptr_t)&unmap_null_hdr_tag},
     .flags = 0};
+
+
 
 // Declare the header for the bootloader
 __attribute__((section(".stivale2hdr"), used)) static struct stivale2_header stivale_hdr = {
@@ -74,6 +83,7 @@ void _start(struct stivale2_struct *hdr)
 {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
+  idt_setup();
 
   // find physical memory
   struct stivale2_struct_tag_hhdm *physicalmem = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
@@ -92,6 +102,9 @@ void _start(struct stivale2_struct *hdr)
               vir->memmap[i].base + vir->memmap[i].length + physicalmem->addr);
     }
   }
+
+    int* p = (int*)0x1;
+  *p = 123;
 
   // We're done, just hang...
   halt();
