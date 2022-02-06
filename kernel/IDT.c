@@ -59,8 +59,8 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   f = f >> 16;
 
   uint32_t offset_2 = 0xffffffff & f;
-  
-  
+
+
   idt_entry_t* entry = &idt[index];
 
   entry->offset_0 = offset_0;
@@ -92,10 +92,30 @@ void idt_setup() {
   // Step 2: Use idt_set_handler() to set handlers for the standard exceptions (1--21)
   // Write me!
 
-  idt_set_handler(14, divide_error_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(0, divide_error_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(1, debug_exception_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(2, nmi_interrupt_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(3, breakpoint_handler, IDT_TYPE_TRAP);
+  idt_set_handler(4, overflow_handler, IDT_TYPE_TRAP);
+  idt_set_handler(5, bound_range_exceeded_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(6, invalid_opcode_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(7, device_not_available_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(8, double_fault_handler_ec, IDT_TYPE_INTERRUPT);
+  idt_set_handler(9, coprocessor_segment_overrun_handler_ec, IDT_TYPE_INTERRUPT);
+  idt_set_handler(10, invalid_tss_handler_ec, IDT_TYPE_INTERRUPT);
+  idt_set_handler(11, segment_not_present_handler_ec, IDT_TYPE_INTERRUPT);
+  idt_set_handler(12, stack_segment_fault_handler_ec, IDT_TYPE_INTERRUPT);
+  idt_set_handler(13, general_protection_handler_ec, IDT_TYPE_INTERRUPT);
+  idt_set_handler(14, page_fault_handler_ec, IDT_TYPE_INTERRUPT);
+  idt_set_handler(15, reserve_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(16, x87_fpu_floating_point_error_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(17, alignment_check_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(18, machine_check_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(19, simd_floating_point_exception_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(20, virtualization_exception_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(21, control_protection_exception_handler_ec, IDT_TYPE_INTERRUPT);
 
-  kprintf("entry: %d\n", idt[0].present);
-  // halt();
+
 
   // Step 3: Install the IDT
   idt_record_t record = {
