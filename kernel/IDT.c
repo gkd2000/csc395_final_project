@@ -11,10 +11,10 @@
 #define IDT_TYPE_INTERRUPT 0xE
 #define IDT_TYPE_TRAP 0xF
 
-
-
-// Make an IDT
-
+/** 
+ * Mimics the standard C function memset. 
+ * Writes size bytes of value c to the memory pointed to by arr.
+ */
 void memset(void* arr, int c, uint32_t size) {
     // create a enmty idt
     uint8_t * temp = arr;
@@ -22,9 +22,6 @@ void memset(void* arr, int c, uint32_t size) {
         temp[i] = c;
     }
 }
-
-
-
 
 /**
  * Set an interrupt handler for the given interrupt number.
@@ -45,24 +42,24 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   //   selector=IDT_CODE_SELECTOR
 
 
-
-  // we try to split the function pointer.
+  // We try to split the function pointer.
   uint64_t f = (uint64_t) fn;
 
+  // Get the least significant 16 bits
+  uint16_t offset_0 = 0xffff & f; 
 
-  uint16_t offset_0 = 0xffff & f;
-
+  // Get the next least significant 16 bits (bits 16 - 31)
   f = f >> 16;
-
   uint16_t offset_1 = 0xffff & f;
 
+  // Get the most signifcant 32 bits
   f = f >> 16;
-
   uint32_t offset_2 = 0xffffffff & f;
 
-
+  // Find the entry to fill in
   idt_entry_t* entry = &idt[index];
 
+  // Set all the fields of the entry
   entry->offset_0 = offset_0;
   entry->offset_1 = offset_1;
   entry->offset_2 = offset_2;
@@ -84,14 +81,11 @@ typedef struct idt_record {
  * the IDT.
  */
 void idt_setup() {
-  // Step 1: Zero out the IDT, probably using memset (which you'll have to implement)
-  // Write me!
+  // Step 1: Zero out the IDT, probably using memset
   memset(idt, 0, 4096);
 
 
   // Step 2: Use idt_set_handler() to set handlers for the standard exceptions (1--21)
-  // Write me!
-
   idt_set_handler(0, divide_error_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(1, debug_exception_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(2, nmi_interrupt_handler, IDT_TYPE_INTERRUPT);
@@ -115,15 +109,11 @@ void idt_setup() {
   idt_set_handler(20, virtualization_exception_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(21, control_protection_exception_handler_ec, IDT_TYPE_INTERRUPT);
 
-
-
   // Step 3: Install the IDT
   idt_record_t record = {
     .size = sizeof(idt),
     .base = idt
   };
   __asm__("lidt %0" :: "m"(record));
-
-
 
 }
