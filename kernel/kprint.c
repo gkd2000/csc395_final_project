@@ -4,7 +4,7 @@
  * Set the term_write function, which allows us to print output to the terminal
  * \param t function pointer to the function we want to set term_write to be
  */
-void set_term_write(term_write_t t) 
+void set_term_write(term_write_t t)
 {
   term_write = t;
 }
@@ -34,7 +34,7 @@ void kprint_c(char c)
   term_write(&c, 1);
 }
 
-// Print a string to the terminal. 
+// Print a string to the terminal.
 // The input string, str, must be null-terminated.
 void kprint_s(const char *str)
 {
@@ -74,11 +74,11 @@ void kprint_p(void *ptr)
 }
 
 /**
- * Mimic the basic functionality of printf. Given a format string and 
- * a variable number of additional arguments, print the format string, with the 
- * additional arguments inserted, to the terminal. 
- * Accepted format specifiers are: %c (character), %s (string), 
- * %d (integer, printed in decimal), %x (integer, printed in hexadecimal), 
+ * Mimic the basic functionality of printf. Given a format string and
+ * a variable number of additional arguments, print the format string, with the
+ * additional arguments inserted, to the terminal.
+ * Accepted format specifiers are: %c (character), %s (string),
+ * %d (integer, printed in decimal), %x (integer, printed in hexadecimal),
  * and %p (pointer).
  */
 void kprintf(const char *format, ...)

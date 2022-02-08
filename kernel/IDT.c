@@ -1,7 +1,6 @@
 #include "IDT.h"
 
-#include "kprint.h"
-
+#include "handler.h"
 
 // Every interrupt handler must specify a code selector. We'll use entry 5 (5*8=0x28), which
 // is where our bootloader set up a usable code selector for 64-bit mode.
@@ -11,8 +10,8 @@
 #define IDT_TYPE_INTERRUPT 0xE
 #define IDT_TYPE_TRAP 0xF
 
-/** 
- * Mimics the standard C function memset. 
+/**
+ * Mimics the standard C function memset.
  * Writes size bytes of value c to the memory pointed to by arr.
  */
 void memset(void* arr, int c, uint32_t size) {
@@ -46,7 +45,7 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   uint64_t f = (uint64_t) fn;
 
   // Get the least significant 16 bits
-  uint16_t offset_0 = 0xffff & f; 
+  uint16_t offset_0 = 0xffff & f;
 
   // Get the next least significant 16 bits (bits 16 - 31)
   f = f >> 16;
@@ -95,7 +94,7 @@ void idt_setup() {
   idt_set_handler(6, invalid_opcode_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(7, device_not_available_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(8, double_fault_handler_ec, IDT_TYPE_INTERRUPT);
-  idt_set_handler(9, coprocessor_segment_overrun_handler_ec, IDT_TYPE_INTERRUPT);
+  idt_set_handler(9, coprocessor_segment_overrun_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(10, invalid_tss_handler_ec, IDT_TYPE_INTERRUPT);
   idt_set_handler(11, segment_not_present_handler_ec, IDT_TYPE_INTERRUPT);
   idt_set_handler(12, stack_segment_fault_handler_ec, IDT_TYPE_INTERRUPT);
@@ -103,7 +102,7 @@ void idt_setup() {
   idt_set_handler(14, page_fault_handler_ec, IDT_TYPE_INTERRUPT);
   idt_set_handler(15, reserve_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(16, x87_fpu_floating_point_error_handler, IDT_TYPE_INTERRUPT);
-  idt_set_handler(17, alignment_check_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(17, alignment_check_handler_ec, IDT_TYPE_INTERRUPT);
   idt_set_handler(18, machine_check_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(19, simd_floating_point_exception_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(20, virtualization_exception_handler, IDT_TYPE_INTERRUPT);
