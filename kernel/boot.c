@@ -86,6 +86,7 @@ void _start(struct stivale2_struct *hdr)
   term_setup(hdr);
   idt_setup();
   pic_init();
+  pic_unmask_irq(1);
 
   // Find the start of physical memory
   struct stivale2_struct_tag_hhdm *physicalmem = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
