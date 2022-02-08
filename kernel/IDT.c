@@ -2,6 +2,7 @@
 
 #include "handler.h"
 #include "pic.h"
+#include "mem.h"
 
 // Every interrupt handler must specify a code selector. We'll use entry 5 (5*8=0x28), which
 // is where our bootloader set up a usable code selector for 64-bit mode.
@@ -11,17 +12,7 @@
 #define IDT_TYPE_INTERRUPT 0xE
 #define IDT_TYPE_TRAP 0xF
 
-/**
- * Mimics the standard C function memset.
- * Writes size bytes of value c to the memory pointed to by arr.
- */
-void memset(void* arr, int c, uint32_t size) {
-    // create a enmty idt
-    uint8_t * temp = arr;
-    for (int i = 0; i < size; i++) {
-        temp[i] = c;
-    }
-}
+
 
 /**
  * Set an interrupt handler for the given interrupt number.

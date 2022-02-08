@@ -5,6 +5,9 @@
 
 #include "kprint.h"
 #include "util.h"
+#include "port.h"
+#include "pic.h"
+#include "char.h"
 
 // Do we need this?
 __attribute__((interrupt)) void example_handler(interrupt_context_t* ctx)
@@ -169,6 +172,6 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
 
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
 {
-    kprintf("hello\n");
-  halt();
+    kprintf("%c\n", getchar(inb(0x60)));
+    outb(PIC1_COMMAND, PIC_EOI);
 }
