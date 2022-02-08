@@ -4,6 +4,8 @@
 #include "stivale2.h"
 #include "util.h"
 #include "kprint.h"
+#include "IDT.h"
+#include "pic.h"
 
 
 // Reserve space for the stack
@@ -83,6 +85,7 @@ void _start(struct stivale2_struct *hdr)
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
   idt_setup();
+  pic_init();
 
   // Find the start of physical memory
   struct stivale2_struct_tag_hhdm *physicalmem = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
@@ -99,10 +102,6 @@ void _start(struct stivale2_struct *hdr)
               vir->memmap[i].base + vir->memmap[i].length + physicalmem->addr);
     }
   }
-
-  // Cause a page fault (to test IDT)
-  int* p = (int*)0x1;
-  *p = 123;
 
   // We're done, just hang...
   halt();

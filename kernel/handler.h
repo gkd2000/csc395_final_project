@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "util.h"
+// #include "util.h"
 
 // Struct for storing what was happening when an interrupt occurred
 typedef struct interrupt_context {
@@ -78,3 +78,6 @@ __attribute__((interrupt)) void virtualization_exception_handler(interrupt_conte
 
 // Handler for a control protection exception (fault)
 __attribute__((interrupt)) void control_protection_exception_handler_ec(interrupt_context_t *ctx, uint64_t ec);
+
+// Handler for a key press (irq1)
+__attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx);

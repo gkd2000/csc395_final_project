@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include "kprint.h"
+#include "util.h"
 
 // Do we need this?
 __attribute__((interrupt)) void example_handler(interrupt_context_t* ctx)
@@ -166,4 +167,8 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
   halt();
 }
 
-
+__attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
+{
+    kprintf("hello\n");
+  halt();
+}
