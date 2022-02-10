@@ -172,6 +172,12 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
 
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
 {
-    kprintf("%c\n", getchar(inb(0x60)));
+    // Read the character and prepare to accept new inputs
+    char c = getchar(inb(0x60));
     outb(PIC1_COMMAND, PIC_EOI);
+
+    // Add the character to our buffer
+    if(c != 0 && c <= 127) {
+      buffer_put(c);
+    }
 }

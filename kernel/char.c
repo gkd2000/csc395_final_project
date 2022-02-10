@@ -1,5 +1,6 @@
 #include "char.h"
 
+
 // device control 1(17) is for left control, device control 2(19) is for right control
 // shift out (14) is assigned to left shift
 // device control 3(18) is used for left and right alt, devicecontrol 4(20) is for caps lock
@@ -22,23 +23,78 @@
 // 154 -  f11 pressed
 // 155 -  f12 pressed
 
+/*
 uint8_t table[] = {
   0, 27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 8, 9,
   'q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']', 13, 17, 'a', 's',
-  'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 14, '\\', 'z', 'x','c','v',
-  'b','n','m',',','.','/', 15, '*',  18, ' ', 20, 129, 130, 131, 132, 133,
+  'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x','c','v',
+  'b','n','m',',','.','/', 0, '*',  18, ' ', 20, 129, 130, 131, 132, 133,
+  134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+  150,151,152,153,0,0,0,154,155
+
+};*/
+
+uint8_t table[] = {
+   0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 8, 9,
+  'q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']', 13, 0, 'a', 's',
+  'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x','c','v',
+  'b','n','m',',','.','/', 0, '*',  0, ' ', 0, 129, 130, 131, 132, 133,
   134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
   150,151,152,153,0,0,0,154,155
 
 };
+
+uint8_t uppercase_table[] = {
+  
+}
+
+
+// TODO: Handle shifts by adding some if 
 uint8_t getchar(uint8_t ch) {
   // check whether it is a key press, or whether it is a key release.
-
+  if (ch == 0x2A) {
+    lshift = 1;
+  } else if (ch == 0x36) {
+    rshift = 1;
+  } else if (ch == 0xAA) {
+    lshift = 0;
+  } else if (ch == 0xB6) {
+    rshift = 0;
+  }
+  
   if (ch <= 0x58) {
-    return table[ch];
+    // key was pressed
+    return (lshift | rshift) ? table[ch] - 32 : table[ch];
   } else if (ch <= 0xd8 && ch >= 0x80) {
-    return table[ch - 0x80];
+    // key was released
+    return 0;
   }
 
   return 0;
+}
+
+void buffer_put(char c) {
+  if(count != SIZE) {
+    char_buffer[(start + count) % SIZE] = c;
+    count++;
+  }
+  return;
+}
+
+/**
+ * Read one character from the keyboard buffer. If the keyboard buffer is empty this function will
+ * block until a key is pressed.
+ *
+ * \returns the next character input from the keyboard
+ */
+char kgetc() {
+  char c;
+  // Loop until there is something in the buffer
+  while(count == 0);
+
+  // There's something in the buffer! Get it
+  c = char_buffer[start];
+  start = (start + 1) % SIZE;
+  count--;
+  return c;
 }

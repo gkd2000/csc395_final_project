@@ -6,6 +6,7 @@
 #include "kprint.h"
 #include "IDT.h"
 #include "pic.h"
+#include "char.h"
 
 
 // Reserve space for the stack
@@ -102,6 +103,12 @@ void _start(struct stivale2_struct *hdr)
               vir->memmap[i].base + vir->memmap[i].length, vir->memmap[i].base + physicalmem->addr,
               vir->memmap[i].base + vir->memmap[i].length + physicalmem->addr);
     }
+  }
+
+  for(uint64_t i = 0; i < 1000000000000000L; i++){}
+  
+  while(1) {
+    kprintf("%c\n", kgetc());
   }
 
   // We're done, just hang...

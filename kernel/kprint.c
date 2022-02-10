@@ -42,20 +42,28 @@ void kprint_s(const char *str)
   term_write(str, length);
 }
 
-// Print a number in decimal to the terminal, without leading zeros
-void kprint_d(uint64_t value)
-{
+void kprint_d_helper(uint64_t value) {
   if (value != 0)
   {
-    kprint_d(value / 10); //> Recursive call
+    kprint_d_helper(value / 10); //> Recursive call
 
     kprint_c(value % 10 + 48); //> Print the least significant digit
   }
 }
 
-// Print a number in hexadecimal to the terminal, without leading zeros
-void kprint_x(uint64_t value)
+// Print a number in decimal to the terminal, without leading zeros
+void kprint_d(uint64_t value)
 {
+  if (value != 0)
+  {
+    kprint_d_helper(value);
+  } else {
+    kprint_c('0');
+  }
+}
+
+// Print a number in hexadecimal to the terminal, without leading zeros
+void kprint_x(uint64_t value) {
   // Hexadecimal digits
   char table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
   if (value != 0)
