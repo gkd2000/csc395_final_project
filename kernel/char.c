@@ -65,9 +65,11 @@ uint8_t getchar(uint8_t ch) {
     lshift = 0;
   } else if (ch == 0xB6) {
     rshift = 0;
-  } else if (ch == 0x3A) {
+  } else if (ch == 0xBA) {
     capslock = capslock ? 0 : 1;
     kprintf("capslock: %d\n", capslock);
+  } else if (ch == 0x0E) {
+    buffer_delete();
   }
 
   if (ch <= 0x58) {
@@ -81,7 +83,14 @@ uint8_t getchar(uint8_t ch) {
   return 0;
 }
 
-void buffer_put(char c) {
+void buffer_delete() {
+  if (count > 0) {
+    count--;
+  }
+}
+
+void buffer_put(char c)
+{
   if(count != SIZE) {
     char_buffer[(start + count) % SIZE] = c;
     count++;

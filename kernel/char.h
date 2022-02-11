@@ -17,8 +17,8 @@ static uint8_t capslock = 0;
 
 uint8_t getchar(uint8_t ch);
 
+void buffer_delete() ;
 void buffer_put(char c);
-
 
 /**
  * Read one character from the keyboard buffer. If the keyboard buffer is empty this function will
