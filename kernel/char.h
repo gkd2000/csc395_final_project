@@ -12,6 +12,7 @@ static volatile int count = 0;
 
 static uint8_t lshift = 0;
 static uint8_t rshift = 0;
+static uint8_t capslock = 0;
 
 
 uint8_t getchar(uint8_t ch);
