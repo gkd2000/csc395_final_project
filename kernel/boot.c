@@ -45,8 +45,7 @@ __attribute__((section(".stivale2hdr"), used)) static struct stivale2_header sti
     .tags = (uintptr_t)&terminal_hdr_tag};
 
 // Find a tag with a given ID
-void *find_tag(struct stivale2_struct *hdr, uint64_t id)
-{
+void *find_tag(struct stivale2_struct *hdr, uint64_t id) {
   // Start at the first tag
   struct stivale2_tag *current = (struct stivale2_tag *)hdr->tags;
 
@@ -68,8 +67,7 @@ void *find_tag(struct stivale2_struct *hdr, uint64_t id)
 }
 
 
-void term_setup(struct stivale2_struct *hdr)
-{
+void term_setup(struct stivale2_struct *hdr) {
   // Look for a terminal tag
   struct stivale2_struct_tag_terminal *tag = find_tag(hdr, STIVALE2_STRUCT_TAG_TERMINAL_ID);
 
@@ -82,8 +80,7 @@ void term_setup(struct stivale2_struct *hdr)
 }
 
 
-void _start(struct stivale2_struct *hdr)
-{
+void _start(struct stivale2_struct *hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
   idt_setup();

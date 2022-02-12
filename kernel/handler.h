@@ -13,8 +13,8 @@ typedef struct interrupt_context {
   uint64_t ss;
 } __attribute__((packed)) interrupt_context_t;
 
-// Do we need this?
-__attribute__((interrupt)) void reserve_handler(interrupt_context_t *ctx); 
+// Generic handler for reserved and undefined interrupts
+__attribute__((interrupt)) void generic_handler(interrupt_context_t* ctx); 
 
 // Handler for a divide error fault
 __attribute__((interrupt)) void divide_error_handler(interrupt_context_t* ctx);
@@ -79,5 +79,5 @@ __attribute__((interrupt)) void virtualization_exception_handler(interrupt_conte
 // Handler for a control protection exception (fault)
 __attribute__((interrupt)) void control_protection_exception_handler_ec(interrupt_context_t *ctx, uint64_t ec);
 
-// Handler for a key press (irq1)
+// Handler for a keyboard event (irq1)
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx);

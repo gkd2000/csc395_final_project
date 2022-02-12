@@ -23,17 +23,7 @@
  *              Pass IDT_TYPE_INTERRUPT or IDT_TYPE_TRAP from above.
  */
 void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
-  // Fill in all fields of idt[index]
-  // Make sure you fill in:
-  //   handler (all three parts, which requires some bit masking/shifting)
-  //   type (using the parameter passed to this function)
-  //   p=1 (the entry is present)
-  //   dpl=0 (run the handler in kernel mode)
-  //   ist=0 (we aren't using an interrupt stack table, so just pass 0)
-  //   selector=IDT_CODE_SELECTOR
-
-
-  // We try to split the function pointer.
+  // Split the handler function pointer.
   uint64_t f = (uint64_t) fn;
 
   // Get the least significant 16 bits
@@ -68,15 +58,15 @@ typedef struct idt_record {
 } __attribute__((packed)) idt_record_t;
 
 /**
- * Initialize an interrupt descriptor table, set handlers for standard exceptions, and install
- * the IDT.
+ * Initialize an interrupt descriptor table, set handlers for standard exceptions and keyboard events, 
+ * and install the IDT.
  */
 void idt_setup() {
-  // Step 1: Zero out the IDT, probably using memset
+  // Step 1: Zero out the IDT using memset
   memset(idt, 0, 4096);
 
-
   // Step 2: Use idt_set_handler() to set handlers for the standard exceptions (1--21)
+  //         and keyboard events
   idt_set_handler(0, divide_error_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(1, debug_exception_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(2, nmi_interrupt_handler, IDT_TYPE_INTERRUPT);
@@ -92,7 +82,7 @@ void idt_setup() {
   idt_set_handler(12, stack_segment_fault_handler_ec, IDT_TYPE_INTERRUPT);
   idt_set_handler(13, general_protection_handler_ec, IDT_TYPE_INTERRUPT);
   idt_set_handler(14, page_fault_handler_ec, IDT_TYPE_INTERRUPT);
-  idt_set_handler(15, reserve_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(15, generic_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(16, x87_fpu_floating_point_error_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(17, alignment_check_handler_ec, IDT_TYPE_INTERRUPT);
   idt_set_handler(18, machine_check_handler, IDT_TYPE_INTERRUPT);

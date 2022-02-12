@@ -47,50 +47,76 @@ uint8_t table[] = {
 };
 
 uint8_t uppercase_table[] = {
-    0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 8, 9,
-    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 13, 0, 'A', 'S',
-    'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0, '|', 'Z', 'X', 'C', 'V',
-    'B', 'N', 'M', '<', '>', '?', 0, '*', 0, ' ', 0, 129, 130, 131, 132, 133,
-    134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
-    150, 151, 152, 153, 0, 0, 0, 154, 155};
+   0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 8, 9,
+  'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 13, 0, 'A', 'S',
+  'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0, '|', 'Z', 'X', 'C', 'V',
+  'B', 'N', 'M', '<', '>', '?', 0, '*', 0, ' ', 0, 129, 130, 131, 132, 133,
+  134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+  150, 151, 152, 153, 0, 0, 0, 154, 155
+};
 
-// TODO: Handle shifts by adding some if
+/**
+ * Return the character corresponding to a keyboard event.
+ * Side effect: if the code corresponding to backspace was received, remove an element
+ * from the character buffer, so long as the character buffer is nonempty.
+ * \param ch PS/2 scan code (from scan code set 1) corresponding to the keyboard event
+ * \returns the character which was typed. If shift or capslock was engaged 
+ *          and the key pressed was one that is affected by this, then return the
+ *          appropriate character. If an unprintable character was pressed, return 0.
+ */
 uint8_t getchar(uint8_t ch) {
-  // check whether it is a key press, or whether it is a key release.
-  if (ch == 0x2A) {
+  // Check if the key was...
+  if (ch == 0x2A) { 
+    // left shift pressed
     lshift = 1;
-  } else if (ch == 0x36) {
+  } else if (ch == 0x36) { 
+    // right shift pressed
     rshift = 1;
   } else if (ch == 0xAA) {
+    // left shift released
     lshift = 0;
   } else if (ch == 0xB6) {
+    // right shift released
     rshift = 0;
   } else if (ch == 0xBA) {
+    // caps lock pressed
     capslock = capslock ? 0 : 1;
     kprintf("capslock: %d\n", capslock);
   } else if (ch == 0x0E) {
+    // Idea: instead of calling buffer_delete() here, return the value of the backspace key (8), and handle that in 
+    // the handler function, where we do the other buffer operations
+    // backspace pressed
     buffer_delete();
-  }
-
-  if (ch <= 0x58) {
-    // key was pressed
-    return (lshift || rshift || capslock) ? uppercase_table[ch] : table[ch];
-  } else if (ch <= 0xd8 && ch >= 0x80) {
-    // key was released
     return 0;
   }
 
+  // A key was pressed! (as opposed to released)
+  if (ch <= 0x58) {
+    // Return the lowercase or uppercase version of the key pressed
+    return (lshift || rshift || capslock) ? uppercase_table[ch] : table[ch];
+  } else if (ch <= 0xd8 && ch >= 0x80) {
+    // key was released
+    // This might be unnecessary
+    return 0;
+  }
   return 0;
 }
 
+/**
+ * Remove the most recently inserted item from the circular buffer
+ * (note that ordinarily we remove things from the buffer following FIFO)
+ */
 void buffer_delete() {
   if (count > 0) {
     count--;
   }
 }
 
-void buffer_put(char c)
-{
+/**
+ * Insert a character into the circular buffer char_buffer
+ * \param c the character to be inserted
+ */
+void buffer_put(char c) {
   if(count != SIZE) {
     char_buffer[(start + count) % SIZE] = c;
     count++;
