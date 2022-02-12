@@ -7,6 +7,7 @@
 #include "IDT.h"
 #include "pic.h"
 #include "char.h"
+#include "mem.h"
 
 
 // Reserve space for the stack
@@ -89,21 +90,13 @@ void _start(struct stivale2_struct *hdr)
   pic_init();
   pic_unmask_irq(1);
 
-  // Find the start of physical memory
-  struct stivale2_struct_tag_hhdm *physicalmem = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
+  // Find the start of higher half direct map (virtual memory)
+  struct stivale2_struct_tag_hhdm *virtual = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
 
-  // Get information about virtual memory
-  struct stivale2_struct_tag_memmap *vir = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
+  // Get information about physical memory
+  struct stivale2_struct_tag_memmap *physical = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
 
-  // Loop through virtual memory entries, looking for usable memory
-  for (int i = 0; i < vir->entries; i++) {
-    if (vir->memmap[i].type == 1) {
-      // We found usable memory! Print its physical and virtual location
-      kprintf("0x%d-0x%d mapped at 0x%d-0x%d\n", vir->memmap[i].base,
-              vir->memmap[i].base + vir->memmap[i].length, vir->memmap[i].base + physicalmem->addr,
-              vir->memmap[i].base + vir->memmap[i].length + physicalmem->addr);
-    }
-  }
+  get_usable_memory(virtual, physical);
 
   for(uint64_t i = 0; i < 1000000000000000L; i++){}
   
