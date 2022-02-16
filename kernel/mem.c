@@ -9,7 +9,7 @@
  * \return arr (the first argument)
  */
 void* memset(void *arr, int c, uint32_t size) {
-  
+
   // Walk through each byte of arr, setting the value to c
   uint8_t *temp = arr;
   for (int i = 0; i < size; i++) {
@@ -25,7 +25,7 @@ void* memset(void *arr, int c, uint32_t size) {
  *                 the memory map built by the bootloader
  */
 void get_usable_memory(struct stivale2_struct_tag_hhdm *virtual, struct stivale2_struct_tag_memmap *physical) {
-  // Store the start of the HHDM 
+  // Store the start of the HHDM
   uint64_t virtual_offset = virtual->addr;
   // Loop through physical memory entries, looking for usable memory
   for (int i = 0; i < physical->entries; i++) {
@@ -36,4 +36,13 @@ void get_usable_memory(struct stivale2_struct_tag_hhdm *virtual, struct stivale2
               physical->memmap[i].base + physical->memmap[i].length + virtual_offset);
     }
   }
+}
+
+/**
+ * Translate a virtual address to its mapped physical address
+ *
+ * \param address     The virtual address to translate
+ */
+void translate(uintptr_t page_table, void *address) {
+  // split the address into 4 level page table
 }
