@@ -46,15 +46,25 @@ void add_memory(uint64_t base, uint64_t length) {
 void get_usable_memory(struct stivale2_struct_tag_hhdm *virtual, struct stivale2_struct_tag_memmap *physical) {
   // Store the start of the HHDM
   virtual_offset = virtual->addr;
+
+
+
+  // Enable write protection
+  uint64_t cr0 = read_cr0();
+  cr0 |= 0x10000;
+  write_cr0(cr0);
+
+
   // Loop through physical memory entries, looking for usable memory
   for (int i = 0; i < physical->entries; i++) {
     if (physical->memmap[i].type == 1) {
 
       add_memory(physical->memmap[i].base, physical->memmap[i].length);
+
       // We found usable memory! Print its physical and virtual location
-      kprintf("0x%x-0x%x mapped at 0x%x-0x%x\n", physical->memmap[i].base,
-              physical->memmap[i].base + physical->memmap[i].length, physical->memmap[i].base + virtual_offset,
-              physical->memmap[i].base + physical->memmap[i].length + virtual_offset);
+      // kprintf("0x%x-0x%x mapped at 0x%x-0x%x\n", physical->memmap[i].base,
+      //         physical->memmap[i].base + physical->memmap[i].length, physical->memmap[i].base + virtual_offset,
+      //         physical->memmap[i].base + physical->memmap[i].length + virtual_offset);
     }
   }
 
@@ -142,13 +152,6 @@ void translate(uintptr_t page_table, void *address)
   kprintf("%p maps to 0x%x\n", address, physical_addr);
 }
 
-uintptr_t read_cr3()
-{
-  uintptr_t value;
-  __asm__("mov %%cr3, %0"
-          : "=r"(value));
-  return value;
-}
 
 /**
  * Allocate a page of physical memory.

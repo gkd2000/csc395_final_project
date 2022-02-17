@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "stivale2.h"
 #include "kprint.h"
+#include "assembly.h"
 
 #define SERIAL_NUMBER 9123213123
 
@@ -60,7 +61,7 @@ void get_usable_memory(struct stivale2_struct_tag_hhdm *virtual, struct stivale2
  */
 void translate(uintptr_t page_table, void *address);
 
-uintptr_t read_cr3();
+
 
 /**
  * Allocate a page of physical memory.

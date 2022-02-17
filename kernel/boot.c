@@ -8,7 +8,7 @@
 #include "pic.h"
 #include "char.h"
 #include "mem.h"
-
+#include "assembly.h"
 
 // Reserve space for the stack
 static uint8_t stack[8192];
