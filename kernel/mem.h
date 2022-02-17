@@ -1,9 +1,13 @@
 #pragma once
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include "stivale2.h"
 #include "kprint.h"
 
+#define SERIAL_NUMBER 9123213123
+
+static uint64_t virtual_offset;
 typedef struct page_table
 {
   uint8_t present : 1;
@@ -18,14 +22,17 @@ typedef struct page_table
   uint8_t no_execute : 1;
 } __attribute__((packed)) page_table_t;
 
-typedef struct virtual_addr
+
+typedef struct node {
+  uint64_t serial_number;
+  struct node* next;
+} node_t;
+
+typedef struct freelist
 {
-  uint16_t offset : 12;
-  uint16_t level1 : 9;
-  uint16_t level2 : 9;
-  uint16_t level3 : 9;
-  uint16_t level4 : 9;
-} __attribute__((packed)) virtual_addr_t;
+  node_t *head;
+} freelist_t;
+
 
     /**
  * Mimics the standard C function memset.
@@ -52,3 +59,28 @@ void get_usable_memory(struct stivale2_struct_tag_hhdm *virtual, struct stivale2
  * \param address     The virtual address to translate
  */
 void translate(uintptr_t page_table, void *address);
+
+uintptr_t read_cr3();
+
+/**
+ * Allocate a page of physical memory.
+ * \returns the physical address of the allocated physical memory or 0 on error.
+ */
+uintptr_t pmem_alloc();
+
+/**
+ * Free a page of physical memory.
+ * \param p is the physical address of the page to free, which must be page-aligned.
+ */
+void pmem_free(uintptr_t p);
+
+/**
+ * Map a single page of memory into a virtual address space.
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to map into the address space, must be page-aligned
+ * \param user Should the page be user-accessible?
+ * \param writable Should the page be writable?
+ * \param executable Should the page be executable?
+ * \returns true if the mapping succeeded, or false if there was an error
+ */
+bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable);

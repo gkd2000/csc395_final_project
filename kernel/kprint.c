@@ -62,16 +62,29 @@ void kprint_d(uint64_t value)
   }
 }
 
-// Print a number in hexadecimal to the terminal, without leading zeros
-void kprint_x(uint64_t value) {
+void kprint_x_helper(uint64_t value)
+{
   // Hexadecimal digits
   char table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
   if (value != 0)
   {
-    kprint_x(value / 16); //> Recursive call
+    kprint_x_helper(value / 16); //> Recursive call
 
     kprint_c(table[value % 16]); //> Print the least significant digit
   };
+}
+
+
+// Print a number in hexadecimal to the terminal, without leading zeros
+void kprint_x(uint64_t value) {
+  if (value != 0)
+  {
+    kprint_x_helper(value);
+  }
+  else
+  {
+    kprint_c('0');
+  }
 }
 
 // Print a pointer to the terminal, preceded by "0x"

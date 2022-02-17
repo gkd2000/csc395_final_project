@@ -95,10 +95,24 @@ void _start(struct stivale2_struct *hdr) {
 
   get_usable_memory(virtual, physical);
 
-  for(uint64_t i = 0; i < 1000000000000000L; i++){}
-  
-  while(1) {
-    kprintf("%c\n", kgetc());
+  translate(((read_cr3() >> 12) << 12), _start);
+  translate(((read_cr3() >> 12) << 12), NULL);
+
+  // while(1) {
+  //   kprintf("%c\n", kgetc());
+  // }
+
+  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  int *p = (int *)(uintptr_t)_start;
+  bool result = vm_map(root, (uintptr_t)p, false, true, false);
+  if (result)
+  {
+    *p = 123;
+    kprintf("Stored %d at %p\n", *p, p);
+  }
+  else
+  {
+    kprintf("vm_map failed with an error\n");
   }
 
   // We're done, just hang...
