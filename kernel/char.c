@@ -2,40 +2,32 @@
 
 #include "kprint.h"
 
-
-// device control 1(17) is for left control, device control 2(19) is for right control
-// shift out (14) is assigned to left shift
-// device control 3(18) is used for left and right alt, devicecontrol 4(20) is for caps lock
-// F1 - F10 are char 129-138
-// 139 - NumberLock pressed
-// 140 - ScrollLock pressed
-// 141 - 	(keypad) 7 pressed
-// 142 - 	(keypad) 8 pressed
-// 143 -  (keypad) 9 pressed
-// 144 -  (keypad) - pressed
-// 145 -  (keypad) 4 pressed
-// 146 -  (keypad) 5 pressed
-// 147 -  (keypad) 6 pressed
-// 148 -  (keypad) + pressed
-// 149 -  (keypad) 1 pressed
-// 150 -  (keypad) 2 pressed
-// 151 -  (keypad) 3 pressed
-// 152 -  (keypad) 0 pressed
-// 153 -  (keypad) . pressed
-// 154 -  f11 pressed
-// 155 -  f12 pressed
-
 /*
-uint8_t table[] = {
-  0, 27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 8, 9,
-  'q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']', 13, 17, 'a', 's',
-  'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x','c','v',
-  'b','n','m',',','.','/', 0, '*',  18, ' ', 20, 129, 130, 131, 132, 133,
-  134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
-  150,151,152,153,0,0,0,154,155
-
-};*/
-
+ * Table to convert scan codes to ascii characters.
+ *
+ * First 0 is because the scan codes are 1-indexed. 
+ * Key presses which are mapped to 0: escape, left control, left shift, 
+ *   right shift, left alt, caps lock
+ * The zeroes near the end of the table are unmapped by the scan code set
+ * 129-138 - F1 through F10
+ * 139 -  NumberLock pressed
+ * 140 -  ScrollLock pressed
+ * 141 - 	(keypad) 7 pressed
+ * 142 - 	(keypad) 8 pressed
+ * 143 -  (keypad) 9 pressed
+ * 144 -  (keypad) - pressed
+ * 145 -  (keypad) 4 pressed
+ * 146 -  (keypad) 5 pressed
+ * 147 -  (keypad) 6 pressed
+ * 148 -  (keypad) + pressed
+ * 149 -  (keypad) 1 pressed
+ * 150 -  (keypad) 2 pressed
+ * 151 -  (keypad) 3 pressed
+ * 152 -  (keypad) 0 pressed
+ * 153 -  (keypad) . pressed
+ * 154 -  f11 pressed
+ * 155 -  f12 pressed
+ */
 uint8_t table[] = {
    0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 8, 9,
   'q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']', 13, 0, 'a', 's',
@@ -46,6 +38,7 @@ uint8_t table[] = {
 
 };
 
+// Table to convert scan codes to uppercase characters
 uint8_t uppercase_table[] = {
    0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 8, 9,
   'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 13, 0, 'A', 'S',
