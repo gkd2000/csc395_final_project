@@ -1,6 +1,5 @@
 #include "mem.h"
 
-// The freelist. Should this be in the .h and static?
 node_t* freelist = NULL;
 
 /**
@@ -84,7 +83,7 @@ void get_usable_memory(struct stivale2_struct_tag_hhdm *virtual, struct stivale2
  * \returns 1 if the entry is not present
  *          0 if the entry is present
  */
-uint8_t check_permission(page_table_t * table) {
+uint8_t check_permission(page_table_entry_t * table) {
 
   if (!table->present) {
     kprintf("        not present\n");
@@ -127,7 +126,7 @@ void translate(uintptr_t page_table, void *address) {
 
   kprintf("Translating: %p\n", address);
 
-  page_table_t *level4_table = ((page_table_t *)(page_table + virtual_offset))+ level4;
+  page_table_entry_t *level4_table = ((page_table_entry_t *)(page_table + virtual_offset))+ level4;
   kprintf("    Level 4 (index %d of %p)\n", level4, page_table);
   if(check_permission(level4_table)) {
     return;
@@ -135,21 +134,21 @@ void translate(uintptr_t page_table, void *address) {
 
 
   uintptr_t level3_start_of_the_page = (level4_table->physical_addr) << 12;
-  page_table_t *level3_table = ((page_table_t *) (level3_start_of_the_page + virtual_offset)) + level3;
+  page_table_entry_t *level3_table = ((page_table_entry_t *) (level3_start_of_the_page + virtual_offset)) + level3;
   kprintf("    Level 3 (index %d of %p)\n", level3, level3_start_of_the_page);
   if (check_permission(level3_table)) {
     return;
   }
 
   uintptr_t level2_start_of_the_page = (level3_table->physical_addr) << 12;
-  page_table_t *level2_table = ((page_table_t *)(level2_start_of_the_page + virtual_offset)) + level2;
+  page_table_entry_t *level2_table = ((page_table_entry_t *)(level2_start_of_the_page + virtual_offset)) + level2;
   kprintf("    Level 2 (index %d of 0x%x)\n", level2, level2_start_of_the_page);
   if (check_permission(level2_table)) {
     return;
   }
 
   uintptr_t level1_start_of_the_page = level2_table->physical_addr << 12;
-  page_table_t *level1_table = ((page_table_t *) (level1_start_of_the_page + virtual_offset)) + level1;
+  page_table_entry_t *level1_table = ((page_table_entry_t *) (level1_start_of_the_page + virtual_offset)) + level1;
   kprintf("    Level 1 (index %d of %p)\n", level1, level1_start_of_the_page);
   if (check_permission(level1_table)) {
     return;
@@ -182,12 +181,16 @@ uintptr_t pmem_alloc() {
  * \param p is the physical address of the page to free, which must be page-aligned.
  */
 void pmem_free(uintptr_t p) {
-  node_t * temp = (node_t *)p;
+  if (!(p% PAGE_SIZE)) {
+    return;
+  }
+  node_t * temp = (node_t *)(p);
   if (temp->serial_number != SERIAL_NUMBER) {
     temp->serial_number = SERIAL_NUMBER;
     temp->next = freelist;
     freelist = temp;
   }
+  return;
 }
 
 /**
@@ -196,11 +199,11 @@ void pmem_free(uintptr_t p) {
  * \param user       Should the page be user-accessible?
  * \param writable   Should the page be writable?
  * \param executable Should the page be executable?
- * \returns true if no page was allocated, false otherwise 
+ * \returns true if no page was allocated, false otherwise
  */
-bool malloc_page(page_table_t *table, bool user, bool writable, bool executable) {
-  
-  // Get a page for the new entry 
+bool malloc_page(page_table_entry_t *table, bool user, bool writable, bool executable) {
+
+  // Get a page for the new entry
   uintptr_t new_page = pmem_alloc();
   if (new_page == 0) {
     // pmem_alloc failed
@@ -238,8 +241,8 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
   uint16_t level3 = (temp2 >> 30) & 0x1ff;
   uint16_t level4 = (temp2 >> 39) & 0x1ff;
 
-  // Traverse the page tables, mapping new pages as necessary 
-  page_table_t *level4_table = ((page_table_t *)(root + virtual_offset)) + level4;
+  // Traverse the page tables, mapping new pages as necessary
+  page_table_entry_t *level4_table = ((page_table_entry_t *)(root + virtual_offset)) + level4;
   if (!level4_table->present) {
     if(malloc_page(level4_table, 1, 1, 0)) {
       return false;
@@ -247,7 +250,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
   }
 
   uintptr_t level3_start_of_the_page = (level4_table->physical_addr) << 12;
-  page_table_t *level3_table = ((page_table_t *)(level3_start_of_the_page + virtual_offset)) + level3;
+  page_table_entry_t *level3_table = ((page_table_entry_t *)(level3_start_of_the_page + virtual_offset)) + level3;
   if (!level3_table->present) {
     if(malloc_page(level3_table, 1, 1, 0)) {
       return false;
@@ -255,7 +258,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
   }
 
   uintptr_t level2_start_of_the_page = (level3_table->physical_addr) << 12;
-  page_table_t *level2_table = ((page_table_t *)(level2_start_of_the_page + virtual_offset)) + level2;
+  page_table_entry_t *level2_table = ((page_table_entry_t *)(level2_start_of_the_page + virtual_offset)) + level2;
   if (!level2_table->present) {
     if(malloc_page(level2_table, 1, 1, 0)) {
       return false;
@@ -263,7 +266,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
   }
 
   uintptr_t level1_start_of_the_page = level2_table->physical_addr << 12;
-  page_table_t *level1_table = ((page_table_t *)(level1_start_of_the_page + virtual_offset)) + level1;
+  page_table_entry_t *level1_table = ((page_table_entry_t *)(level1_start_of_the_page + virtual_offset)) + level1;
   if (!level1_table->present) {
     if(malloc_page(level1_table, user, writable, executable)) {
       return false;
@@ -274,5 +277,130 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
   }
 
   // Page mapped successfully!
+  return true;
+}
+
+bool free_page_table(uintptr_t page_head) {
+  page_table_entry_t *table = (page_table_entry_t *)page_head;
+  for (int i = 0; i < PAGE_SIZE / sizeof(page_table_entry_t); i++) {
+    if ((table+i)->present) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Unmap a page from a virtual address space
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to unmap from the address space
+ * \returns true if successful, or false if anything goes wrong
+ */
+bool vm_unmap(uintptr_t root, uintptr_t address)
+{
+  // Break the virtual address into the page table addresses
+  uintptr_t temp2 = (uintptr_t)address;
+  uint16_t level1 = (temp2 >> 12) & 0x1ff;
+  uint16_t level2 = (temp2 >> 21) & 0x1ff;
+  uint16_t level3 = (temp2 >> 30) & 0x1ff;
+  uint16_t level4 = (temp2 >> 39) & 0x1ff;
+
+  // Traverse the page tables, mapping new pages as necessary
+  page_table_entry_t *level4_table = ((page_table_entry_t *)(root + virtual_offset)) + level4;
+  if (!level4_table->present) {
+    return false;
+  }
+
+  uintptr_t level3_start_of_the_page = (level4_table->physical_addr) << 12;
+  page_table_entry_t *level3_table = ((page_table_entry_t *)(level3_start_of_the_page + virtual_offset)) + level3;
+  if (!level3_table->present)
+  {
+    return false;
+  }
+
+  uintptr_t level2_start_of_the_page = (level3_table->physical_addr) << 12;
+  page_table_entry_t *level2_table = ((page_table_entry_t *)(level2_start_of_the_page + virtual_offset)) + level2;
+  if (!level2_table->present)
+  {
+    return false;
+  }
+
+  uintptr_t level1_start_of_the_page = level2_table->physical_addr << 12;
+  page_table_entry_t *level1_table = ((page_table_entry_t *)(level1_start_of_the_page + virtual_offset)) + level1;
+  if (!level1_table->present)
+  {
+    return false;
+  }
+
+  level1_table->present = 0;
+
+  pmem_free(level1_table->physical_addr<<12);
+
+  if (free_page_table(level1_start_of_the_page)) {
+    level2_table->present = 0;
+    pmem_free(level2_table->physical_addr << 12);
+  }
+
+  if (free_page_table(level2_start_of_the_page)) {
+    level3_table->present = 0;
+    pmem_free(level3_table->physical_addr << 12);
+  }
+
+  if (free_page_table(level3_start_of_the_page)) {
+    level4_table->present = 0;
+    pmem_free(level4_table->physical_addr << 12);
+  }
+
+  return true;
+}
+
+/**
+ * Change the protections for a page in a virtual address space
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to update
+ * \param user Should the page be user-accessible or kernel only?
+ * \param writable Should the page be writable?
+ * \param executable Should the page be executable?
+ * \returns true if successful, or false if anything goes wrong (e.g. page is not mapped)
+ */
+bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable) {
+  // Break the virtual address into the page table addresses
+  uintptr_t temp2 = (uintptr_t)address;
+  uint16_t level1 = (temp2 >> 12) & 0x1ff;
+  uint16_t level2 = (temp2 >> 21) & 0x1ff;
+  uint16_t level3 = (temp2 >> 30) & 0x1ff;
+  uint16_t level4 = (temp2 >> 39) & 0x1ff;
+
+  // Traverse the page tables, mapping new pages as necessary
+  page_table_entry_t *level4_table = ((page_table_entry_t *)(root + virtual_offset)) + level4;
+  if (!level4_table->present)
+  {
+    return false;
+  }
+
+  uintptr_t level3_start_of_the_page = (level4_table->physical_addr) << 12;
+  page_table_entry_t *level3_table = ((page_table_entry_t *)(level3_start_of_the_page + virtual_offset)) + level3;
+  if (!level3_table->present)
+  {
+    return false;
+  }
+
+  uintptr_t level2_start_of_the_page = (level3_table->physical_addr) << 12;
+  page_table_entry_t *level2_table = ((page_table_entry_t *)(level2_start_of_the_page + virtual_offset)) + level2;
+  if (!level2_table->present)
+  {
+    return false;
+  }
+
+  uintptr_t level1_start_of_the_page = level2_table->physical_addr << 12;
+  page_table_entry_t *level1_table = ((page_table_entry_t *)(level1_start_of_the_page + virtual_offset)) + level1;
+  if (!level1_table->present)
+  {
+    return false;
+  }
+
+  level1_table->kernel = user;
+  level1_table->writable = writable;
+  level1_table->no_execute = !executable;
   return true;
 }

@@ -103,7 +103,7 @@ void _start(struct stivale2_struct *hdr) {
   // }
 
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
-  int *p = (int *)(uintptr_t)_start;
+  int *p = (int *)0x500040001231;
   bool result = vm_map(root, (uintptr_t)p, false, true, false);
   if (result)
   {
@@ -115,6 +115,11 @@ void _start(struct stivale2_struct *hdr) {
     kprintf("vm_map failed with an error\n");
   }
 
+  char arr[100];
+  kgets(arr, 100);
+
+  kprintf(": %s\n", arr);
   // We're done, just hang...
+
   halt();
 }

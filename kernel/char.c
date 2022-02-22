@@ -2,11 +2,13 @@
 
 #include "kprint.h"
 
+char char_buffer[BUFFER_SIZE]; //> The buffer itself
+
 /*
  * Table to convert scan codes to ascii characters.
  *
- * First 0 is because the scan codes are 1-indexed. 
- * Key presses which are mapped to 0: escape, left control, left shift, 
+ * First 0 is because the scan codes are 1-indexed.
+ * Key presses which are mapped to 0: escape, left control, left shift,
  *   right shift, left alt, caps lock
  * The zeroes near the end of the table are unmapped by the scan code set
  * 129-138 - F1 through F10
@@ -30,7 +32,7 @@
  */
 uint8_t table[] = {
    0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 8, 9,
-  'q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']', 13, 0, 'a', 's',
+  'q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']', '\n', 0, 'a', 's',
   'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x','c','v',
   'b','n','m',',','.','/', 0, '*',  0, ' ', 0, 129, 130, 131, 132, 133,
   134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
@@ -41,7 +43,7 @@ uint8_t table[] = {
 // Table to convert scan codes to uppercase characters
 uint8_t uppercase_table[] = {
    0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 8, 9,
-  'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 13, 0, 'A', 'S',
+  'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n', 0, 'A', 'S',
   'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0, '|', 'Z', 'X', 'C', 'V',
   'B', 'N', 'M', '<', '>', '?', 0, '*', 0, ' ', 0, 129, 130, 131, 132, 133,
   134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
@@ -53,16 +55,16 @@ uint8_t uppercase_table[] = {
  * Side effect: if the code corresponding to backspace was received, remove an element
  * from the character buffer, so long as the character buffer is nonempty.
  * \param ch PS/2 scan code (from scan code set 1) corresponding to the keyboard event
- * \returns the character which was typed. If shift or capslock was engaged 
+ * \returns the character which was typed. If shift or capslock was engaged
  *          and the key pressed was one that is affected by this, then return the
  *          appropriate character. If an unprintable character was pressed, return 0.
  */
 uint8_t getchar(uint8_t ch) {
   // Check if the key was...
-  if (ch == 0x2A) { 
+  if (ch == 0x2A) {
     // left shift pressed
     lshift = 1;
-  } else if (ch == 0x36) { 
+  } else if (ch == 0x36) {
     // right shift pressed
     rshift = 1;
   } else if (ch == 0xAA) {
@@ -74,9 +76,8 @@ uint8_t getchar(uint8_t ch) {
   } else if (ch == 0xBA) {
     // caps lock pressed
     capslock = capslock ? 0 : 1;
-    kprintf("capslock: %d\n", capslock);
   } else if (ch == 0x0E) {
-    // Idea: instead of calling buffer_delete() here, return the value of the backspace key (8), and handle that in 
+    // Idea: instead of calling buffer_delete() here, return the value of the backspace key (8), and handle that in
     // the handler function, where we do the other buffer operations
     // backspace pressed
     buffer_delete();
@@ -110,8 +111,8 @@ void buffer_delete() {
  * \param c the character to be inserted
  */
 void buffer_put(char c) {
-  if(count != SIZE) {
-    char_buffer[(start + count) % SIZE] = c;
+  if (count != BUFFER_SIZE) {
+    char_buffer[(start + count) % BUFFER_SIZE] = c;
     count++;
   }
   return;
@@ -130,7 +131,33 @@ char kgetc() {
 
   // There's something in the buffer! Get it
   c = char_buffer[start];
-  start = (start + 1) % SIZE;
+  start = (start + 1) % BUFFER_SIZE;
   count--;
   return c;
+}
+
+/**
+ * Read a line of characters from the keyboard. Read characters until the buffer fills or a newline
+ * character is read. If input ends with a newline, the newline character is stored in output. The
+ * string written to output is always null terminated unless the function fails for some reason.
+ *
+ * \param output A pointer to the beginning of an array where this function should store characters.
+ *               This function will write a null terminator into the output array unless it fails.
+ * \param capacity The number of characters that can safely be written to the output array
+ *                 including the final null termiantor.
+ * \returns The number of characters read, or zero if no characters were read due to an error.
+ */
+size_t kgets(char *output, size_t capacity) {
+  char c = kgetc();
+  size_t length = 0;
+  output[length++] = c;
+
+  while ((length < capacity-1) && (c != '\n')) {
+    c = kgetc();
+    // kprintf("in lower case if:%d\n", c);
+
+    output[length++] = c;
+  }
+  output[length] = '\0';
+  return length;
 }

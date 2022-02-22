@@ -23,7 +23,7 @@ typedef struct page_table {
   uint8_t _unused_2 : 4;
   uint64_t physical_addr : 51;
   uint8_t no_execute : 1;
-} __attribute__((packed)) page_table_t;
+} __attribute__((packed)) page_table_entry_t;
 
 // A node in a free list
 typedef struct node {
@@ -79,3 +79,22 @@ void pmem_free(uintptr_t p);
  * \returns true if the mapping succeeded, or false if there was an error
  */
 bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable);
+
+/**
+ * Unmap a page from a virtual address space
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to unmap from the address space
+ * \returns true if successful, or false if anything goes wrong
+ */
+bool vm_unmap(uintptr_t root, uintptr_t address);
+
+/**
+ * Change the protections for a page in a virtual address space
+ * \param root The physical address of the top-level page table structure
+ * \param address The virtual address to update
+ * \param user Should the page be user-accessible or kernel only?
+ * \param writable Should the page be writable?
+ * \param executable Should the page be executable?
+ * \returns true if successful, or false if anything goes wrong (e.g. page is not mapped)
+ */
+bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable);
