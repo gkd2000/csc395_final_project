@@ -8,7 +8,9 @@ LDFLAGS := -nostdlib -static
 OUT := obj
 
 SRC := $(wildcard *.c)
-OBJ := $(patsubst %.c, $(OUT)/%.o, $(SRC))
+ASM := $(wildcard *.s)
+C_OBJ := $(patsubst %.c, $(OUT)/%.o, $(SRC))
+S_OBJ := $(patsubst %.s, $(OUT)/%.o, $(ASM))
 DEP := $(patsubst %.c, $(OUT)/%.d, $(SRC))
 
 .PHONY: all
@@ -22,11 +24,15 @@ clean:
 run:
 	$(MAKE) -C .. run
 
-kernel.elf: $(OBJ) linker.ld
-	$(LD) $(LDFLAGS) -T linker.ld -o $@ $(OBJ)
+kernel.elf: $(C_OBJ) $(S_OBJ) linker.ld
+	$(LD) $(LDFLAGS) -T linker.ld -o $@ $(C_OBJ) $(S_OBJ)
 
-$(OBJ): $(OUT)/%.o: %.c
+$(C_OBJ): $(OUT)/%.o: %.c
 	@mkdir -p `dirname $@`
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(S_OBJ): $(OUT)/%.o: %.s
+	@mkdir -p `dirname $@`
+	$(CC) -c $< -o $@
 
 -include $(DEP)

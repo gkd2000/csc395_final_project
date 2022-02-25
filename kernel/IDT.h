@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "posix.h"
+
 // A struct the matches the layout of an IDT entry
 typedef struct idt_entry {
   uint16_t offset_0;
@@ -21,7 +23,7 @@ typedef struct idt_entry {
 static idt_entry_t idt[256];
 
 /**
- * Initialize an interrupt descriptor table, set handlers for standard exceptions and keyboard events, 
+ * Initialize an interrupt descriptor table, set handlers for standard exceptions and keyboard events,
  * and install the IDT.
  */
 void idt_setup();

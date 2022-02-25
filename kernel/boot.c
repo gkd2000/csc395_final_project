@@ -121,5 +121,17 @@ void _start(struct stivale2_struct *hdr) {
   kprintf(": %s\n", arr);
   // We're done, just hang...
 
+  char* buf = "12345";
+  long rc = syscall(SYS_write, 1, buf, 5);
+  if (rc <= 0)
+  {
+    kprintf("read failed\n");
+  }
+  else
+  {
+    buf[rc] = '\0';
+    kprintf("read '%s'\n", buf);
+  }
+
   halt();
 }

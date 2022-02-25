@@ -58,7 +58,7 @@ typedef struct idt_record {
 } __attribute__((packed)) idt_record_t;
 
 /**
- * Initialize an interrupt descriptor table, set handlers for standard exceptions and keyboard events, 
+ * Initialize an interrupt descriptor table, set handlers for standard exceptions and keyboard events,
  * and install the IDT.
  */
 void idt_setup() {
@@ -90,6 +90,7 @@ void idt_setup() {
   idt_set_handler(20, virtualization_exception_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(21, control_protection_exception_handler_ec, IDT_TYPE_INTERRUPT);
   idt_set_handler(IRQ1_INTERRUPT, irq1_interrupt_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(0x80, syscall_entry, IDT_TYPE_TRAP);
 
   // Step 3: Install the IDT
   idt_record_t record = {

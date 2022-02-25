@@ -14,7 +14,7 @@ typedef struct interrupt_context {
 } __attribute__((packed)) interrupt_context_t;
 
 // Generic handler for reserved and undefined interrupts
-__attribute__((interrupt)) void generic_handler(interrupt_context_t* ctx); 
+__attribute__((interrupt)) void generic_handler(interrupt_context_t* ctx);
 
 // Handler for a divide error fault
 __attribute__((interrupt)) void divide_error_handler(interrupt_context_t* ctx);
@@ -81,3 +81,5 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
 
 // Handler for a keyboard event (irq1)
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx);
+
+int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5);
