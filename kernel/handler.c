@@ -162,6 +162,8 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
     // read from stdin 0
     return sys_write(arg0, arg1, arg2);
 
+  case SYS_read:
+    return sys_read(arg0, arg1, arg2);
   default:
     return 0;
   }

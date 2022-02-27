@@ -80,8 +80,10 @@ uint8_t getchar(uint8_t ch) {
     // Idea: instead of calling buffer_delete() here, return the value of the backspace key (8), and handle that in
     // the handler function, where we do the other buffer operations
     // backspace pressed
-    buffer_delete();
-    return 0;
+    // buffer_delete();
+
+    // put the ebackspace into the circular buffer, and deal it in sys_read
+    return 8;
   }
 
   // A key was pressed! (as opposed to released)
@@ -156,7 +158,11 @@ size_t kgets(char *output, size_t capacity) {
     c = kgetc();
     // kprintf("in lower case if:%d\n", c);
 
-    output[length++] = c;
+    if (c == 8) {
+      length = length ? length-1 : 0;
+    } else {
+      output[length++] = c;
+    }
   }
   output[length] = '\0';
   return length;

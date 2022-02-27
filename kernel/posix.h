@@ -12,3 +12,5 @@ extern int64_t syscall(uint64_t nr, ...);
 extern void syscall_entry();
 
 int64_t sys_write(uint64_t fd, intptr_t buffer, uint64_t size);
+
+int64_t sys_read(uint64_t fd, intptr_t buffer, uint64_t size);
