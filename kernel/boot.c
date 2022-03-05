@@ -90,17 +90,29 @@ void _start(struct stivale2_struct *hdr) {
   // Find the start of higher half direct map (virtual memory)
   struct stivale2_struct_tag_hhdm *virtual = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
 
+
+
   // Get information about physical memory
   struct stivale2_struct_tag_memmap *physical = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
 
   get_usable_memory(virtual, physical);
 
-  translate(((read_cr3() >> 12) << 12), _start);
-  translate(((read_cr3() >> 12) << 12), NULL);
+  struct stivale2_struct_tag_modules *modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
 
-  // while(1) {
-  //   kprintf("%c\n", kgetc());
-  // }
+  // test module
+  kprintf("modules:\n");
+  for (int i = 0; i < modules->module_count; i++)
+  {
+    kprintf("        %s:\n            %p-%p\n", modules->modules[i].string, modules->modules[i].begin, modules->modules[i].end);
+    run_program(modules->modules[i].begin);
+  }
+
+  // translate(((read_cr3() >> 12) << 12), _start);
+  // translate(((read_cr3() >> 12) << 12), NULL);
+
+  // // while(1) {
+  // //   kprintf("%c\n", kgetc());
+  // // }
 
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
   int *p = (int *)0x500040001231;
@@ -115,35 +127,35 @@ void _start(struct stivale2_struct *hdr) {
     kprintf("vm_map failed with an error\n");
   }
 
-  // char arr[100];
-  // kgets(arr, 100);
+  // // char arr[100];
+  // // kgets(arr, 100);
 
-  // kprintf(": %s\n", arr);
-  // We're done, just hang...
+  // // kprintf(": %s\n", arr);
+  // // We're done, just hang...
 
-  char* buf = "12345";
-  long rc = syscall(SYS_write, 1, buf, 5);
-  if (rc <= 0)
-  {
-    kprintf("write failed\n");
-  }
-  else
-  {
-    buf[rc] = '\0';
-    kprintf("write '%s'\n", buf);
-  }
+  // char* buf = "12345";
+  // long rc = syscall(SYS_write, 1, buf, 5);
+  // if (rc <= 0)
+  // {
+  //   kprintf("write failed\n");
+  // }
+  // else
+  // {
+  //   buf[rc] = '\0';
+  //   kprintf("write '%s'\n", buf);
+  // }
 
-  char buff[6];
-  long rc2 = syscall(SYS_read, 0, buff, 5);
-  if (rc2 <= 0)
-  {
-    kprintf("read failed\n");
-  }
-  else
-  {
-    buff[rc2] = '\0';
-    kprintf("read '%s'\n", buff);
-  }
+  // char buff[6];
+  // long rc2 = syscall(SYS_read, 0, buff, 5);
+  // if (rc2 <= 0)
+  // {
+  //   kprintf("read failed\n");
+  // }
+  // else
+  // {
+  //   buff[rc2] = '\0';
+  //   kprintf("read '%s'\n", buff);
+  // }
 
   halt();
 }

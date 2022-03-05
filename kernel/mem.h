@@ -39,7 +39,9 @@ typedef struct node {
  * \param size number of bytes to be written
  * \return arr (the first argument)
  */
-void* memset(void *arr, int c, uint32_t size);
+void *memset(void *arr, int c, uint32_t size);
+
+void *memcpy(void *des, void* src, size_t size);
 
 /**
  * Does not currently print the usable memory, as reported by the bootloader.

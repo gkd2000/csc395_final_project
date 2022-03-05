@@ -20,6 +20,16 @@ void* memset(void *arr, int c, uint32_t size) {
   return arr;
 }
 
+void *memcpy(void *des, void *src, size_t size) {
+  uint8_t* des1 = (uint8_t *)des;
+    kprintf("%d\n", size);
+  uint8_t* src1 = (uint8_t *)src;
+  for (size_t i = 0; i < size; i++) {
+    des1[i] = src1[i];
+  }
+  return des;
+}
+
 /**
  * Break up a large piece of memory and add it to the free list
  * \param base   the physical start of the usable memory
