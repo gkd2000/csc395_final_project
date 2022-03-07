@@ -37,15 +37,32 @@ typedef struct node {
  * \param arr  pointer to the memory to be written to
  * \param c    value to be written
  * \param size number of bytes to be written
- * \return arr (the first argument)
+ * \returns arr (the first argument)
  */
-void *memset(void *arr, int c, uint32_t size);
-
-void *memcpy(void *des, void* src, size_t size);
+void* memset(void *arr, int c, uint32_t size);
 
 /**
- * Does not currently print the usable memory, as reported by the bootloader.
- * Enables write protection and creates the freelist
+ * Mimics the standard C function memcpy
+ * Copies size bytes of data from des to src. 
+ * The locations indicated by des and src should not overlap
+ * \param des  pointer to the memory location to copy data to
+ * \param src  pointer to the memory location to copy data from
+ * \param size number of bytes to copy
+ * \returns pointer to the first byte of copied memory
+ */
+void* memcpy(void *des, void* src, size_t size);
+
+/**
+ * Enables write protection and initializes the freelist, adding to it all memory 
+ * reported as usable by the bootloader
+ * \param virtual  the stivale2 struct tag which gives the beginning of the HHDM
+ * \param physical the stivale2 memory map struct tag, which reports the memory map
+ *                 the memory map built by the bootloader
+ */
+void freelist_init(struct stivale2_struct_tag_hhdm *virtual, struct stivale2_struct_tag_memmap *physical);
+
+/**
+ * Prints the usable memory, as reported by the bootloader.
  * \param virtual  the stivale2 struct tag which gives the beginning of the HHDM
  * \param physical the stivale2 memory map struct tag, which reports the memory map
  *                 the memory map built by the bootloader

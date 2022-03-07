@@ -90,13 +90,13 @@ void _start(struct stivale2_struct *hdr) {
   // Find the start of higher half direct map (virtual memory)
   struct stivale2_struct_tag_hhdm *virtual = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
 
-
-
   // Get information about physical memory
   struct stivale2_struct_tag_memmap *physical = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
 
-  get_usable_memory(virtual, physical);
+  // Set up the free list and enable write protection
+  freelist_init(virtual, physical);
 
+  // Get information about the modules we've asked the bootloader to load
   struct stivale2_struct_tag_modules *modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
 
   // test module

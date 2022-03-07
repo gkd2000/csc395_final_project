@@ -5,13 +5,14 @@
 
 #include "mem.h"
 
-// This is the elf struct in https://uclibc.org/docs/elf-64-gen.pdf
+// Structures for the ELF header and program header table entries were 
+// obtained from https://uclibc.org/docs/elf-64-gen.pdf
 
 #define EI_NIDENT 16
 
-typedef struct elfhdr
-{
-  unsigned char e_ident[16]; /* ELF identification */
+// Structure of an ELF file header
+typedef struct elfhdr {
+  unsigned char e_ident[EI_NIDENT]; /* ELF identification */
   uint16_t e_type;         /* Object file type */
   uint16_t e_machine;      /* Machine type */
   uint32_t e_version;      /* Object file version */
@@ -28,19 +29,22 @@ typedef struct elfhdr
 
 } __attribute__((packed)) elfhdr_t;
 
-typedef struct phdr
-{
+// Structure of an entry in the program header table
+typedef struct phdr {
   uint32_t p_type;    /* Type of segment */
   uint32_t p_flags;   /* Segment attributes */
   uint64_t p_offset;  /* Offset in file */
   uint64_t p_vaddr;   /* Virtual address in memory */
   uint64_t p_paddr;   /* Reserved */
-  uint64_t p_filesz; /* Size of segment in file */
-  uint64_t p_memsz;  /* Size of segment in memory */
-  uint64_t p_align;  /* Alignment of segment */
+  uint64_t p_filesz;  /* Size of segment in file */
+  uint64_t p_memsz;   /* Size of segment in memory */
+  uint64_t p_align;   /* Alignment of segment */
 } __attribute__((packed)) phdr_t;
 
-
+/**
+ * Run an executable stored the ELF file which begins at virtual address addr
+ * \param addr the virtual address of the beginning of the ELF file
+ */
 void run_program(intptr_t addr);
 
 // Typedef a function pointer which corresponds to the inputs and outputs of the term_write function

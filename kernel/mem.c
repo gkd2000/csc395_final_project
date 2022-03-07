@@ -8,7 +8,7 @@ node_t* freelist = NULL;
  * \param arr  pointer to the memory to be written to
  * \param c    value to be written
  * \param size number of bytes to be written
- * \return arr (the first argument)
+ * \returns arr (the first argument)
  */
 void* memset(void *arr, int c, uint32_t size) {
 
@@ -20,7 +20,16 @@ void* memset(void *arr, int c, uint32_t size) {
   return arr;
 }
 
-void *memcpy(void *des, void *src, size_t size) {
+/**
+ * Mimics the standard C function memcpy
+ * Copies size bytes of data from des to src. 
+ * The locations indicated by des and src should not overlap
+ * \param des  pointer to the memory location to copy data to
+ * \param src  pointer to the memory location to copy data from
+ * \param size number of bytes to copy
+ * \returns pointer to the first byte of copied memory
+ */
+void* memcpy(void *des, void *src, size_t size) {
   uint8_t* des1 = (uint8_t *)des;
     kprintf("%d\n", size);
   uint8_t* src1 = (uint8_t *)src;
@@ -55,13 +64,13 @@ void add_memory(uint64_t base, uint64_t length) {
 }
 
 /**
- * Does not currently print the usable memory, as reported by the bootloader.
- * Enables write protection and creates the freelist
+ * Enables write protection and initializes the freelist, adding to it all memory 
+ * reported as usable by the bootloader
  * \param virtual  the stivale2 struct tag which gives the beginning of the HHDM
  * \param physical the stivale2 memory map struct tag, which reports the memory map
  *                 the memory map built by the bootloader
  */
-void get_usable_memory(struct stivale2_struct_tag_hhdm *virtual, struct stivale2_struct_tag_memmap *physical) {
+void freelist_init(struct stivale2_struct_tag_hhdm *virtual, struct stivale2_struct_tag_memmap *physical) {
   // Store the start of the HHDM
   virtual_offset = virtual->addr;
 
@@ -76,15 +85,30 @@ void get_usable_memory(struct stivale2_struct_tag_hhdm *virtual, struct stivale2
 
       // Add usable memory to the freelist
       add_memory(physical->memmap[i].base, physical->memmap[i].length);
-
-      // We found usable memory! Print its physical and virtual location
-      // kprintf("0x%x-0x%x mapped at 0x%x-0x%x\n", physical->memmap[i].base,
-      //         physical->memmap[i].base + physical->memmap[i].length, physical->memmap[i].base + virtual_offset,
-      //         physical->memmap[i].base + physical->memmap[i].length + virtual_offset);
     }
   }
+}
 
-  kprintf("first in the free list:%p\n", freelist);
+/**
+ * Prints the usable memory, as reported by the bootloader.
+ * \param virtual  the stivale2 struct tag which gives the beginning of the HHDM
+ * \param physical the stivale2 memory map struct tag, which reports the memory map
+ *                 the memory map built by the bootloader
+ */
+void get_usable_memory(struct stivale2_struct_tag_hhdm *virtual, struct stivale2_struct_tag_memmap *physical) {
+  // Store the start of the HHDM
+  virtual_offset = virtual->addr;
+
+  // Loop through physical memory entries, looking for usable memory
+  for (int i = 0; i < physical->entries; i++) {
+    if (physical->memmap[i].type == 1) {
+
+      // We found usable memory! Print its physical and virtual location
+      kprintf("0x%x-0x%x mapped at 0x%x-0x%x\n", physical->memmap[i].base,
+              physical->memmap[i].base + physical->memmap[i].length, physical->memmap[i].base + virtual_offset,
+              physical->memmap[i].base + physical->memmap[i].length + virtual_offset);
+    }
+  }
 }
 
 /**
@@ -306,8 +330,7 @@ bool free_page_table(uintptr_t page_head) {
  * \param address The virtual address to unmap from the address space
  * \returns true if successful, or false if anything goes wrong
  */
-bool vm_unmap(uintptr_t root, uintptr_t address)
-{
+bool vm_unmap(uintptr_t root, uintptr_t address) {
   // Break the virtual address into the page table addresses
   uintptr_t temp2 = (uintptr_t)address;
   uint16_t level1 = (temp2 >> 12) & 0x1ff;
@@ -323,22 +346,19 @@ bool vm_unmap(uintptr_t root, uintptr_t address)
 
   uintptr_t level3_start_of_the_page = (level4_table->physical_addr) << 12;
   page_table_entry_t *level3_table = ((page_table_entry_t *)(level3_start_of_the_page + virtual_offset)) + level3;
-  if (!level3_table->present)
-  {
+  if (!level3_table->present) {
     return false;
   }
 
   uintptr_t level2_start_of_the_page = (level3_table->physical_addr) << 12;
   page_table_entry_t *level2_table = ((page_table_entry_t *)(level2_start_of_the_page + virtual_offset)) + level2;
-  if (!level2_table->present)
-  {
+  if (!level2_table->present) {
     return false;
   }
 
   uintptr_t level1_start_of_the_page = level2_table->physical_addr << 12;
   page_table_entry_t *level1_table = ((page_table_entry_t *)(level1_start_of_the_page + virtual_offset)) + level1;
-  if (!level1_table->present)
-  {
+  if (!level1_table->present) {
     return false;
   }
 
@@ -383,29 +403,25 @@ bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, boo
 
   // Traverse the page tables, mapping new pages as necessary
   page_table_entry_t *level4_table = ((page_table_entry_t *)(root + virtual_offset)) + level4;
-  if (!level4_table->present)
-  {
+  if (!level4_table->present) {
     return false;
   }
 
   uintptr_t level3_start_of_the_page = (level4_table->physical_addr) << 12;
   page_table_entry_t *level3_table = ((page_table_entry_t *)(level3_start_of_the_page + virtual_offset)) + level3;
-  if (!level3_table->present)
-  {
+  if (!level3_table->present) {
     return false;
   }
 
   uintptr_t level2_start_of_the_page = (level3_table->physical_addr) << 12;
   page_table_entry_t *level2_table = ((page_table_entry_t *)(level2_start_of_the_page + virtual_offset)) + level2;
-  if (!level2_table->present)
-  {
+  if (!level2_table->present) {
     return false;
   }
 
   uintptr_t level1_start_of_the_page = level2_table->physical_addr << 12;
   page_table_entry_t *level1_table = ((page_table_entry_t *)(level1_start_of_the_page + virtual_offset)) + level1;
-  if (!level1_table->present)
-  {
+  if (!level1_table->present) {
     return false;
   }
 

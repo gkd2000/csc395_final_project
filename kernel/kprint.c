@@ -149,5 +149,3 @@ void kprintf(const char *format, ...) {
   // Finish handling variadic arguments
   va_end(args);
 }
-
-
