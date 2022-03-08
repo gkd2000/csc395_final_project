@@ -22,7 +22,7 @@ void* memset(void *arr, int c, uint32_t size) {
 
 /**
  * Mimics the standard C function memcpy
- * Copies size bytes of data from des to src. 
+ * Copies size bytes of data from des to src.
  * The locations indicated by des and src should not overlap
  * \param des  pointer to the memory location to copy data to
  * \param src  pointer to the memory location to copy data from
@@ -31,7 +31,6 @@ void* memset(void *arr, int c, uint32_t size) {
  */
 void* memcpy(void *des, void *src, size_t size) {
   uint8_t* des1 = (uint8_t *)des;
-    kprintf("%d\n", size);
   uint8_t* src1 = (uint8_t *)src;
   for (size_t i = 0; i < size; i++) {
     des1[i] = src1[i];
@@ -64,7 +63,7 @@ void add_memory(uint64_t base, uint64_t length) {
 }
 
 /**
- * Enables write protection and initializes the freelist, adding to it all memory 
+ * Enables write protection and initializes the freelist, adding to it all memory
  * reported as usable by the bootloader
  * \param virtual  the stivale2 struct tag which gives the beginning of the HHDM
  * \param physical the stivale2 memory map struct tag, which reports the memory map
@@ -278,7 +277,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
   // Traverse the page tables, mapping new pages as necessary
   page_table_entry_t *level4_table = ((page_table_entry_t *)(root + virtual_offset)) + level4;
   if (!level4_table->present) {
-    if(malloc_page(level4_table, 1, 1, 0)) {
+    if(malloc_page(level4_table, 1, 1, 1)) {
       return false;
     }
   }
@@ -286,7 +285,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
   uintptr_t level3_start_of_the_page = (level4_table->physical_addr) << 12;
   page_table_entry_t *level3_table = ((page_table_entry_t *)(level3_start_of_the_page + virtual_offset)) + level3;
   if (!level3_table->present) {
-    if(malloc_page(level3_table, 1, 1, 0)) {
+    if(malloc_page(level3_table, 1, 1, 1)) {
       return false;
     }
   }
@@ -294,7 +293,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
   uintptr_t level2_start_of_the_page = (level3_table->physical_addr) << 12;
   page_table_entry_t *level2_table = ((page_table_entry_t *)(level2_start_of_the_page + virtual_offset)) + level2;
   if (!level2_table->present) {
-    if(malloc_page(level2_table, 1, 1, 0)) {
+    if(malloc_page(level2_table, 1, 1, 1)) {
       return false;
     }
   }

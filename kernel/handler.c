@@ -21,7 +21,7 @@ __attribute__((interrupt)) void generic_handler(interrupt_context_t* ctx) {
 __attribute__((interrupt)) void divide_error_handler(interrupt_context_t* ctx) {
   kprintf("divide error handler\n");
   halt();
-}
+};
 
 // Handler for a debug exception (fault/trap)
 __attribute__((interrupt)) void debug_exception_handler(interrupt_context_t* ctx) {
@@ -39,19 +39,19 @@ __attribute__((interrupt)) void nmi_interrupt_handler(interrupt_context_t* ctx) 
 __attribute__((interrupt)) void breakpoint_handler(interrupt_context_t* ctx) {
   kprintf("breakpoint handler\n");
   halt();
-}
+};
 
 // Handler for an overflow trap
 __attribute__((interrupt)) void overflow_handler(interrupt_context_t* ctx) {
     kprintf("overflow handler\n");
   halt();
-}
+};
 
 // Handler for a BOUND range exceeded fault
 __attribute__((interrupt)) void bound_range_exceeded_handler(interrupt_context_t *ctx) {
   kprintf("bound range exceeded handler\n");
   halt();
-}
+};
 
 // Handler for an invalid opcode fault
 __attribute__((interrupt)) void invalid_opcode_handler(interrupt_context_t *ctx) {
@@ -155,12 +155,13 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
     }
 }
 
-// Handler for system calls
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
   switch (nr)
   {
   case SYS_write:
+    // read from stdin 0
     return sys_write(arg0, arg1, arg2);
+
   case SYS_read:
     return sys_read(arg0, arg1, arg2);
   default:

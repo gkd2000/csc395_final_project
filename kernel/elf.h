@@ -5,10 +5,11 @@
 
 #include "mem.h"
 
-// Structures for the ELF header and program header table entries were 
+// Structures for the ELF header and program header table entries were
 // obtained from https://uclibc.org/docs/elf-64-gen.pdf
 
 #define EI_NIDENT 16
+#define PT_LOAD 1
 
 // Structure of an ELF file header
 typedef struct elfhdr {
@@ -48,6 +49,4 @@ typedef struct phdr {
 void run_program(intptr_t addr);
 
 // Typedef a function pointer which corresponds to the inputs and outputs of the term_write function
-typedef void (*void_function_t)();
-// Initialize term_write to NULL
-static void_function_t void_function = NULL;
+// typedef void (*void_function_t)();
