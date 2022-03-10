@@ -2,7 +2,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+
 #include "kprint.h"
+#include "char.h"
 
 #define SYS_read 0
 #define SYS_write 1

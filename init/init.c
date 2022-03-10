@@ -1,11 +1,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <syscall.h>
 
-#define SYS_read 0
-#define SYS_write 1
 
-extern int syscall(uint64_t nr, ...);
 
 void _start() {
   // Issue a write system call

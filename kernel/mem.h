@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <string.h>
+
 #include "stivale2.h"
 #include "kprint.h"
 #include "assembly.h"
@@ -32,28 +34,7 @@ typedef struct node {
 } node_t;
 
 /**
- * Mimics the standard C function memset.
- * Writes size bytes of value c to the memory pointed to by arr.
- * \param arr  pointer to the memory to be written to
- * \param c    value to be written
- * \param size number of bytes to be written
- * \returns arr (the first argument)
- */
-void* memset(void *arr, int c, uint32_t size);
-
-/**
- * Mimics the standard C function memcpy
- * Copies size bytes of data from des to src. 
- * The locations indicated by des and src should not overlap
- * \param des  pointer to the memory location to copy data to
- * \param src  pointer to the memory location to copy data from
- * \param size number of bytes to copy
- * \returns pointer to the first byte of copied memory
- */
-void* memcpy(void *des, void* src, size_t size);
-
-/**
- * Enables write protection and initializes the freelist, adding to it all memory 
+ * Enables write protection and initializes the freelist, adding to it all memory
  * reported as usable by the bootloader
  * \param virtual  the stivale2 struct tag which gives the beginning of the HHDM
  * \param physical the stivale2 memory map struct tag, which reports the memory map

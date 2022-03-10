@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <string.h>
 
 // Typedef a function pointer which corresponds to the inputs and outputs of the term_write function
 typedef void (*term_write_t)(const char *, size_t);

@@ -9,6 +9,7 @@
 #include "char.h"
 #include "mem.h"
 #include "assembly.h"
+#include "elf.h"
 
 // Reserve space for the stack
 static uint8_t stack[8192];

@@ -2,3 +2,5 @@ limine
 boot.iso
 kernel/kernel.elf
 kernel/obj
+
+.DS_Store

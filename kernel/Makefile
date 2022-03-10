@@ -1,9 +1,9 @@
 CC := clang -target x86_64-elf
 LD := x86_64-elf-ld
 
-CFLAGS := --std=c17 -Wall -O2 -I. -ffreestanding -nostdlib -fno-stack-protector -fno-pic -mno-80387 -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -MMD -MP
+CFLAGS := --std=c17 -Wall -O2 -I. -isystem ../stdlib -ffreestanding -nostdlib -fno-stack-protector -fno-pic -mno-80387 -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -MMD -MP
 
-LDFLAGS := -nostdlib -static
+LDFLAGS := -nostdlib -static -L../stdlib -lc
 
 OUT := obj
 
@@ -25,7 +25,7 @@ run:
 	$(MAKE) -C .. run
 
 kernel.elf: $(C_OBJ) $(S_OBJ) linker.ld
-	$(LD) $(LDFLAGS) -T linker.ld -o $@ $(C_OBJ) $(S_OBJ)
+	$(LD) -T linker.ld -o $@ $(C_OBJ) $(S_OBJ) $(LDFLAGS)
 
 $(C_OBJ): $(OUT)/%.o: %.c
 	@mkdir -p `dirname $@`

@@ -8,23 +8,6 @@ void set_term_write(term_write_t t) {
   term_write = t;
 }
 
-/**
- * Counts the number of characters, excluding the null terminator, in a string
- * \param str the string to count characters of
- * \return the number of cahracters in str, excluding the null terminator
- */
-uint32_t strlen(const char *str) {
-  uint32_t length = 0;
-  const char *temp = str;
-
-  // Iterate through str, incrementing our counter
-  while (*temp != '\0') {
-    length++;
-    temp++;
-  }
-
-  return length;
-}
 
 /**
  * Print a character to the terminal
