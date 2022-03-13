@@ -2,6 +2,17 @@
 
 node_t* freelist = NULL;
 
+intptr_t ptov(intptr_t addr)
+{
+  return addr + virtual_offset;
+}
+
+void invalidate_tlb(uintptr_t virtual_address)
+{
+  __asm__("invlpg (%0)" ::"r"(virtual_address)
+          : "memory");
+}
+
 /**
  * Break up a large piece of memory and add it to the free list
  * \param base   the physical start of the usable memory
@@ -50,6 +61,7 @@ void freelist_init(struct stivale2_struct_tag_hhdm *virtual, struct stivale2_str
       add_memory(physical->memmap[i].base, physical->memmap[i].length);
     }
   }
+
 }
 
 /**
@@ -165,10 +177,11 @@ void translate(uintptr_t page_table, void *address) {
  */
 uintptr_t pmem_alloc() {
   node_t * temp = freelist;
+  temp = (node_t *) ptov((intptr_t)temp);
   if (temp) {
     freelist = temp->next;
     temp->serial_number = 0;
-    return (uintptr_t) temp;
+    return ((uintptr_t)temp) - virtual_offset;
   }
   return 0;
 }
@@ -181,11 +194,11 @@ void pmem_free(uintptr_t p) {
   if (!(p% PAGE_SIZE)) {
     return;
   }
-  node_t * temp = (node_t *)(p);
+  node_t * temp = (node_t *)(p+virtual_offset);
   if (temp->serial_number != SERIAL_NUMBER) {
     temp->serial_number = SERIAL_NUMBER;
     temp->next = freelist;
-    freelist = temp;
+    freelist = (node_t *)(((uintptr_t)temp)-virtual_offset);
   }
   return;
 }
@@ -245,7 +258,6 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
       return false;
     }
   }
-
   uintptr_t level3_start_of_the_page = (level4_table->physical_addr) << 12;
   page_table_entry_t *level3_table = ((page_table_entry_t *)(level3_start_of_the_page + virtual_offset)) + level3;
   if (!level3_table->present) {
@@ -273,6 +285,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
     return false;
   }
 
+  invalidate_tlb(address);
   // Page mapped successfully!
   return true;
 }
@@ -344,6 +357,8 @@ bool vm_unmap(uintptr_t root, uintptr_t address) {
     pmem_free(level4_table->physical_addr << 12);
   }
 
+  invalidate_tlb(address);
+
   return true;
 }
 
@@ -391,5 +406,58 @@ bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, boo
   level1_table->kernel = user;
   level1_table->writable = writable;
   level1_table->no_execute = !executable;
+  invalidate_tlb(address);
+
   return true;
+}
+
+// Unmap everything in the lower half of an address space with level 4 page table at address root
+void unmap_lower_half(uintptr_t root) {
+  // We can reclaim memory used to hold page tables, but NOT the mapped pages
+  page_table_entry_t *l4_table = (page_table_entry_t *) ptov(root);
+  for (size_t l4_index = 0; l4_index < 256; l4_index++)
+  {
+
+    // Does this entry point to a level 3 table?
+    if (l4_table[l4_index].present)
+    {
+
+      // Yes. Mark the entry as not present in the level 4 table
+      l4_table[l4_index].present = false;
+
+      // Now loop over the level 3 table
+      page_table_entry_t *l3_table = (page_table_entry_t *)ptov(l4_table[l4_index].physical_addr << 12);
+      for (size_t l3_index = 0; l3_index < 512; l3_index++)
+      {
+
+        // Does this entry point to a level 2 table?
+        if (l3_table[l3_index].present && !l3_table[l3_index].page_size)
+        {
+
+          // Yes. Loop over the level 2 table
+          page_table_entry_t *l2_table = (page_table_entry_t *)ptov(l3_table[l3_index].physical_addr << 12);
+          for (size_t l2_index = 0; l2_index < 512; l2_index++)
+          {
+
+            // Does this entry point to a level 1 table?
+            if (l2_table[l2_index].present && !l2_table[l2_index].page_size)
+            {
+
+              // Yes. Free the physical page the holds the level 1 table
+              pmem_free(l2_table[l2_index].physical_addr << 12);
+            }
+          }
+
+          // Free the physical page that held the level 2 table
+          pmem_free(l3_table[l3_index].physical_addr << 12);
+        }
+      }
+
+      // Free the physical page that held the level 3 table
+      pmem_free(l4_table[l4_index].physical_addr << 12);
+    }
+  }
+
+// Reload CR3 to flush any cached address translations
+write_cr3(read_cr3());
 }

@@ -4,3 +4,4 @@ kernel/kernel.elf
 kernel/obj
 
 .DS_Store
+stdlib/*.a

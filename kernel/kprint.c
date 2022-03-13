@@ -4,9 +4,9 @@
  * Set the term_write function, which allows us to print output to the terminal
  * \param t function pointer to the function we want to set term_write to be
  */
-void set_term_write(term_write_t t) {
-  term_write = t;
-}
+// void set_term_write(term_write_t t) {
+//   term_write = t;
+// }
 
 
 /**

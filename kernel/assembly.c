@@ -23,3 +23,10 @@ uintptr_t read_cr3() {
           : "=r"(value));
   return value;
 }
+
+void write_cr3(uint64_t value)
+{
+  __asm__("mov %0, %%cr3"
+          :
+          : "r"(value));
+}

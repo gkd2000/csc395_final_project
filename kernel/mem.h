@@ -18,12 +18,14 @@ typedef struct page_table {
   uint8_t present : 1;
   uint8_t writable : 1;
   uint8_t kernel : 1;
-  uint8_t _unused_0 : 2;
+  uint8_t write_through : 1;
+  uint8_t cache_disable : 1;
   uint8_t accessed : 1;
-  uint8_t _unused_1 : 1;
-  uint8_t ps : 1;
-  uint8_t _unused_2 : 4;
-  uint64_t physical_addr : 51;
+  uint8_t dirty : 1;
+  uint8_t page_size : 1;
+  uint8_t _unused_0 : 4;
+  uint64_t physical_addr : 40;
+  uint16_t _unused1 : 11;
   uint8_t no_execute : 1;
 } __attribute__((packed)) page_table_entry_t;
 
@@ -98,3 +100,10 @@ bool vm_unmap(uintptr_t root, uintptr_t address);
  * \returns true if successful, or false if anything goes wrong (e.g. page is not mapped)
  */
 bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable);
+
+
+intptr_t ptov(intptr_t addr);
+
+void unmap_lower_half(uintptr_t root);
+
+void invalidate_tlb(uintptr_t virtual_address);

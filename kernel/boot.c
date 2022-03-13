@@ -77,7 +77,7 @@ void term_setup(struct stivale2_struct *hdr) {
     halt();
 
   // Save the term_write function pointer
-  set_term_write((term_write_t)tag->term_write);
+  // set_term_write((term_write_t)tag->term_write);
 }
 
 
@@ -96,6 +96,9 @@ void _start(struct stivale2_struct *hdr) {
 
   // Set up the free list and enable write protection
   freelist_init(virtual, physical);
+  term_init();
+  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  unmap_lower_half(root);
 
   // Get information about the modules we've asked the bootloader to load
   struct stivale2_struct_tag_modules *modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
@@ -115,7 +118,7 @@ void _start(struct stivale2_struct *hdr) {
   // //   kprintf("%c\n", kgetc());
   // // }
 
-  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+
   int *p = (int *)0x500040001231;
   bool result = vm_map(root, (uintptr_t)p, false, true, false);
   if (result)
