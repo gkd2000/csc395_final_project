@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <stddef.h>
-
+#include <syscall.h>
 
 #include "kprint.h"
 #include "char.h"
@@ -11,7 +11,6 @@
 
 #define BACKSPACE 8
 
-extern int64_t syscall(uint64_t nr, ...);
 extern void syscall_entry();
 
 /**

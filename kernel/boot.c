@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <io.h>
+#include <string.h>
 
 #include "stivale2.h"
 #include "util.h"
@@ -108,8 +110,69 @@ void _start(struct stivale2_struct *hdr) {
   for (int i = 0; i < modules->module_count; i++)
   {
     kprintf("        %s:\n            %p-%p\n", modules->modules[i].string, modules->modules[i].begin, modules->modules[i].end);
-    run_program(modules->modules[i].begin);
+    // run_program(modules->modules[i].begin);
   }
+
+  // Test strsep
+  char* token;
+  char string[12] = "abc,def,ghi";
+  char* str_ptr = (char*) string;
+
+  // while ((token = strsep(&str_ptr, ",")) != NULL) {
+  //   kprintf("%s\n", token);
+  // }
+
+  // Test strcpy and strncpy
+  char des[15];
+  strncpy(des, str_ptr, 4);
+  for(int i = 0; i < 10; i++) {
+    kprintf("%c ", des[i]);
+  }
+  kprintf("\n");
+  kprintf("%s\n", strcpy(des, str_ptr));
+  kprintf("%s\n", des);
+
+  kprintf("%s\n", strncpy(des, str_ptr, 14));
+
+  // Test strpbrk
+  kprintf("%s\n", strpbrk("abc,def,ghi", ","));
+  kprintf("%s\n", strpbrk("abc,def,ghi", " ") ? "true" : "false"); // No occurences
+  kprintf("%s\n", strpbrk("abc,def,ghi", "i")); // Last char
+  kprintf("%s\n", strpbrk("abc,def,ghi", "a")); // First char
+  kprintf("%s\n", strpbrk("abc,def,ghi", "zyxf")); // Several delimiters
+
+  if(strcmp("hi", "bye") <= 0) {
+    kprintf("1 failed\n");
+  } else {
+    kprintf("1 success\n");
+  }
+
+  if(strcmp("bye", "hi") >= 0) {
+    kprintf("2 failed\n");
+  } else {
+    kprintf("2 success\n");
+  }
+
+  if(strcmp("hi", "hire") >= 0) {
+    kprintf("3 failed\n");
+  } else {
+    kprintf("3 success\n");
+  }
+
+  if(strcmp("hello world", "hello world") != 0) {
+    kprintf("4 failed\n");
+  } else {
+    kprintf("4 success\n");
+  }
+
+  // Test getline
+  // char buffer[10];
+  // char* buffer_ptr = (char*) buffer;
+  // size_t max = 10;
+  // size_t chars_read = getline(&buffer_ptr, &max, 0);
+  // for(size_t i = 0; i < chars_read; i++) {
+  //   kprintf("%c", buffer[i]);
+  // }
 
   // translate(((read_cr3() >> 12) << 12), _start);
   // translate(((read_cr3() >> 12) << 12), NULL);
