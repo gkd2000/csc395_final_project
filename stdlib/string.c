@@ -1,5 +1,6 @@
 #include "string.h"
 
+char *strtok_s = NULL;
 /**
  * Mimics the standard C function memset.
  * Writes size bytes of value c to the memory pointed to by arr.
@@ -58,4 +59,57 @@ uint32_t strlen(const char *str)
   }
 
   return length;
+}
+
+
+bool contain(char c, char* l) {
+  while(l) {
+    if (c == *l++) {
+      return true;
+    }
+  }
+  return false;
+}
+char *strtok(char * str, const char *restrict sep) {
+  char * res = str ? str : strtok_s;
+  char * temp = res;
+  while (*temp != '\0' && contain(*temp, sep));
+  if (*temp == '\0') {
+    strtok_s = NULL;
+  } else {
+    strtok_s = temp+1;
+    *temp = '\0';
+  }
+
+  return res;
+}
+
+
+int atoi(const char* str) {
+  int res = 0;
+  for (int i = 0; i < strlen(str); i++) {
+    if (str[i]>='0' && str[i] <= '9') {
+      res = res*10+str[i]-'0';
+    } else {
+      return res;
+    }
+  }
+  return res;
+}
+
+int strcmp(const char *s1, const char *s2) {
+  char * p = s1;
+  char * q = s2;
+  while ((*p && *q) && (*p++ == *q++));
+
+  return *p - *q;
+}
+
+int strncmp(const char *s1, const char *s2, size_t n) {
+  for (int i = 0; i < n; i++) {
+    if (s1[i]!=s2[i]) {
+      return s1[i] - s2[i];
+    }
+  }
+  return 0;
 }

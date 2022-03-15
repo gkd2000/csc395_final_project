@@ -8,6 +8,7 @@
 
 #define SYS_read 0
 #define SYS_write 1
+#define SYS_mmap 2
 
 #define BACKSPACE 8
 
@@ -31,3 +32,5 @@ int64_t sys_write(uint64_t fd, intptr_t buffer, uint64_t size);
  * \return number of characters read
  */
 int64_t sys_read(uint64_t fd, intptr_t buffer, uint64_t size);
+
+int64_t sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t offset);

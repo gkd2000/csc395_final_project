@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+
 /**
  * Mimics the standard C function memset.
  * Writes size bytes of value c to the memory pointed to by arr.
@@ -34,7 +35,7 @@ uint32_t strlen(const char *str);
 
 char * strpbrk(const char *s, const char *charset);
 
-char * strtok(char *restrict str, const char *restrict sep);
+char * strtok(char * str, const char *restrict sep);
 
 char * strtok_r(char *restrict str, const char *restrict sep,
          char **restrict lasts);

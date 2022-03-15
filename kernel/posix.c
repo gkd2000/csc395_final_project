@@ -44,11 +44,23 @@ int64_t sys_read(uint64_t fd, intptr_t buffer, uint64_t size) {
   while (length < size) {
     c = kgetc();
     if (c == BACKSPACE) {
-      // We read a backspace, change our index to overwrite the last character stored 
+      // We read a backspace, change our index to overwrite the last character stored
       length = length ? length - 1 : 0;
     } else {
       output[length++] = c;
     }
   }
   return length;
+}
+
+int64_t sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t offset) {
+  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  for (int j = 0; j < ((((intptr_t)addr) + len - (((intptr_t)addr) & 0xFFFFFFFFFFFFF000)) / PAGE_SIZE + 1); j++)
+  {
+    if (!vm_map(root, (((intptr_t)addr) & 0xFFFFFFFFFFFFF000) + j * PAGE_SIZE, 1, 1, 1))
+    {
+      kprintf("mem map failed\n");
+    }; // Map the virtual address we need
+  }
+  return (((intptr_t)addr) & 0xFFFFFFFFFFFFF000);
 }
