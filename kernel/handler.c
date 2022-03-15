@@ -164,6 +164,9 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
 
   case SYS_read:
     return sys_read(arg0, arg1, arg2);
+
+  case SYS_mmap:
+    return sys_mmap((void *)arg0, arg1, arg2, arg3, arg4, arg5);
   default:
     return 0;
   }
