@@ -126,4 +126,4 @@ int atoi(const char *str);
  */
 void* malloc(size_t sz);
 
-void* mmap(void *addr, size_t len, int prot, int flags, int fd, int offset);
+// void* mmap(void *addr, size_t len, int prot, int flags, int fd, int offset);

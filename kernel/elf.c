@@ -3,6 +3,8 @@
 #include "kprint.h"
 #include "assembly.h"
 #include "posix.h"
+#include "mem.h"
+#include "gdt.h"
 
 typedef void (*void_function_t)();
 
@@ -45,17 +47,33 @@ void run_program(intptr_t addr) {
         };                                   // Map the virtual address we need
       }
       memcpy(v_ptr, file_ptr, h->p_memsz); // Copy the segment to its new place
-      for (int j = 0; j < ((h->p_vaddr + h->p_memsz - (h->p_vaddr & 0xFFFFFFFFFFFFF000)) / PAGE_SIZE + 1); j++)
-      {
-        if (!vm_protect(root, (((intptr_t)v_ptr) & 0xFFFFFFFFFFFFF000) + j * PAGE_SIZE, readable, writable, executable))
-        {
+      for (int j = 0; j < ((h->p_vaddr + h->p_memsz - (h->p_vaddr & 0xFFFFFFFFFFFFF000)) / PAGE_SIZE + 1); j++) {
+        if (!vm_protect(root, (((intptr_t)v_ptr) & 0xFFFFFFFFFFFFF000) + j * PAGE_SIZE, readable, writable, executable)) {
           kprintf("protect failed\n");
-        };
+        }
       }
     }
   }
 
-  // Jump to entry point of the function (doesn't work)
-   void_function_t void_function = (void_function_t)entry;
-   void_function();
+  // Everything is set up! Now jump to entry point of the function
+
+  // Pick an arbitrary location and size for the user-mode stack
+  uintptr_t user_stack = 0x70000000000;
+  size_t user_stack_size = 8 * PAGE_SIZE;
+
+  // Map the user-mode-stack
+  for(uintptr_t p = user_stack; p < user_stack + user_stack_size; p += 0x1000) {
+    // Map a page that is user-accessible, writable, but not executable
+    vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, p, true, true, false);
+  }
+
+  // And now jump to the entry point
+  usermode_entry(USER_DATA_SELECTOR | 0x3,            // User data selector with priv=3
+                  user_stack + user_stack_size - 8,   // Stack starts at the high address minus 8 bytes
+                  USER_CODE_SELECTOR | 0x3,           // User code selector with priv=3
+                  entry);                     // Jump to the entry point specified in the ELF file
+  
+  // Old way of jumping to the entry point (does not put it in user mode)
+  // void_function_t void_function = (void_function_t)entry;
+  // void_function();
 }

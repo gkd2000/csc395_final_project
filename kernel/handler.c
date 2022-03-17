@@ -145,6 +145,7 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
 
 // Handler for a keyboard event
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx) {
+  kprintf("in irq1\n");
     // Read the character and prepare to accept new inputs
     char c = getchar(inb(0x60));
     outb(PIC1_COMMAND, PIC_EOI);
@@ -153,9 +154,11 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
     if(c != 0 && c <= 127) {
       buffer_put(c);
     }
+    kprintf("end irq1\n");
 }
 
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
+  kprintf("in syscall: %d\n", nr);
   switch (nr)
   {
   case SYS_write:

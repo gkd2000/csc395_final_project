@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
-#include <io.h>
+#include <unistd.h>
 #include <string.h>
 
 #include "stivale2.h"
@@ -12,6 +12,10 @@
 #include "mem.h"
 #include "assembly.h"
 #include "elf.h"
+#include "gdt.h"
+
+// TODO: Stopped just before Re-enabling System Calls 
+//  need to set up the TSS and maybe do more things after that
 
 // Reserve space for the stack
 static uint8_t stack[8192];
@@ -86,9 +90,9 @@ void term_setup(struct stivale2_struct *hdr) {
 void _start(struct stivale2_struct *hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
+  
+  gdt_setup();
   idt_setup();
-  pic_init();
-  pic_unmask_irq(1);
 
   // Find the start of higher half direct map (virtual memory)
   struct stivale2_struct_tag_hhdm *virtual = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
@@ -100,17 +104,30 @@ void _start(struct stivale2_struct *hdr) {
   freelist_init(virtual, physical);
   term_init();
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+
+  pic_init();
+  pic_unmask_irq(1);
+
   unmap_lower_half(root);
 
   // Get information about the modules we've asked the bootloader to load
   struct stivale2_struct_tag_modules *modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+
+  // Test page for init
+  uintptr_t test_page = 0x400000000;
+  vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
+
+  char buffer1[10];
+  read(0, buffer1, 9);
+
+  kprintf("%s\n", buffer1);
 
   // test module
   kprintf("modules:\n");
   for (int i = 0; i < modules->module_count; i++)
   {
     kprintf("        %s:\n            %p-%p\n", modules->modules[i].string, modules->modules[i].begin, modules->modules[i].end);
-    // run_program(modules->modules[i].begin);
+    run_program(modules->modules[i].begin);
   }
 
   // Test strsep
