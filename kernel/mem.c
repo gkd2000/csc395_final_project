@@ -2,13 +2,13 @@
 
 node_t* freelist = NULL;
 
-intptr_t ptov(intptr_t addr)
-{
+// Translate a physical address to a virtual one
+intptr_t ptov(intptr_t addr) {
   return addr + virtual_offset;
 }
 
-void invalidate_tlb(uintptr_t virtual_address)
-{
+// Invalidate a TLB entry to get rid of cached address transalations which are no longer accurate
+void invalidate_tlb(uintptr_t virtual_address) {
   __asm__("invlpg (%0)" ::"r"(virtual_address)
           : "memory");
 }

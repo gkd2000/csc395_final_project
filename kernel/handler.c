@@ -157,6 +157,12 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
     kprintf("end irq1\n");
 }
 
+/**
+ * Handler for a system call. 
+ * \param nr the number of the system call, defined in posix.h
+ * Other parameters are dependent on the specific syscall (specified by nr)
+ * \returns the return for the syscall specified by nr
+ */ 
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
   kprintf("in syscall: %d\n", nr);
   switch (nr)

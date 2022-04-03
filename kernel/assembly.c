@@ -24,8 +24,8 @@ uintptr_t read_cr3() {
   return value;
 }
 
-void write_cr3(uint64_t value)
-{
+// Write to control register 3, which stores the pointer to the top level page table
+void write_cr3(uint64_t value) {
   __asm__("mov %0, %%cr3"
           :
           : "r"(value));
