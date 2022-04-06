@@ -95,8 +95,6 @@ int atoi(const char* str) {
 }
 
 int strcmp(const char *s1, const char *s2) {
-  // char * p = s1;
-  // char * q = s2;
   while ((*s1 && *s2) && (*s1++ == *s2++));
 
   return *s1 - *s2;
@@ -235,25 +233,6 @@ char* strpbrk(const char *s, const char *charset) {
   return NULL;
 }
 
-/**
- * Mimics C standard library strcmp
- */
-// int strcmp(const char *s1, const char *s2) {
-//   int i = 0;
-//   while(s1[i] == s2[i]) {
-//     if(s1[i] == '\0') {
-//       // We reached the end of both strings
-//       return 0;
-//     } else {
-//       i++;
-//     }
-//   }
-//   if(s1[i] == '\0' || s1[i] - s2[i] < 0) {
-//     return -1;
-//   } else {
-//     return 1;
-//   }
-// }
 
 // Globals for malloc
 void* bump = NULL;
@@ -261,11 +240,10 @@ size_t space_remaining = 0;
 
 /**
  * Allocate sz bytes of memory
- * NO ONE USE THIS YET, it depends on mmap system call
  * \param sz number of bytes to be allocated
  * \returns a pointer to the beginning of the allocated memory,
  *          or NULL on error
-
+*/
 void* malloc(size_t sz) {
   // Round sz up to a multiple of 16
   sz = ROUND_UP(sz, 16);
@@ -291,7 +269,7 @@ void* malloc(size_t sz) {
   space_remaining -= sz;
 
   return result;
-}*/
+}
 
 // Our malloc implementation does not support freeing right now
 void free(void* p) {

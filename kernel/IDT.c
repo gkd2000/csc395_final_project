@@ -41,7 +41,7 @@ void idt_set_handler(uint8_t index, void* fn, uint8_t type) {
   entry->offset_2 = offset_2;
   entry->type = type;
   entry->present = 1;
-  entry->dpl = 0;
+  entry->dpl = 3;
   entry->ist = 0;
   entry->selector = KERNEL_CODE_SELECTOR;
 }

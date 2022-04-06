@@ -14,7 +14,7 @@
 #include "elf.h"
 #include "gdt.h"
 
-// TODO: Stopped just before Re-enabling System Calls 
+// TODO: Stopped just before Re-enabling System Calls
 //  need to set up the TSS and maybe do more things after that
 
 // Reserve space for the stack
@@ -90,9 +90,9 @@ void term_setup(struct stivale2_struct *hdr) {
 void _start(struct stivale2_struct *hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
-  
-  gdt_setup();
+
   idt_setup();
+  gdt_setup();
 
   // Find the start of higher half direct map (virtual memory)
   struct stivale2_struct_tag_hhdm *virtual = find_tag(hdr, STIVALE2_STRUCT_TAG_HHDM_ID);
@@ -118,7 +118,8 @@ void _start(struct stivale2_struct *hdr) {
   vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
 
   char buffer1[10];
-  read(0, buffer1, 9);
+  // write(1, "hellowor\n", 9);
+  // read(0, buffer1, 9);
 
   kprintf("%s\n", buffer1);
 

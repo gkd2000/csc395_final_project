@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -25,16 +27,16 @@ size_t write(int filedes, const void *buf, size_t nbyte);
 /**
  * Mimics functionality of C standard library getline function.
  * Read from the location specified by filedes until a newline character
- * is encountered or a given number of bytes are read. 
- * Note that the C standard library function getline allows for dynamic 
- * expansion of the buffer *linep, as well as corresponding updates to 
- * *linecapp (the size of the buffer). This implementation simply reads 
- * a specified number of bytes. It is up to the caller to ensure that 
+ * is encountered or a given number of bytes are read.
+ * Note that the C standard library function getline allows for dynamic
+ * expansion of the buffer *linep, as well as corresponding updates to
+ * *linecapp (the size of the buffer). This implementation simply reads
+ * a specified number of bytes. It is up to the caller to ensure that
  * *linep is large enough to hold *linecapp bytes.
  * \param linep    pointer to an array to store the values read
  * \param linecapp pointer to the maximum number of bytes to read
  * \param filedes  the file to read from
- *    Note that right now, filedes must be 0 (stdin), but that check happens 
+ *    Note that right now, filedes must be 0 (stdin), but that check happens
  *    in the system call itself
  * \returns the number of bytes read and stored in *linep on success
  *          -1 on error

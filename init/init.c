@@ -18,7 +18,7 @@ void _start() {
 
   // syscall(SYS_write, 1, "Hello world!\n", 13);
     // Loop forever
-  for(;;){}
+  // for(;;){}
 
   char* test_page = (char*)0x400000000;
   test_page[0] = 'h';
@@ -28,6 +28,10 @@ void _start() {
   test_page[4] = 'o';
   test_page[5] = '\n';
   syscall(SYS_write, 1, test_page, 6);
+
+  char buffer1[10];
+  write(1, "hellowor\n", 9);
+  read(0, buffer1, 9);
 
   // Loop forever
   for(;;){}

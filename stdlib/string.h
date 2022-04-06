@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "mman.h"
 
 
 // Round a value x up to the next multiple of y
