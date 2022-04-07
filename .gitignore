@@ -8,3 +8,5 @@ stdlib/*.a
 init/obj
 shell/obj
 */obj
+init/init
+shell/shell
