@@ -5,3 +5,6 @@ kernel/obj
 
 .DS_Store
 stdlib/*.a
+init/obj
+shell/obj
+*/obj

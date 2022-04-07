@@ -44,16 +44,15 @@ size_t exit(int status) {
  *          -1 on error
  */
 size_t getline(char* linep, size_t* linecapp, int filedes) {
-    for(size_t i = 0; i < *linecapp; i++) {
+  size_t i = 0;
+    for(; i < *linecapp; i++) {
         if(read(STDIN, (linep) + i, 1) == -1) {
-          write(STDOUT, "in get line\n", 12);
             return -1;
         } else if((linep)[i] == '\n') {
-          write(STDOUT, "in get lin2\n", 12);
           return i + 1;
         }
-        write(STDOUT, "in get lin3\n", 12);
     }
+    *linecapp = i;
     return *linecapp;
 }
 

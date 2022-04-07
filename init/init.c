@@ -31,7 +31,6 @@ void _start() {
 
   // char buffer1[10];
   // read(0, buffer1, 9);
-  write(1, "hello\nasdasdasd", 9);
 
   exec("shell", NULL);
   // Loop forever

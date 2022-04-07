@@ -118,17 +118,17 @@ void _start(struct stivale2_struct *hdr) {
   uintptr_t test_page = 0x400000000;
   vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
 
-  char buffer1[10];
-  write(1, "hellowor\n", 9);
+  // char buffer1[10];
+  // write(1, "hellowor\n", 9);
   // read(0, buffer1, 9);
 
-  kprintf("%s\n", buffer1);
+  // kprintf("%s\n", buffer1);
 
   // test module
-  kprintf("modules:\n");
+  // kprintf("modules:\n");
   for (int i = 0; i < modules->module_count; i++)
   {
-    kprintf("        %s:\n            %p-%p\n", modules->modules[i].string, modules->modules[i].begin, modules->modules[i].end);
+    // kprintf("        %s:\n            %p-%p\n", modules->modules[i].string, modules->modules[i].begin, modules->modules[i].end);
     run_program(modules->modules[i].begin);
   }
 

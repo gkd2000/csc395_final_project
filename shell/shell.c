@@ -12,11 +12,10 @@ void _start() {
   int size = 100;
   char buffer[size+1];
 
-  getline(buffer, &size, STDIN);
+  size = getline(buffer, &size, STDIN);
   // read(STDIN, buffer, 5);
-  buffer[5] = '\0';
-  write(1, buffer, 5);
-  write(1, "\n", 1);
+  buffer[size] = '\0';
+  write(1, buffer, size);
   exec(buffer, NULL);
   exit(0);
 }
