@@ -1,5 +1,9 @@
 #include "posix.h"
 
+void module_setup(struct stivale2_struct_tag_modules *modules) {
+  modules_list = modules;
+};
+
 /**
  * Write to size characters from buffer to fd
  * \param fd     the location to write to. Must be 1 (stdout) or 2 (stderr)
@@ -39,7 +43,6 @@ int64_t sys_read(uint64_t fd, intptr_t buffer, uint64_t size) {
   char* output = (char *) buffer;
   size_t length = 0;
   output[length++] = c;
-
   // Read size characters from stdin
   while (length < size) {
     c = kgetc();
@@ -64,3 +67,29 @@ int64_t sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t off
   }
   return (((intptr_t)addr) & 0xFFFFFFFFFFFFF000);
 }
+
+int64_t sys_exec(char * file, char* argv[]) {
+  for (int i = 0; i < modules_list->module_count; i++)
+  {
+    if (!strcmp(modules_list->modules[i].string, file)) {
+      uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+      unmap_lower_half(root);
+      run_program(modules_list->modules[i].begin);
+    }
+  }
+}
+
+int64_t sys_exit(int status) {
+  for (int i = 0; i < modules_list->module_count; i++)
+  {
+    if (!strcmp(modules_list->modules[i].string, "init"))
+    {
+      uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+      unmap_lower_half(root);
+      run_program(modules_list->modules[i].begin);
+    }
+  }
+  return status;
+}
+
+

@@ -13,6 +13,7 @@
 #include "assembly.h"
 #include "elf.h"
 #include "gdt.h"
+#include "posix.h"
 
 // TODO: Stopped just before Re-enabling System Calls
 //  need to set up the TSS and maybe do more things after that
@@ -112,13 +113,13 @@ void _start(struct stivale2_struct *hdr) {
 
   // Get information about the modules we've asked the bootloader to load
   struct stivale2_struct_tag_modules *modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
-
+  module_setup(modules);
   // Test page for init
   uintptr_t test_page = 0x400000000;
   vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
 
   char buffer1[10];
-  // write(1, "hellowor\n", 9);
+  write(1, "hellowor\n", 9);
   // read(0, buffer1, 9);
 
   kprintf("%s\n", buffer1);

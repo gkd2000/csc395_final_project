@@ -9,6 +9,7 @@
 #include "syscall.h"
 
 #define STDOUT 1
+#define STDIN 0
 
 size_t read(int fildes, void *buf, size_t nbyte);
 
@@ -23,6 +24,10 @@ size_t read(int fildes, void *buf, size_t nbyte);
  * \returns the number of bytes written, or -1 on error
  */
 size_t write(int filedes, const void *buf, size_t nbyte);
+
+size_t exec(const char *buf, char *arr[]);
+
+size_t exit(int status);
 
 /**
  * Mimics functionality of C standard library getline function.
@@ -41,7 +46,7 @@ size_t write(int filedes, const void *buf, size_t nbyte);
  * \returns the number of bytes read and stored in *linep on success
  *          -1 on error
  */
-size_t getline(char** linep, size_t* linecapp, int filedes);
+size_t getline(char* linep, size_t* linecapp, int filedes);
 
 /**
  * Mimic the basic functionality of printf. Given a format string and

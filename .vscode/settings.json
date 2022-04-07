@@ -7,6 +7,9 @@
     "stdint.h": "c",
     "stivale2.h": "c",
     "stddef.h": "c",
-    "posix.h": "c"
+    "posix.h": "c",
+    "syscall.h": "c",
+    "istream": "c",
+    "string": "c"
   }
 }

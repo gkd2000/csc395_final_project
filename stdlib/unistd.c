@@ -18,6 +18,14 @@ size_t write(int filedes, const void *buf, size_t nbyte) {
     return syscall(SYS_write, filedes, buf, nbyte);
 }
 
+size_t exec(const char *buf, char *arr[]) {
+  return syscall(SYS_exec, buf, arr);
+}
+
+size_t exit(int status) {
+  return syscall(SYS_exit, status);
+};
+
 /**
  * Mimics functionality of C standard library getline function.
  * Read from the location specified by filedes until a newline character
@@ -35,13 +43,16 @@ size_t write(int filedes, const void *buf, size_t nbyte) {
  * \returns the number of bytes read and stored in *linep on success
  *          -1 on error
  */
-size_t getline(char** linep, size_t* linecapp, int filedes) {
+size_t getline(char* linep, size_t* linecapp, int filedes) {
     for(size_t i = 0; i < *linecapp; i++) {
-        if(syscall(SYS_read, filedes, (*linep) + i, 1) == -1) {
+        if(read(STDIN, (linep) + i, 1) == -1) {
+          write(STDOUT, "in get line\n", 12);
             return -1;
-        } else if((*linep)[i] == '\n') {
-            return i + 1;
+        } else if((linep)[i] == '\n') {
+          write(STDOUT, "in get lin2\n", 12);
+          return i + 1;
         }
+        write(STDOUT, "in get lin3\n", 12);
     }
     return *linecapp;
 }
