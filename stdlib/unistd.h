@@ -4,8 +4,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <string.h>
 
-#include "string.h"
 #include "syscall.h"
 
 #define STDOUT 1

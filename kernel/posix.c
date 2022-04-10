@@ -69,21 +69,21 @@ int64_t sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t off
 }
 
 int64_t sys_exec(char * file, char* argv[]) {
-  for (int i = 0; i < modules_list->module_count; i++)
-  {
+  for (int i = 0; i < modules_list->module_count; i++) {
     if (!strcmp(modules_list->modules[i].string, file)) {
       uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
       unmap_lower_half(root);
       run_program(modules_list->modules[i].begin);
+      return 0;
     }
   }
+  // We didn't find the module given as a parameter
+  return -1;
 }
 
 int64_t sys_exit(int status) {
-  for (int i = 0; i < modules_list->module_count; i++)
-  {
-    if (!strcmp(modules_list->modules[i].string, "init"))
-    {
+  for (int i = 0; i < modules_list->module_count; i++) {
+    if (!strcmp(modules_list->modules[i].string, "init")) {
       uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
       unmap_lower_half(root);
       run_program(modules_list->modules[i].begin);

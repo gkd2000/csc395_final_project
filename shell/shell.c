@@ -7,15 +7,28 @@
 
 
 void _start() {
-
-  write(1, "$ ", 2);
+  
   int size = 100;
   char buffer[size+1];
 
-  size = getline(buffer, &size, STDIN);
-  // read(STDIN, buffer, 5);
-  buffer[size] = '\0';
-  write(1, buffer, size);
-  exec(buffer, NULL);
-  exit(0);
+  while(true) {
+    // Prompt for command and read user input
+    write(1, "$ ", 2);
+    size = getline(buffer, &size, STDIN);
+    
+    // Overwrite the newline character
+    buffer[size-1] = '\0';
+
+    // Print the user input 
+    write(STDOUT, buffer, size);
+    write(STDOUT, "\n", 1);
+
+    // Try to exec the user input
+    if(exec(buffer, NULL) == -1) {
+      printf("Invalid command\n");
+      // write(STDOUT, "Invalid command\n", 16);
+    } else {
+      exit(0);
+    }
+  }
 }

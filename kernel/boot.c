@@ -92,6 +92,7 @@ void _start(struct stivale2_struct *hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   term_setup(hdr);
 
+  // Set up the interrupt descriptor table and global descriptor table
   idt_setup();
   gdt_setup();
 
@@ -103,17 +104,24 @@ void _start(struct stivale2_struct *hdr) {
 
   // Set up the free list and enable write protection
   freelist_init(virtual, physical);
-  term_init();
-  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
 
+  // Initialize the terminal 
+  term_init();
+
+  // Set up keyboard interrupts
   pic_init();
   pic_unmask_irq(1);
 
+  // Unmap the lower half of memory
+  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
   unmap_lower_half(root);
 
   // Get information about the modules we've asked the bootloader to load
   struct stivale2_struct_tag_modules *modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
+  // Save information about the modules to be accessed later when we make an exec system call
   module_setup(modules);
+
+
   // Test page for init
   uintptr_t test_page = 0x400000000;
   vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);

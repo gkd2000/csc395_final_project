@@ -90,77 +90,72 @@ void print_x_helper(uint64_t value)
  * %s (string), %d (integer, printed in decimal), %x (integer, printed in hexadecimal),
  * and %p (pointer).
  */
-// void printf(const char *format, ...)
-// {
-//   // Start processing variadic arguments
-//   va_list args;
-//   va_start(args, format);
+void printf(const char *format, ...) {
+  // Start processing variadic arguments
+  va_list args;
+  va_start(args, format);
 
-//   // Loop until we reach the end of the format string
-//   size_t index = 0;
-//   while (format[index] != '\0')
-//   {
-//     // Is the current charater a '%'?
-//     if (format[index] == '%')
-//     {
-//       // Yes, print the argument
-//       index++;
-//       switch (format[index])
-//       {
-//       case '%':
-//         write(STDOUT, &format[index], 1);
-//         break;
-//       case 'c':
-//         char temp = va_arg(args, int);
-//         write(STDOUT, &temp, 1);
-//         break;
-//       case 's':
-//         char *temp = va_arg(args, char *);
-//         write(STDOUT, temp, strlen(temp));
-//         break;
-//       case 'd':
-//         uint64_t value = va_arg(args, uint64_t);
-//         if (value != 0) {
-//           print_d_helper(value);
-//         }
-//         else {
-//           char temp = '0';
-//           write(STDOUT, &temp, 1);
-//         }
-//         break;
-//       case 'x':
-//         uint64_t value = va_arg(args, uint64_t);
-//         if (value != 0) {
-//           print_x_helper(value);
-//         }
-//         else {
-//           char temp = '0';
-//           write(STDOUT, &temp, 1);
-//         }
-//         break;
-//       case 'p':
-//         write(STDOUT, "0x", 2);
-//         uint64_t value = va_arg(args, uint64_t);
-//         if (value != 0) {
-//           print_x_helper(value);
-//         }
-//         else {
-//           char temp = '0';
-//           write(STDOUT, &temp, 1);
-//         }
-//         break;
-//       default:
-//         write(STDOUT, "<not supported>", 15);
-//       }
-//     }
-//     else
-//     {
-//       // No, just a normal character. Print it.
-//       write(STDOUT, &format[index], 1);
-//     }
-//     index++;
-//   }
+  // Loop until we reach the end of the format string
+  size_t index = 0;
+  uint64_t value;
+  char temp_char;
+  char* temp_str;
+  while (format[index] != '\0') {
+    // Is the current charater a '%'?
+    if (format[index] == '%') {
+      // Yes, print the argument
+      index++;
+      switch (format[index]) {
+      case '%':
+        write(STDOUT, &(format[index]), 1);
+        break;
+      case 'c':
+        temp_char = va_arg(args, int);
+        write(STDOUT, &temp_char, 1);
+        break;
+      case 's':
+        temp_str = va_arg(args, char *);
+        write(STDOUT, temp_str, strlen(temp_str));
+        break;
+      case 'd':
+        value = va_arg(args, uint64_t);
+        if (value != 0) {
+          print_d_helper(value);
+        } else {
+          write(STDOUT, "0", 1);
+        }
+        break;
+      case 'x':
+        value = va_arg(args, uint64_t);
+        if (value != 0) {
+          print_x_helper(value);
+        }
+        else {
+          write(STDOUT, "0", 1);
+        }
+        break;
+      case 'p':
+        write(STDOUT, "0x", 2);
+        value = va_arg(args, uint64_t);
+        if (value != 0) {
+          print_x_helper(value);
+        }
+        else {
+          write(STDOUT, "0", 1);
+        }
+        break;
+      default:
+        write(STDOUT, "<not supported>", 15);
+      }
+    }
+    else
+    {
+      // No, just a normal character. Print it.
+      write(STDOUT, &format[index], 1);
+    }
+    index++;
+  }
 
-//   // Finish handling variadic arguments
-//   va_end(args);
-// }
+  // Finish handling variadic arguments
+  va_end(args);
+}
