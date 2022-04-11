@@ -1,11 +1,5 @@
 #include "elf.h"
 
-#include "kprint.h"
-#include "assembly.h"
-#include "posix.h"
-#include "mem.h"
-#include "gdt.h"
-
 typedef void (*void_function_t)();
 
 /**

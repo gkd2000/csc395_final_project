@@ -1,4 +1,5 @@
 #pragma once
+
 #include <stdint.h>
 #include <stddef.h>
 #include <syscall.h>
@@ -8,6 +9,7 @@
 #include "stivale2.h"
 #include "char.h"
 #include "mem.h"
+#include "elf.h"
 
 #define SYS_read 0
 #define SYS_write 1
@@ -19,7 +21,7 @@
 
 extern void syscall_entry();
 
-static struct stivale2_struct_tag_modules * modules_list;
+static struct stivale2_struct_tag_modules* modules_list;
 
 /**
  * Write to size characters from buffer to fd
@@ -31,18 +33,45 @@ static struct stivale2_struct_tag_modules * modules_list;
 int64_t sys_write(uint64_t fd, intptr_t buffer, uint64_t size);
 
 /**
- * Read size characters from fd into buffer
- * \param fd     location to read from. Must be 0 (stdin)
- * \param buffer buffer to store read characters in
- * \param size   number of characters to read
- * \return number of characters read
+ * Mimics functionality of C standard library read function.
+ * Reads size bytes of data from the location referenced by fd
+ * into buffer.
+ * \param fd     the location to read from. Must be 0 (standard input)
+ * \param buffer location to store bytes read from filedes
+ * \param size   number of bytes to read
+ * \returns the number of bytes read, or -1 on error
  */
 int64_t sys_read(uint64_t fd, intptr_t buffer, uint64_t size);
 
+/**
+ * A pared-down version of the C standard library mmap.
+ * Maps pages of memory starting at the beginning of the page containing addr 
+ * and continuing for at most len bytes. Pages are mapped as user-readable, writable,
+ * and executable.
+ * \param addr   an address on the first page to be mapped 
+ * \param len    number of bytes to map
+ * \param prot   unused
+ * \param flags  unused
+ * \param fd     unused
+ * \param offset unused
+ */
 int64_t sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t offset);
 
+/**
+ * Load and execute a program specified by file.
+ * \param file the program to execute. Must be a null-terminated string
+ * \param argv unused
+ * \returns -1 if no module matching file was found. 
+ *    Otherwise, an executable will be run, and so this function should not return.
+ */
 int64_t sys_exec(char *file, char *argv[]);
 
+/**
+ * Clean up after an executable has finished running, and launch the init program.
+ * \param status unused
+ * \returns status, to match the C standard library exit() system call signature
+ */
 int64_t sys_exit(int status);
 
+// Save information about the modules loaded by the bootloader in a global variable
 void module_setup(struct stivale2_struct_tag_modules *modules);

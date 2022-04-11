@@ -4,7 +4,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "kprint.h"
+#include "assembly.h"
+#include "posix.h"
 #include "mem.h"
+#include "gdt.h"
+#include "usermode_entry.h"
 
 // Structures for the ELF header and program header table entries were
 // obtained from https://uclibc.org/docs/elf-64-gen.pdf

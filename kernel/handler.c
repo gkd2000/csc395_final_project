@@ -1,16 +1,5 @@
 #include "handler.h"
 
-#include <stdint.h>
-#include <stddef.h>
-
-#include "kprint.h"
-#include "util.h"
-#include "port.h"
-#include "pic.h"
-#include "char.h"
-#include "posix.h"
-
-
 // Generic handler for reserved and undefined interrupts
 __attribute__((interrupt)) void generic_handler(interrupt_context_t* ctx) {
   kprintf("generic interrupt handler\n");
@@ -162,10 +151,8 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
  * \returns the return for the syscall specified by nr
  */
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5) {
-  switch (nr)
-  {
+  switch (nr) {
   case SYS_write:
-    // read from stdin 0
     return sys_write(arg0, arg1, arg2);
 
   case SYS_read:
@@ -179,6 +166,7 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
 
   case SYS_exit:
     return sys_exit(arg0);
+
   default:
     return 0;
   }

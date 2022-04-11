@@ -1,7 +1,5 @@
 #include "char.h"
 
-#include "kprint.h"
-
 char char_buffer[BUFFER_SIZE]; //> The buffer itself
 
 /*

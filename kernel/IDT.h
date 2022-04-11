@@ -1,8 +1,13 @@
 #pragma once
+
 #include <stdint.h>
 #include <stddef.h>
 
 #include "posix.h"
+#include "handler.h"
+#include "pic.h"
+#include "mem.h"
+#include "gdt.h"
 
 // A struct the matches the layout of an IDT entry
 typedef struct idt_entry {

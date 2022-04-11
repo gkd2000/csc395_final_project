@@ -1,10 +1,5 @@
 #include "pic.h"
 
-#include <stdint.h>
-#include <stddef.h>
-
-#include "port.h"
-
 #define ICW1_ICW4 0x01
 #define ICW1_SINGLE 0x02
 #define ICW1_INTERVAL4 0x04

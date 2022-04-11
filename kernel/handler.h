@@ -1,6 +1,14 @@
 #pragma once
+
 #include <stdint.h>
 #include <stddef.h>
+
+#include "kprint.h"
+#include "util.h"
+#include "port.h"
+#include "pic.h"
+#include "char.h"
+#include "posix.h"
 
 // #include "util.h"
 

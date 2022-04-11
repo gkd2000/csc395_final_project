@@ -121,10 +121,20 @@ void _start(struct stivale2_struct *hdr) {
   // Save information about the modules to be accessed later when we make an exec system call
   module_setup(modules);
 
+  // test for mmap. the code generates a page fault if mmap is not called.
+  char* test_page = 0x400000000;
+  sys_mmap(test_page, 9000, 0, 0, 0, 0);
+  test_page[0] = 'h';
+  test_page[1] = 'i';
+  test_page[2] = '\0';
+  test_page[4099] = 'b';
+  test_page[4100] = '\0';
+  kprintf("%s\n", test_page);
+  kprintf("%s\n", &(test_page[4099]));
 
   // Test page for init
-  uintptr_t test_page = 0x400000000;
-  vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
+  // uintptr_t test_page = 0x400000000;
+  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
 
   // char buffer1[10];
   // write(1, "hellowor\n", 9);

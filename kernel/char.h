@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "kprint.h"
 
 // Size of the circular buffer for keyboard input
 #define BUFFER_SIZE 10000

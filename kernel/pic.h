@@ -1,6 +1,9 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
+
+#include "port.h"
 
 // Ports to talk to PICs
 #define PIC1 0x20

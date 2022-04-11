@@ -26,7 +26,6 @@ void _start() {
     // Try to exec the user input
     if(exec(buffer, NULL) == -1) {
       printf("Invalid command\n");
-      // write(STDOUT, "Invalid command\n", 16);
     } else {
       exit(0);
     }
