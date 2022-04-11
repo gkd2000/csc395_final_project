@@ -1,6 +1,8 @@
 #include "string.h"
 
+// Global for strtok to save progress between calls
 char *strtok_s = NULL;
+
 /**
  * Mimics the standard C function memset.
  * Writes size bytes of value c to the memory pointed to by arr.
@@ -41,16 +43,15 @@ void *memcpy(void *des, void *src, size_t size) {
 
 /**
  * Counts the number of characters, excluding the null terminator, in a string
- * \param str the string to count characters of
- * \return the number of cahracters in str, excluding the null terminator
+ * \param str the string to count characters of. Must be null-terminated
+ * \return the number of characters in str, excluding the null terminator
  */
 uint32_t strlen(const char *str) {
   uint32_t length = 0;
   const char *temp = str;
 
   // Iterate through str, incrementing our counter
-  while (*temp != '\0')
-  {
+  while (*temp != '\0') {
     length++;
     temp++;
   }
@@ -58,8 +59,14 @@ uint32_t strlen(const char *str) {
   return length;
 }
 
-bool contain(char c, const char *restrict l)
-{
+// Ask Paul
+/**
+ * Determines whether a string l contains a character c
+ * \param c the character to search for
+ * \param l the string to search through
+ * \returns true if c appears in l, and false otherwise
+ */
+bool contain(char c, const char *restrict l) {
   while(l) {
     if (c == *l++) {
       return true;
@@ -67,10 +74,27 @@ bool contain(char c, const char *restrict l)
   }
   return false;
 }
+
+// Ask Paul
+/**
+ * Mimics the standard C function strtok
+ * Separate str into tokens around the separators in sep. 
+ * The first time that strtok() is called, str must be specified. If further
+ * tokens are to be obtained from the same string, str should be NULL in 
+ * subsequent calls to strtok. The separator string, sep, may change between 
+ * calls.
+ * \param str the string to separate, or NULL to continue separated the most
+ *            recently passed string
+ * \param sep a string of characters around which to separate str
+ * \returns a pointer to the beginning of the first token found in the string, 
+ *          where the delimiter character has been replaced with '\0'. If no more
+ *          tokens remain, NULL is returned
+ */
 char *strtok(char * str, const char *restrict sep) {
+  // If str is NULL, use the global strtok_s (from a previous call)
   char * res = str ? str : strtok_s;
   char * temp = res;
-  while (*temp != '\0' && contain(*temp, sep));
+  while (*temp != '\0' && contain(*temp, sep)); // How does this ever end? Is temp being incremented somewhere?
   if (*temp == '\0') {
     strtok_s = NULL;
   } else {
@@ -81,7 +105,15 @@ char *strtok(char * str, const char *restrict sep) {
   return res;
 }
 
-
+/**
+ * Mimics the standard C function atoi
+ * Convert the initial portion of str to an integer representation,
+ * provided that initial portion consists of numbers.
+ * \param str a null-terminated string
+ * \returns the integer representation of the initial portion of str, until a 
+ *          non-numeral character is encountered.
+ *          If str does not begin with numbers, returns 0
+ */
 int atoi(const char* str) {
   int res = 0;
   for (int i = 0; i < strlen(str); i++) {
@@ -94,13 +126,34 @@ int atoi(const char* str) {
   return res;
 }
 
+/**
+ * Mimics the standard C function atoi
+ * Lexographically compare the null-terminated strings s1 and s2. 
+ * \param s1 the first string to compare
+ * \param s2 the second string to compare
+ * \returns an integer, which is
+ *          less than 0 if s1 is alphabetically before s2, 
+ *          greater than 0 if s1 is alphabetically after s2
+ *          0 if s1 adn s2 are the same
+ */
 int strcmp(const char *s1, const char *s2) {
   while ((*s1 && *s2) && (*s1++ == *s2++));
 
   return *s1 - *s2;
 }
 
-
+// Ask Paul: check for null terminator?
+/**
+ * Mimics the standard C function atoi
+ * Lexographically compare the first n characters (at most) of the null-terminated 
+ * strings s1 and s2. Characters after '\0' are not compared.
+ * \param s1 the first string to compare
+ * \param s2 the second string to compare
+ * \returns an integer, which is
+ *          less than 0 if s1 is alphabetically before s2, 
+ *          greater than 0 if s1 is alphabetically after s2
+ *          0 if s1 adn s2 are the same
+ */
 int strncmp(const char *s1, const char *s2, size_t n) {
   for (int i = 0; i < n; i++) {
     if (s1[i]!=s2[i]) {
@@ -271,7 +324,7 @@ void* malloc(size_t sz) {
   return result;
 }
 
-// Our malloc implementation does not support freeing right now
+// Our malloc implementation does not support freeing
 void free(void* p) {
   // Do nothing
 }
