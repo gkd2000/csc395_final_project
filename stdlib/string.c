@@ -59,7 +59,6 @@ uint32_t strlen(const char *str) {
   return length;
 }
 
-// Ask Paul
 /**
  * Determines whether a string l contains a character c
  * \param c the character to search for
@@ -67,7 +66,8 @@ uint32_t strlen(const char *str) {
  * \returns true if c appears in l, and false otherwise
  */
 bool contain(char c, const char *restrict l) {
-  while(l) {
+  // Loop until we encouter a null terminator
+  while(*l) {
     if (c == *l++) {
       return true;
     }
@@ -94,6 +94,7 @@ char *strtok(char * str, const char *restrict sep) {
   // If str is NULL, use the global strtok_s (from a previous call)
   char * res = str ? str : strtok_s;
   char * temp = res;
+  // Here to check if temp is null, notice that we evaluate the first one before we start the second check
   while (*temp != '\0' && contain(*temp, sep)); // How does this ever end? Is temp being incremented somewhere?
   if (*temp == '\0') {
     strtok_s = NULL;
