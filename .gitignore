@@ -2,6 +2,7 @@ limine
 boot.iso
 kernel/kernel.elf
 kernel/obj
+kernel/boot.c~
 
 .DS_Store
 stdlib/*.a
