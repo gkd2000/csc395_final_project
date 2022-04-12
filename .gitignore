@@ -11,3 +11,5 @@ shell/obj
 */obj
 init/init
 shell/shell
+helloworld/helloworld
+helloworld/obj
