@@ -162,7 +162,7 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
     return sys_mmap((void *)arg0, arg1, arg2, arg3, arg4, arg5);
 
   case SYS_exec:
-    return sys_exec(arg0, arg1);
+    return sys_exec((char*) arg0, (char**) arg1);
 
   case SYS_exit:
     return sys_exit(arg0);

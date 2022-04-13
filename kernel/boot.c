@@ -121,33 +121,38 @@ void _start(struct stivale2_struct *hdr) {
   // Save information about the modules to be accessed later when we make an exec system call
   module_setup(modules);
 
-  // test for mmap. the code generates a page fault if mmap is not called.
-  char* test_page = 0x400000000;
+  // Test for mmap (lines 125 - 143). The code generates a page fault if mmap is not called.
+  char* test_page = (char*) 0x400000000;
   sys_mmap(test_page, 9000, 0, 0, 0, 0);
-  test_page[0] = 'h';
-  test_page[1] = 'i';
-  test_page[2] = '\0';
-  test_page[4099] = 'b';
-  test_page[4100] = '\0';
-  kprintf("%s\n", test_page);
-  kprintf("%s\n", &(test_page[4099]));
 
-  // Test page for init
-  // uintptr_t test_page = 0x400000000;
-  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, true, true, false);
+  // Write to the first page mapped
+  char* test_str = "test";
+  for(int i = 0; i < strlen(test_str); i++) {
+    test_page[i] = test_str[i];
+  }
 
-  // char buffer1[10];
-  // write(1, "hellowor\n", 9);
-  // read(0, buffer1, 9);
+  // Write to the second page
+  test_str = "mmap";
+  for(int i = 0; i < strlen(test_str); i++) {
+    test_page[5000+i] = test_str[i];
+  }
 
-  // kprintf("%s\n", buffer1);
+  // Print what we wrote.
+  kprintf("%s %s\n", test_page, &(test_page[5000]));
 
-  // test module
-  // kprintf("modules:\n");
-  for (int i = 0; i < modules->module_count; i++)
-  {
-    // kprintf("        %s:\n            %p-%p\n", modules->modules[i].string, modules->modules[i].begin, modules->modules[i].end);
-    run_program(modules->modules[i].begin);
+  // This wasn't working.
+  // Test that user programs really run in user mode.
+  // uintptr_t usr_test_page = 0x400010000;
+  // Map as user-accessible. Should not generate a page-fault when accessed in helloworld
+  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, usr_test_page, true, true, false); 
+  // Map as kernel only. Should generate a page-fault when accessed in helloworld
+  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, false, true, false); 
+
+  // Launch the init program
+  for (int i = 0; i < modules->module_count; i++) {
+    if (!strcmp(modules->modules[i].string, "init")) {
+      run_program(modules->modules[i].begin);
+    }
   }
 
   // Test strsep

@@ -27,7 +27,7 @@ shell: stdlib
 	$(MAKE) -C shell
 
 .PHONY: helloworld
-shell: helloworld
+helloworld: stdlib
 	$(MAKE) -C helloworld
 
 .PHONY: stdlib

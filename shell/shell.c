@@ -5,10 +5,14 @@
 #include <syscall.h>
 #include <unistd.h>
 
-
+/**
+ * Prompt the user for a command (maxumum 100 characters). If
+ * the user enters a valid program, then run it. Otherwise, 
+ * print an error and prompt for another command. 
+ */
 void _start() {
   
-  int size = 100;
+  size_t size = 100;
   char buffer[size+1];
 
   while(true) {
