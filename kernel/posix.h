@@ -21,6 +21,7 @@
 
 extern void syscall_entry();
 
+// Place to store the modules loaded by the bootloader
 static struct stivale2_struct_tag_modules* modules_list;
 
 /**

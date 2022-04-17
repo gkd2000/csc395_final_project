@@ -8,7 +8,7 @@
 /**
  * Prompt the user for a command (maxumum 100 characters). If
  * the user enters a valid program, then run it. Otherwise,
- * print an error and prompt for another command.
+ * print an error and exit (which will relaunch the shell).
  */
 void _start() {
 

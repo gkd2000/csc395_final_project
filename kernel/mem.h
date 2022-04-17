@@ -102,9 +102,11 @@ bool vm_unmap(uintptr_t root, uintptr_t address);
  */
 bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, bool executable);
 
-
+// Translate a physical address to a virtual one
 intptr_t ptov(intptr_t addr);
 
+// Unmap everything in the lower half of an address space with level 4 page table at address root
 void unmap_lower_half(uintptr_t root);
 
+// Invalidate a TLB entry to get rid of cached address transalations which are no longer accurate
 void invalidate_tlb(uintptr_t virtual_address);

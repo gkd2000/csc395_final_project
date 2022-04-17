@@ -61,10 +61,21 @@ uint32_t strlen(const char *str);
  */
 char* strpbrk(const char *s, const char *charset);
 
+/**
+ * Mimics the standard C function strtok
+ * Separate str into tokens around the separators in sep. 
+ * The first time that strtok() is called, str must be specified. If further
+ * tokens are to be obtained from the same string, str should be NULL in 
+ * subsequent calls to strtok. The separator string, sep, may change between 
+ * calls.
+ * \param str the string to separate, or NULL to continue separated the most
+ *            recently passed string
+ * \param sep a string of characters around which to separate str
+ * \returns a pointer to the beginning of the first token found in the string, 
+ *          where the delimiter character has been replaced with '\0'. If no more
+ *          tokens remain, NULL is returned
+ */
 char * strtok(char * str, const char *restrict sep);
-
-char * strtok_r(char *restrict str, const char *restrict sep,
-         char **restrict lasts);
 
 /**
  * Mimics the C standard library strsep
@@ -82,10 +93,28 @@ char * strtok_r(char *restrict str, const char *restrict sep,
 char* strsep(char** stringp, const char* delim);
 
 /**
- * Mimics C standard library strcmp
+ * Mimics the standard C function strcmp
+ * Lexographically compare the null-terminated strings s1 and s2. 
+ * \param s1 the first string to compare
+ * \param s2 the second string to compare
+ * \returns an integer, which is
+ *          less than 0 if s1 is alphabetically before s2, 
+ *          greater than 0 if s1 is alphabetically after s2
+ *          0 if s1 adn s2 are the same
  */
 int strcmp(const char *s1, const char *s2);
 
+/**
+ * Mimics the standard C function strncmp
+ * Lexographically compare the first n characters (at most) of the null-terminated 
+ * strings s1 and s2. Characters after '\0' are not compared.
+ * \param s1 the first string to compare
+ * \param s2 the second string to compare
+ * \returns an integer, which is
+ *          less than 0 if s1 is alphabetically before s2, 
+ *          greater than 0 if s1 is alphabetically after s2
+ *          0 if s1 adn s2 are the same
+ */
 int strncmp(const char *s1, const char *s2, size_t n);
 
 /**
@@ -113,18 +142,21 @@ char* strcpy(char *dst, const char *src);
  */
 char* strncpy(char *dst, const char *src, size_t len);
 
+/**
+ * Mimics the standard C function atoi
+ * Convert the initial portion of str to an integer representation,
+ * provided that initial portion consists of numbers.
+ * \param str a null-terminated string
+ * \returns the integer representation of the initial portion of str, until a 
+ *          non-numeral character is encountered.
+ *          If str does not begin with numbers, returns 0
+ */
 int atoi(const char *str);
-
-// Should we move memory utilities to separate file? And if so, should we also move memset and
-// memcpy (which are in string.h in C standard library?)
 
 /**
  * Allocate sz bytes of memory
- * NO ONE USE THIS YET, it depends on mmap system call
  * \param sz number of bytes to be allocated
  * \returns a pointer to the beginning of the allocated memory,
  *          or NULL on error
  */
 void* malloc(size_t sz);
-
-// void* mmap(void *addr, size_t len, int prot, int flags, int fd, int offset);

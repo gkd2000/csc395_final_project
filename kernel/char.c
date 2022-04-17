@@ -154,7 +154,6 @@ size_t kgets(char *output, size_t capacity) {
 
   while ((length < capacity-1) && (c != '\n')) {
     c = kgetc();
-    // kprintf("in lower case if:%d\n", c);
 
     if (c == 8) {
       length = length ? length-1 : 0;

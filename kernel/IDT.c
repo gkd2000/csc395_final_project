@@ -1,10 +1,5 @@
 #include "IDT.h"
 
-#include "handler.h"
-#include "pic.h"
-#include "mem.h"
-#include "gdt.h"
-
 // IDT entry types
 #define IDT_TYPE_INTERRUPT 0xE
 #define IDT_TYPE_TRAP 0xF

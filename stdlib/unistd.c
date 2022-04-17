@@ -27,13 +27,25 @@ size_t write(int filedes, const void *buf, size_t nbyte) {
     return syscall(SYS_write, filedes, buf, nbyte);
 }
 
+/**
+ * Load and execute a program specified by file.
+ * \param file the program to execute. Must be a null-terminated string
+ * \param argv unused
+ * \returns -1 if no module matching file was found.
+ *    Otherwise, an executable will be run, and so this function should not return.
+ */
 size_t exec(const char *buf, char *arr[]) {
   return syscall(SYS_exec, buf, arr);
 }
 
+/**
+ * Clean up after an executable has finished running and launch the init program.
+ * \param status unused
+ * \returns status, to match the C standard library exit() system call signature
+ */
 size_t exit(int status) {
   return syscall(SYS_exit, status);
-};
+}
 
 /**
  * Mimics functionality of C standard library getline function.
@@ -66,7 +78,7 @@ size_t getline(char* linep, size_t* linecapp, int filedes) {
 }
 
 
-// Recursive helper function for kprint_d
+// Recursive helper function for printing numbers in decimal
 void print_d_helper(uint64_t value)
 {
   if (value != 0)
@@ -78,7 +90,7 @@ void print_d_helper(uint64_t value)
   }
 }
 
-// Recursive helper function for kprint_x
+// Recursive helper function for printing numbers in hexidecimal
 void print_x_helper(uint64_t value)
 {
   // Hexadecimal digits
@@ -138,8 +150,7 @@ void printf(const char *format, ...) {
         value = va_arg(args, uint64_t);
         if (value != 0) {
           print_x_helper(value);
-        }
-        else {
+        } else {
           write(STDOUT, "0", 1);
         }
         break;
@@ -148,17 +159,14 @@ void printf(const char *format, ...) {
         value = va_arg(args, uint64_t);
         if (value != 0) {
           print_x_helper(value);
-        }
-        else {
+        } else {
           write(STDOUT, "0", 1);
         }
         break;
       default:
         write(STDOUT, "<not supported>", 15);
       }
-    }
-    else
-    {
+    } else {
       // No, just a normal character. Print it.
       write(STDOUT, &format[index], 1);
     }

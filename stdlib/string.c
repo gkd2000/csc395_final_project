@@ -75,7 +75,6 @@ bool contain(char c, const char *restrict l) {
   return false;
 }
 
-// Ask Paul
 /**
  * Mimics the standard C function strtok
  * Separate str into tokens around the separators in sep. 
@@ -128,7 +127,7 @@ int atoi(const char* str) {
 }
 
 /**
- * Mimics the standard C function atoi
+ * Mimics the standard C function strcmp
  * Lexographically compare the null-terminated strings s1 and s2. 
  * \param s1 the first string to compare
  * \param s2 the second string to compare
@@ -138,14 +137,16 @@ int atoi(const char* str) {
  *          0 if s1 adn s2 are the same
  */
 int strcmp(const char *s1, const char *s2) {
-  while ((*s1 && *s2) && (*s1++ == *s2++));
+  while ((*s1 && *s2) && (*s1 == *s2)){
+    s1++;
+    s2++;
+  }
 
   return *s1 - *s2;
 }
 
-// Ask Paul: check for null terminator?
 /**
- * Mimics the standard C function atoi
+ * Mimics the standard C function strncmp
  * Lexographically compare the first n characters (at most) of the null-terminated 
  * strings s1 and s2. Characters after '\0' are not compared.
  * \param s1 the first string to compare
@@ -286,7 +287,6 @@ char* strpbrk(const char *s, const char *charset) {
   }
   return NULL;
 }
-
 
 // Globals for malloc
 void* bump = NULL;

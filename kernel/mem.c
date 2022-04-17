@@ -415,33 +415,27 @@ bool vm_protect(uintptr_t root, uintptr_t address, bool user, bool writable, boo
 void unmap_lower_half(uintptr_t root) {
   // We can reclaim memory used to hold page tables, but NOT the mapped pages
   page_table_entry_t *l4_table = (page_table_entry_t *) ptov(root);
-  for (size_t l4_index = 0; l4_index < 256; l4_index++)
-  {
+  for (size_t l4_index = 0; l4_index < 256; l4_index++) {
 
     // Does this entry point to a level 3 table?
-    if (l4_table[l4_index].present)
-    {
+    if (l4_table[l4_index].present) {
 
       // Yes. Mark the entry as not present in the level 4 table
       l4_table[l4_index].present = false;
 
       // Now loop over the level 3 table
       page_table_entry_t *l3_table = (page_table_entry_t *)ptov(l4_table[l4_index].physical_addr << 12);
-      for (size_t l3_index = 0; l3_index < 512; l3_index++)
-      {
+      for (size_t l3_index = 0; l3_index < 512; l3_index++) {
 
         // Does this entry point to a level 2 table?
-        if (l3_table[l3_index].present && !l3_table[l3_index].page_size)
-        {
+        if (l3_table[l3_index].present && !l3_table[l3_index].page_size) {
 
           // Yes. Loop over the level 2 table
           page_table_entry_t *l2_table = (page_table_entry_t *)ptov(l3_table[l3_index].physical_addr << 12);
-          for (size_t l2_index = 0; l2_index < 512; l2_index++)
-          {
+          for (size_t l2_index = 0; l2_index < 512; l2_index++) {
 
             // Does this entry point to a level 1 table?
-            if (l2_table[l2_index].present && !l2_table[l2_index].page_size)
-            {
+            if (l2_table[l2_index].present && !l2_table[l2_index].page_size) {
 
               // Yes. Free the physical page the holds the level 1 table
               pmem_free(l2_table[l2_index].physical_addr << 12);

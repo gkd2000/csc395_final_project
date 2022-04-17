@@ -7,11 +7,6 @@
 
 #include "term.h"
 
-// Typedef a function pointer which corresponds to the inputs and outputs of the term_write function
-// typedef void (*term_write_t)(const char *, size_t);
-// Initialize term_write to NULL
-// static term_write_t term_write = NULL;
-
 /**
  * Mimic the basic functionality of printf. Given a format string and
  * a variable number of additional arguments, print the format string, with the
@@ -22,8 +17,3 @@
  */
 void kprintf(const char *format, ...);
 
-/**
- * Set the term_write function, which allows us to print output to the terminal
- * \param t function pointer to the function we want to set term_write to be
- */
-// void set_term_write(term_write_t term_write);

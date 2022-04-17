@@ -65,9 +65,6 @@ void run_program(intptr_t addr) {
   usermode_entry(USER_DATA_SELECTOR | 0x3,            // User data selector with priv=3
                   user_stack + user_stack_size - 8,   // Stack starts at the high address minus 8 bytes
                   USER_CODE_SELECTOR | 0x3,           // User code selector with priv=3
-                  entry);                     // Jump to the entry point specified in the ELF file
+                  entry);                             // Jump to the entry point specified in the ELF file
   
-  // Old way of jumping to the entry point (does not put it in user mode)
-  // void_function_t void_function = (void_function_t)entry;
-  // void_function();
 }

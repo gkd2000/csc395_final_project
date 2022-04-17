@@ -33,8 +33,20 @@ size_t read(int fildes, void *buf, size_t nbyte);
  */
 size_t write(int filedes, const void *buf, size_t nbyte);
 
+/**
+ * Load and execute a program specified by file.
+ * \param file the program to execute. Must be a null-terminated string
+ * \param argv unused
+ * \returns -1 if no module matching file was found.
+ *    Otherwise, an executable will be run, and so this function should not return.
+ */
 size_t exec(const char *buf, char *arr[]);
 
+/**
+ * Clean up after an executable has finished running, and launch the init program.
+ * \param status unused
+ * \returns status, to match the C standard library exit() system call signature
+ */
 size_t exit(int status);
 
 /**

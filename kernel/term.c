@@ -22,8 +22,7 @@
 #define VGA_COLOR_WHITE 15
 
 // Struct representing a single character entry in the VGA buffer
-typedef struct vga_entry
-{
+typedef struct vga_entry{
   uint8_t c;
   uint8_t fg : 4;
   uint8_t bg : 4;
@@ -37,8 +36,7 @@ size_t term_col = 0;
 size_t term_row = 0;
 
 // Turn on the VGA cursor
-void term_enable_cursor()
-{
+void term_enable_cursor() {
   // Set starting scaline to 13 (three up from bottom)
   outb(0x3D4, 0x0A);
   outb(0x3D5, (inb(0x3D5) & 0xC0) | 13);
@@ -49,8 +47,7 @@ void term_enable_cursor()
 }
 
 // Update the VGA cursor
-void term_update_cursor()
-{
+void term_update_cursor() {
   uint16_t pos = term_row * VGA_WIDTH + term_col;
 
   outb(0x3D4, 0x0F);
@@ -60,8 +57,7 @@ void term_update_cursor()
 }
 
 // Clear the terminal
-void term_clear()
-{
+void term_clear() {
   // Clear the terminal
   for (size_t i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++)
   {
@@ -77,19 +73,15 @@ void term_clear()
 }
 
 // Write one character to the terminal
-void term_putchar(char c)
-{
+void term_putchar(char c) {
   // Handle characters that do not consume extra space (no scrolling necessary)
-  if (c == '\r')
-  {
+  if (c == '\r') {
     term_col = 0;
     term_update_cursor();
     return;
   }
-  else if (c == '\b')
-  {
-    if (term_col > 0)
-    {
+  else if (c == '\b') {
+    if (term_col > 0) {
       term_col--;
       term[term_row * VGA_WIDTH + term_col].c = ' ';
     }
@@ -98,29 +90,25 @@ void term_putchar(char c)
   }
 
   // Handle newline
-  if (c == '\n')
-  {
+  if (c == '\n') {
     term_col = 0;
     term_row++;
   }
 
   // Wrap if needed
-  if (term_col == VGA_WIDTH)
-  {
+  if (term_col == VGA_WIDTH) {
     term_col = 0;
     term_row++;
   }
 
   // Scroll if needed
-  if (term_row == VGA_HEIGHT)
-  {
+  if (term_row == VGA_HEIGHT) {
     // Shift characters up a row
     memcpy(term, &term[VGA_WIDTH], sizeof(vga_entry_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
     term_row--;
 
     // Clear the last row
-    for (size_t i = 0; i < VGA_WIDTH; i++)
-    {
+    for (size_t i = 0; i < VGA_WIDTH; i++) {
       size_t index = i + term_row * VGA_WIDTH;
       term[index].c = ' ';
       term[index].fg = VGA_COLOR_WHITE;
@@ -129,8 +117,7 @@ void term_putchar(char c)
   }
 
   // Write the character, unless it's a newline
-  if (c != '\n')
-  {
+  if (c != '\n') {
     size_t index = term_col + term_row * VGA_WIDTH;
     term[index].c = c;
     term[index].fg = VGA_COLOR_WHITE;
@@ -142,8 +129,7 @@ void term_putchar(char c)
 }
 
 // Initialize the terminal
-void term_init()
-{
+void term_init() {
   // Get a usable pointer to the VGA text mode buffer
   term = (vga_entry_t *)ptov(VGA_BUFFER);
 
@@ -151,6 +137,7 @@ void term_init()
   term_clear();
 }
 
+// Write s characters from arr to the terminal
 void term_write(const char *arr, size_t s) {
   for (int i = 0; i < s; i++) {
     term_putchar(arr[i]);

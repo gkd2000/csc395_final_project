@@ -54,5 +54,3 @@ typedef struct phdr {
  */
 void run_program(intptr_t addr);
 
-// Typedef a function pointer which corresponds to the inputs and outputs of the term_write function
-// typedef void (*void_function_t)();

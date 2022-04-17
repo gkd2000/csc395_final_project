@@ -109,8 +109,7 @@ typedef struct gdt_record {
   void* base;
 } __attribute__((packed)) gdt_record_t;
 
-
-
+// Set up and load the GDT
 void gdt_setup() {
   // Zero out the gdt
   memset(gdt, 0, sizeof(gdt));

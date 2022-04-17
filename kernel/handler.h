@@ -10,8 +10,6 @@
 #include "char.h"
 #include "posix.h"
 
-// #include "util.h"
-
 // Struct for storing what was happening when an interrupt occurred
 typedef struct interrupt_context {
   uintptr_t ip;
