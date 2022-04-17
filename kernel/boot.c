@@ -105,7 +105,7 @@ void _start(struct stivale2_struct *hdr) {
   // Set up the free list and enable write protection
   freelist_init(virtual, physical);
 
-  // Initialize the terminal 
+  // Initialize the terminal
   term_init();
 
   // Set up keyboard interrupts
@@ -122,11 +122,14 @@ void _start(struct stivale2_struct *hdr) {
   module_setup(modules);
 
   // Test for mmap (lines 125 - 143). The code generates a page fault if mmap is not called.
-  char* test_page = (char*) 0x400000000;
-  sys_mmap(test_page, 9000, 0, 0, 0, 0);
+  // char* test_page = (char*) 0x400000000;
+  // sys_mmap(test_page, 9000, 3, 0, 0, 0);
+  char *test_page = (char *)sys_mmap(NULL, 9000, 3, 0, 0, 0);
+  intptr_t higher_half_addr = 0xffff800000001000;
+  vm_map(root, higher_half_addr, 0, 1, 0);
 
   // Write to the first page mapped
-  char* test_str = "test";
+  char *test_str = "test";
   for(int i = 0; i < strlen(test_str); i++) {
     test_page[i] = test_str[i];
   }
@@ -139,14 +142,17 @@ void _start(struct stivale2_struct *hdr) {
 
   // Print what we wrote.
   kprintf("%s %s\n", test_page, &(test_page[5000]));
+  char string[12] = "abc,def,ghi";
+  kprintf("kprintf test: %c, %s, %d, %x, %p\n", string[0], string, 123, 123, string);
 
   // This wasn't working.
   // Test that user programs really run in user mode.
-  // uintptr_t usr_test_page = 0x400010000;
+  uintptr_t test_page2 = 0x600000000;
+  vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page2, true, true, false);
   // Map as user-accessible. Should not generate a page-fault when accessed in helloworld
-  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, usr_test_page, true, true, false); 
+  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, usr_test_page, true, true, false);
   // Map as kernel only. Should generate a page-fault when accessed in helloworld
-  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, false, true, false); 
+  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, test_page, false, true, false);
 
   // Launch the init program
   for (int i = 0; i < modules->module_count; i++) {
@@ -157,19 +163,20 @@ void _start(struct stivale2_struct *hdr) {
 
   // Test strsep
   // char* token;
-  char string[12] = "abc,def,ghi";
-  char* str_ptr = (char*) string;
+
 
   // while ((token = strsep(&str_ptr, ",")) != NULL) {
   //   kprintf("%s\n", token);
   // }
 
+  char* str_ptr = (char*) string;
   // Test strcpy and strncpy
   char des[15];
   strncpy(des, str_ptr, 4);
   for(int i = 0; i < 10; i++) {
     kprintf("%c ", des[i]);
   }
+
   kprintf("\n");
   kprintf("%s\n", strcpy(des, str_ptr));
   kprintf("%s\n", des);

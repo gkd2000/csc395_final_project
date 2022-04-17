@@ -1,5 +1,6 @@
 #include "posix.h"
 
+intptr_t addre = 0x60000000;
 // Save information about the modules loaded by the bootloader in a global variable
 void module_setup(struct stivale2_struct_tag_modules *modules) {
   modules_list = modules;
@@ -61,10 +62,10 @@ int64_t sys_read(uint64_t fd, intptr_t buffer, uint64_t size) {
 
 /**
  * A pared-down version of the C standard library mmap.
- * Maps pages of memory starting at the beginning of the page containing addr 
+ * Maps pages of memory starting at the beginning of the page containing addr
  * and continuing for at most len bytes. Pages are mapped as user-readable, writable,
  * and executable.
- * \param addr   an address on the first page to be mapped 
+ * \param addr   an address on the first page to be mapped
  * \param len    number of bytes to map
  * \param prot   unused
  * \param flags  unused
@@ -74,13 +75,22 @@ int64_t sys_read(uint64_t fd, intptr_t buffer, uint64_t size) {
  */
 int64_t sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t offset) {
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  if (addr == NULL) {
+    addr = addre;
+    // increment until we find an available one.
+    addre += (len / PAGE_SIZE + 1) * PAGE_SIZE;
+  }
   intptr_t addr_start_page = (((intptr_t)addr) & 0xFFFFFFFFFFFFF000);
-  intptr_t addr_end_page = (((intptr_t)addr) + len - addr_start_page) / PAGE_SIZE + 1;
-  for (int j = 0; j < addr_end_page; j++) {
+  intptr_t number_of_pages = (((intptr_t)addr) + len - addr_start_page) / PAGE_SIZE + 1;
+
+  int read = prot & 1;
+  int write = prot & 2;
+  int exec = prot & 4;
+  for (int j = 0; j < number_of_pages; j++) {
     // Map one page
-    if (!vm_map(root, addr_start_page + j * PAGE_SIZE, 1, 1, 1)) {
+    if (!vm_map(root, addr_start_page + j * PAGE_SIZE, 1, write, exec)) {
       kprintf("mem map failed\n");
-    } 
+    }
   }
   return addr_start_page;
 }
@@ -89,7 +99,7 @@ int64_t sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t off
  * Load and execute a program specified by file.
  * \param file the program to execute. Must be a null-terminated string
  * \param argv unused
- * \returns -1 if no module matching file was found. 
+ * \returns -1 if no module matching file was found.
  *    Otherwise, an executable will be run, and so this function should not return.
  */
 int64_t sys_exec(char* file, char* argv[]) {
@@ -99,7 +109,7 @@ int64_t sys_exec(char* file, char* argv[]) {
       // We found the program specified! Unmap the lower half of memory
       uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
       unmap_lower_half(root);
-      // Load and run the program specified by file. 
+      // Load and run the program specified by file.
       run_program(modules_list->modules[i].begin);
       return 0;
     }

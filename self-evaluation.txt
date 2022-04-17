@@ -1,0 +1,10 @@
+1. Input/Output       3   The kprintf working correctly in kernel, (in boot.c). Since getline is working correctly and it relies on sys_read, which relies on kgetc. Hence kgetc should also work.
+2. Exceptions         3   All the exceptions are in handler.c and since key board interrupt is working correctly, all of them should work.
+3. Virtual Memory     3   The virtual memory test code is in init, and it succesfully printed and accessed the memory.
+4. System Calls       3   We can read and write to the shell by typing. The test code is on line 127 of boot.c (mmap)
+5. Loader             3   The init program runs and it can execute.
+6. Standard Library   3   Printf strlen, memcpy are all in stdlib.
+7. User Mode          3   The user program cannot access higher half, the test code is in helloworld.c and commented out.
+8. Processes          3   The init works. and it calls shell, which exit when we have an inivalid command, we will exit and restart init
+9. Shell              3   The shell successfully run helloworld
+10. Code Quality      3   Each function is very well commented and put into the right file with the right name.
