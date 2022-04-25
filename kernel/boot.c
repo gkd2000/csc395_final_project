@@ -15,9 +15,6 @@
 #include "gdt.h"
 #include "posix.h"
 
-// TODO: Stopped just before Re-enabling System Calls
-//  need to set up the TSS and maybe do more things after that
-
 // Reserve space for the stack
 static uint8_t stack[8192];
 
