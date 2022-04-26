@@ -15,6 +15,18 @@
 #include "gdt.h"
 #include "posix.h"
 
+/**
+ * Changes: I removed the terminal_hdr_tag, which asks the bootloader to set up a terminal for us.
+ * It is still in the code, but it is no longer passed to the bootloader as a tag to process. That
+ * took away the gray box/cursor looking thing on the screen.
+ * I changed the way we were assigning to pixels to assign the red, blue, and green components 
+ * individually. That's why there are three lines of code inside the body of our nested for loops,
+ * instead of one, as before. 
+ * I changed the starting address of the pixel array to framebuffer->framebuffer_addr instead of 
+ * 0xA0000. I don't know why this seems to work, but it doesn't seem to cut things off the same
+ * way that using 0xA0000 did. 
+ */
+
 // Reserve space for the stack
 static uint8_t stack[8192];
 
@@ -23,8 +35,8 @@ static struct stivale2_header_tag_framebuffer framebuffer_hdr_tag = {
   .tag = {
     .identifier = STIVALE2_HEADER_TAG_FRAMEBUFFER_ID,
     .next = 0},
-  .framebuffer_width = 200,
-  .framebuffer_height = 200,
+  .framebuffer_width = 2000,
+  .framebuffer_height = 2000,
   .framebuffer_bpp = 24 //Not a multiple of 8, OR 2!
 };
 
@@ -66,7 +78,7 @@ __attribute__((section(".stivale2hdr"), used)) static struct stivale2_header sti
     .flags = 0x1E,
 
     // First tag struct
-    .tags = (uintptr_t)&terminal_hdr_tag};
+    .tags = (uintptr_t)&unmap_null_hdr_tag};
 
 // Find a tag with a given ID
 void *find_tag(struct stivale2_struct *hdr, uint64_t id) {
@@ -121,8 +133,13 @@ void _start(struct stivale2_struct *hdr) {
   //Set up framebuffer
   struct stivale2_struct_tag_framebuffer *framebuffer = find_tag(hdr, STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID);
   
+  unsigned char* pixel = (unsigned char*) framebuffer->framebuffer_addr;
   // TODO: Try to map something
-  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, framebuffer->framebuffer_addr);
+  // if(vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, framebuffer->framebuffer_addr + virtual->addr, true, true, false)) {
+  //   pixel = (unsigned char*) (framebuffer->framebuffer_addr + virtual->addr);
+  // } else {
+  //   pixel = (unsigned char*) framebuffer->framebuffer_addr;
+  // }
 
   // Potential way to debug: have an if statement that assigns pixel as on line 130, which crashes
   // the kernel. then we'll know the outcome of the if.
@@ -130,13 +147,29 @@ void _start(struct stivale2_struct *hdr) {
   // This line causes a page fault or something else that restarts the kernel
   // unsigned char* pixel = (unsigned char*) (framebuffer->framebuffer_addr + virtual->addr);
 
-  unsigned char* pixel = (unsigned char*)0xA0000;
+  // unsigned char* pixel = (unsigned char*)0xA0000;
 
 
-  for(int i = 0; i < framebuffer->framebuffer_width; i++) {
-    for(int j = 0; j < framebuffer->framebuffer_height; j++) {
-      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * 
-            (framebuffer->framebuffer_width * (framebuffer->framebuffer_bpp / 8)))] = 2;
+  // for(int i = 0; i < framebuffer->framebuffer_width; i++) {
+  //   for(int j = 0; j < framebuffer->framebuffer_height; j++) {
+  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * 
+  //           (framebuffer->framebuffer_width * (framebuffer->framebuffer_bpp / 8)))] = 2;
+  //   }
+  // }
+
+  for(int i = 10; i < 40; i++) {
+    for(int j = 10; j < 20; j++) {
+      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch)] = 0;
+      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 1] = 0;
+      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 2] = 255;
+    }
+  }
+
+  for(int i = 40; i < 50; i++) {
+    for(int j = 10; j < 40; j++) {
+      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch)] = 0;
+      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 1] = 255;
+      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 2] = 0;
     }
   }
 
