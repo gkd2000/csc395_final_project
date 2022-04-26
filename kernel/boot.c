@@ -18,10 +18,28 @@
 // Reserve space for the stack
 static uint8_t stack[8192];
 
+// Request that a linear framebuffer from the bootloader
+static struct stivale2_header_tag_framebuffer framebuffer_hdr_tag = {
+  .tag = {
+    .identifier = STIVALE2_HEADER_TAG_FRAMEBUFFER_ID,
+    .next = 0},
+  .framebuffer_width = 200,
+  .framebuffer_height = 200,
+  .framebuffer_bpp = 24 //Not a multiple of 8, OR 2!
+};
+
+// Request that a linear framebuffer from the bootloader
+static struct stivale2_header_tag_any_video video_hdr_tag = {
+  .tag = {
+    .identifier = STIVALE2_HEADER_TAG_ANY_VIDEO_ID,
+    .next = (uintptr_t) &framebuffer_hdr_tag},
+  .preference = 0
+};
+
 // Request that the beginning of memory (address 0x0) be unmapped
 static struct stivale2_tag unmap_null_hdr_tag = {
   .identifier = STIVALE2_HEADER_TAG_UNMAP_NULL_ID,
-  .next = 0
+  .next = (uintptr_t) &video_hdr_tag
 };
 
 // Request a terminal from the bootloader
@@ -29,7 +47,8 @@ static struct stivale2_header_tag_terminal terminal_hdr_tag = {
     .tag = {
         .identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
         .next = (uintptr_t)&unmap_null_hdr_tag},
-    .flags = 0};
+    .flags = 0
+};
 
 
 // Declare the header for the bootloader
@@ -87,7 +106,7 @@ void term_setup(struct stivale2_struct *hdr) {
 
 void _start(struct stivale2_struct *hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
-  term_setup(hdr);
+  // term_setup(hdr);
 
   // Set up the interrupt descriptor table and global descriptor table
   idt_setup();
@@ -98,6 +117,33 @@ void _start(struct stivale2_struct *hdr) {
 
   // Get information about physical memory
   struct stivale2_struct_tag_memmap *physical = find_tag(hdr, STIVALE2_STRUCT_TAG_MEMMAP_ID);
+
+  //Set up framebuffer
+  struct stivale2_struct_tag_framebuffer *framebuffer = find_tag(hdr, STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID);
+  
+  // TODO: Try to map something
+  // vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, framebuffer->framebuffer_addr);
+
+  // Potential way to debug: have an if statement that assigns pixel as on line 130, which crashes
+  // the kernel. then we'll know the outcome of the if.
+
+  // This line causes a page fault or something else that restarts the kernel
+  // unsigned char* pixel = (unsigned char*) (framebuffer->framebuffer_addr + virtual->addr);
+
+  unsigned char* pixel = (unsigned char*)0xA0000;
+
+
+  for(int i = 0; i < framebuffer->framebuffer_width; i++) {
+    for(int j = 0; j < framebuffer->framebuffer_height; j++) {
+      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * 
+            (framebuffer->framebuffer_width * (framebuffer->framebuffer_bpp / 8)))] = 2;
+    }
+  }
+
+  while(1){}
+
+  // unsigned char* location = (unsigned char*)0xA0000 + 320 * 10 /* y */ + 10 /* x */;
+  // *location = 4;
 
   // Set up the free list and enable write protection
   freelist_init(virtual, physical);
