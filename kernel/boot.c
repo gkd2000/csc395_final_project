@@ -14,6 +14,7 @@
 #include "elf.h"
 #include "gdt.h"
 #include "posix.h"
+#include "stivale-hdr.h"
 
 /**
  * Changes: I removed the terminal_hdr_tag, which asks the bootloader to set up a terminal for us.
@@ -119,6 +120,7 @@ void term_setup(struct stivale2_struct *hdr) {
 void _start(struct stivale2_struct *hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   // term_setup(hdr);
+  global_hdr = hdr;
 
   // Set up the interrupt descriptor table and global descriptor table
   idt_setup();
@@ -132,6 +134,7 @@ void _start(struct stivale2_struct *hdr) {
 
   //Set up framebuffer
   struct stivale2_struct_tag_framebuffer *framebuffer = find_tag(hdr, STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID);
+  global_framebuffer = framebuffer;
   
   unsigned char* pixel = (unsigned char*) framebuffer->framebuffer_addr;
   // TODO: Try to map something
@@ -157,23 +160,23 @@ void _start(struct stivale2_struct *hdr) {
   //   }
   // }
 
-  for(int i = 10; i < 40; i++) {
-    for(int j = 10; j < 20; j++) {
-      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch)] = 0;
-      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 1] = 0;
-      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 2] = 255;
-    }
-  }
+  // for(int i = 10; i < 40; i++) {
+  //   for(int j = 10; j < 20; j++) {
+  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch)] = 0;
+  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 1] = 0;
+  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 2] = 255;
+  //   }
+  // }
 // hello
-  for(int i = 40; i < 50; i++) {
-    for(int j = 10; j < 40; j++) {
-      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch)] = 0;
-      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 1] = 255;
-      pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 2] = 0;
-    }
-  }
+  // for(int i = 40; i < 50; i++) {
+  //   for(int j = 10; j < 40; j++) {
+  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch)] = 0;
+  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 1] = 255;
+  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 2] = 0;
+  //   }
+  // }
 
-  while(1){}
+  // while(1){}
 
   // unsigned char* location = (unsigned char*)0xA0000 + 320 * 10 /* y */ + 10 /* x */;
   // *location = 4;
@@ -187,6 +190,7 @@ void _start(struct stivale2_struct *hdr) {
   // Set up keyboard interrupts
   pic_init();
   pic_unmask_irq(1);
+  pic_unmask_irq(12);
 
   // Unmap the lower half of memory
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
@@ -236,11 +240,11 @@ void _start(struct stivale2_struct *hdr) {
   vm_map(root, higher_half_addr, 0, 1, 0);
 
   // Launch the init program
-  for (int i = 0; i < modules->module_count; i++) {
-    if (!strcmp(modules->modules[i].string, "init")) {
-      run_program(modules->modules[i].begin);
-    }
-  }
+  // for (int i = 0; i < modules->module_count; i++) {
+  //   if (!strcmp(modules->modules[i].string, "init")) {
+  //     run_program(modules->modules[i].begin);
+  //   }
+  // }
 
   halt();
 }

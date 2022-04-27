@@ -80,6 +80,7 @@ void idt_setup() {
   idt_set_handler(20, virtualization_exception_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(21, control_protection_exception_handler_ec, IDT_TYPE_INTERRUPT);
   idt_set_handler(IRQ1_INTERRUPT, irq1_interrupt_handler, IDT_TYPE_INTERRUPT);
+  idt_set_handler(IRQ12_INTERRUPT, irq12_interrupt_handler, IDT_TYPE_INTERRUPT);
   idt_set_handler(0x80, syscall_entry, IDT_TYPE_TRAP);
 
   // Step 3: Install the IDT

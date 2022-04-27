@@ -9,6 +9,7 @@
 #include "pic.h"
 #include "char.h"
 #include "posix.h"
+#include "stivale-hdr.h"
 
 // Struct for storing what was happening when an interrupt occurred
 typedef struct interrupt_context {
@@ -87,6 +88,9 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
 
 // Handler for a keyboard event (irq1)
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx);
+
+// Handler for a mouse event (irq12)
+__attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx);
 
 // Handler for system calls
 int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5);
