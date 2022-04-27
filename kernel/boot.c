@@ -164,7 +164,7 @@ void _start(struct stivale2_struct *hdr) {
       pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 2] = 255;
     }
   }
-
+// hello
   for(int i = 40; i < 50; i++) {
     for(int j = 10; j < 40; j++) {
       pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch)] = 0;
