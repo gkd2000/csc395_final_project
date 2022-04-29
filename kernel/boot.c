@@ -17,15 +17,19 @@
 #include "stivale-hdr.h"
 
 /**
- * Changes: I removed the terminal_hdr_tag, which asks the bootloader to set up a terminal for us.
- * It is still in the code, but it is no longer passed to the bootloader as a tag to process. That
- * took away the gray box/cursor looking thing on the screen.
- * I changed the way we were assigning to pixels to assign the red, blue, and green components 
- * individually. That's why there are three lines of code inside the body of our nested for loops,
- * instead of one, as before. 
- * I changed the starting address of the pixel array to framebuffer->framebuffer_addr instead of 
- * 0xA0000. I don't know why this seems to work, but it doesn't seem to cut things off the same
- * way that using 0xA0000 did. 
+ * Meeting with Charlie: added unmask irq2 because he suspects that the irq12 might report to a lower number irq. that didn't
+ * change anything but it won't hurt anything to have more irqs unmasked than we need.
+ * Added the call to outb on line 189 of boot.c, which sends a command to the pic (we wre trying to change the compaq status byte)
+ * I think that this is something that Benjamin tried in our last meeting. It is what makes the red rectangle appear on the 
+ * screen even if we don't do anything with the keyboard or mouse.
+ * Charlie's suggestions going forward:
+ *    follow the instructions on the osdev wiki Mouse page to enable packets (that's low down on the page)
+ *    the mouse might just always generate an IRQ1, and so we need to inspect the byte that
+ *      we get in that case to see if it came from the keyboard or the mouse
+ *    it's possible that we're going to need to receive three consecutive bytes for mouse input. It is also possible that 
+ *      we're going to have to look at three consecutive ports, or read bytes using inw or inl (instead of inb)
+ *    Look at the forums on the osdev wiki. Someone might have a working example, and there's nothing wrong with using that
+ *      as long as we cite them!
  */
 
 // Reserve space for the stack
@@ -187,10 +191,11 @@ void _start(struct stivale2_struct *hdr) {
   // Initialize the terminal
   term_init();
 
-  // Set up keyboard interrupts
   pic_init();
   pic_unmask_irq(1);
+  pic_unmask_irq(2);
   pic_unmask_irq(12);
+  //outb(0x64, 0x20);
 
   // Unmap the lower half of memory
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
