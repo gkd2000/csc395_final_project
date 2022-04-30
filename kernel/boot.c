@@ -15,6 +15,10 @@
 #include "gdt.h"
 #include "posix.h"
 #include "stivale-hdr.h"
+#include "mouse.h"
+
+// MOUSE FIX!!! We stole some code from a forum. it is in mouse.c. Also, we send the end of interrupt command to PIC2 in the 
+// mouse interrupt handler (in addition to the end of interrupt command we were sending to the PIC1)
 
 /**
  * Meeting with Charlie: added unmask irq2 because he suspects that the irq12 might report to a lower number irq. that didn't
@@ -120,7 +124,6 @@ void term_setup(struct stivale2_struct *hdr) {
   // set_term_write((term_write_t)tag->term_write);
 }
 
-
 void _start(struct stivale2_struct *hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
   // term_setup(hdr);
@@ -190,11 +193,13 @@ void _start(struct stivale2_struct *hdr) {
 
   // Initialize the terminal
   term_init();
-
+  
   pic_init();
   pic_unmask_irq(1);
   pic_unmask_irq(2);
   pic_unmask_irq(12);
+  InitialiseMouse();
+
   //outb(0x64, 0x20);
 
   // Unmap the lower half of memory

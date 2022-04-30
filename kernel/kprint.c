@@ -80,6 +80,7 @@ void kprint_p(void *ptr) {
  * and %p (pointer).
  */
 void kprintf(const char *format, ...) {
+  
   // Start processing variadic arguments
   va_list args;
   va_start(args, format);
