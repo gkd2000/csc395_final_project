@@ -4,6 +4,18 @@
 
 // Todo: reformat this, cite the author better, comment it clearly
 
+void initialize_cursor() {
+  mouse_data_t* data = malloc(sizeof(mouse_data_t));
+  data->x_pos = 0;
+  data->y_pos = 0;
+  data->click = false;
+}
+
+//Handler calls this function when the mouse moves (?)
+// void mouse_input() {
+
+// }
+
 void MouseWait(unsigned char type) {
     int time_out = 100000;
 

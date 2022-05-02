@@ -139,8 +139,8 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx) {
     unsigned char* pixel = (unsigned char*) global_framebuffer->framebuffer_addr;
     // Read the character and prepare to accept new inputs
-    // char c = getchar(inb(0x60));
-    uint8_t c = inb(0x60);
+    char c = getchar(inb(0x60));
+    // uint8_t c = inb(0x60);
     outb(PIC1_COMMAND, PIC_EOI);
     // outb(PIC2_COMMAND, PIC_EOI);
 
@@ -172,6 +172,20 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
     }
 }
 
+//This is 3 bytes large
+typedef struct mouse_bytes {
+  uint8_t left : 1;
+  uint8_t right : 1;
+  uint8_t middle : 1;
+  uint8_t unused : 1;
+  uint8_t x_sb : 1;
+  uint8_t y_sb : 1;
+  uint8_t x_overflow : 1; //Not useful
+  uint8_t y_overflow : 1; //Not useful
+  uint8_t x_move;
+  uint8_t y_move;
+} __attribute__((packed)) mouse_bytes_t;
+
 // Handler for mouse event
 __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx) {
   unsigned char* pixel = (unsigned char*) global_framebuffer->framebuffer_addr;
@@ -185,10 +199,26 @@ __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx
   }
   x_start += 10;
   y_start += 10;
-  char c = getchar(inb(0x60));
+  uint8_t c = getchar(inb(0x60));
+  // uint8_t c = inb(0x60);
   outb(PIC1_COMMAND, PIC_EOI);
   outb(PIC2_COMMAND, PIC_EOI);
+  // char d = getchar(inb(0x60));
+  // outb(PIC1_COMMAND, PIC_EOI);
+  // outb(PIC2_COMMAND, PIC_EOI);
+  // char e = getchar(inb(0x60));
+  // outb(PIC1_COMMAND, PIC_EOI);
+  // outb(PIC2_COMMAND, PIC_EOI);
 }
+
+// mouse_bytes_t mousebytes;
+// int mouse_counter;
+
+// mouse_bytes_t mouse_input() {
+//   if(mouse_counter == 0) {
+//     mousebytes->left = 
+//   }
+// }
 
 
 /**
