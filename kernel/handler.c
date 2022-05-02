@@ -140,7 +140,7 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
     unsigned char* pixel = (unsigned char*) global_framebuffer->framebuffer_addr;
     // Read the character and prepare to accept new inputs
     // char c = getchar(inb(0x60));
-    char c = inb(0x60);
+    uint8_t c = inb(0x60);
     outb(PIC1_COMMAND, PIC_EOI);
     // outb(PIC2_COMMAND, PIC_EOI);
 
@@ -148,7 +148,7 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
       for(int i = x_start; i < x_start+10; i++) {
         for(int j = y_start; j < y_start+10; j++) {
           pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
-          pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 1] = 0;
+          pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 1] = 255;
           pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 255;
         }
       }
