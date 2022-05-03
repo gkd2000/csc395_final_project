@@ -129,6 +129,8 @@ void _start(struct stivale2_struct *hdr) {
   // term_setup(hdr);
   global_hdr = hdr;
 
+  
+
   // Set up the interrupt descriptor table and global descriptor table
   idt_setup();
   gdt_setup();
@@ -198,6 +200,7 @@ void _start(struct stivale2_struct *hdr) {
   pic_unmask_irq(1);
   pic_unmask_irq(2);
   pic_unmask_irq(12);
+  initialize_cursor();
   InitialiseMouse();
 
   //outb(0x64, 0x20);

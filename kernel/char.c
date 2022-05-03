@@ -59,7 +59,7 @@ uint8_t uppercase_table[] = {
  */
 uint8_t getchar(uint8_t ch) {
   // Check if the key was...
-  if (ch == 0x2A) {
+  /*if (ch == 0x2A) {
     // left shift pressed
     lshift = 1;
   } else if (ch == 0x36) {
@@ -92,7 +92,7 @@ uint8_t getchar(uint8_t ch) {
     // key was released
     // This might be unnecessary
     return 0;
-  }
+  }*/
   return 0;
 }
 

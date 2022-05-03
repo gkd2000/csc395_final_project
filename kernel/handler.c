@@ -142,29 +142,29 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
     char c = getchar(inb(0x60));
     // uint8_t c = inb(0x60);
     outb(PIC1_COMMAND, PIC_EOI);
-    // outb(PIC2_COMMAND, PIC_EOI);
+    outb(PIC2_COMMAND, PIC_EOI);
 
-    if(c == 0xFA) {
-      for(int i = x_start; i < x_start+10; i++) {
-        for(int j = y_start; j < y_start+10; j++) {
-          pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
-          pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 1] = 255;
-          pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 255;
-        }
-      }
-      x_start += 10;
-      y_start += 10;
-    }
+    // if(c == 0xFA) {
+    //   for(int i = x_start; i < x_start+10; i++) {
+    //     for(int j = y_start; j < y_start+10; j++) {
+    //       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
+    //       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 1] = 255;
+    //       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 255;
+    //     }
+    //   }
+    //   x_start += 10;
+    //   y_start += 10;
+    // }
 
-    for(int i = x_start; i < x_start+10; i++) {
-      for(int j = y_start; j < y_start+10; j++) {
-        pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
-        pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 1] = 0;
-        pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 255;
-      }
-    }
-    x_start += 10;
-    y_start += 10;
+    // for(int i = x_start; i < x_start+10; i++) {
+    //   for(int j = y_start; j < y_start+10; j++) {
+    //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
+    //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 1] = 0;
+    //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 255;
+    //   }
+    // }
+    // x_start += 10;
+    // y_start += 10;
 
     // If the character can be printed, add it to our buffer
     if(c != 0 && c <= 127) {
@@ -172,24 +172,15 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
     }
 }
 
-//This is 3 bytes large
-typedef struct mouse_bytes {
-  uint8_t left : 1;
-  uint8_t right : 1;
-  uint8_t middle : 1;
-  uint8_t unused : 1;
-  uint8_t x_sb : 1;
-  uint8_t y_sb : 1;
-  uint8_t x_overflow : 1; //Not useful
-  uint8_t y_overflow : 1; //Not useful
-  uint8_t x_move;
-  uint8_t y_move;
-} __attribute__((packed)) mouse_bytes_t;
-
 // Handler for mouse event
 __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx) {
   unsigned char* pixel = (unsigned char*) global_framebuffer->framebuffer_addr;
   // Read the character and prepare to accept new inputs
+  x_start += 10;
+  y_start += 10;
+  // uint8_t c = getchar(inb(0x60));
+  uint8_t c = inb(0x60);
+  store_mouse_data(c);
   for(int i = x_start; i < x_start+10; i++) {
     for(int j = y_start; j < y_start+10; j++) {
       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
@@ -197,10 +188,6 @@ __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx
       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 0;
     }
   }
-  x_start += 10;
-  y_start += 10;
-  uint8_t c = getchar(inb(0x60));
-  // uint8_t c = inb(0x60);
   outb(PIC1_COMMAND, PIC_EOI);
   outb(PIC2_COMMAND, PIC_EOI);
   // char d = getchar(inb(0x60));
@@ -210,15 +197,6 @@ __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx
   // outb(PIC1_COMMAND, PIC_EOI);
   // outb(PIC2_COMMAND, PIC_EOI);
 }
-
-// mouse_bytes_t mousebytes;
-// int mouse_counter;
-
-// mouse_bytes_t mouse_input() {
-//   if(mouse_counter == 0) {
-//     mousebytes->left = 
-//   }
-// }
 
 
 /**

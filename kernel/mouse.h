@@ -5,6 +5,12 @@
 #include "unistd.h"
 #include "port.h"
 #include "pic.h"
+#include "graphics.h"
+
+#define CURSOR_WIDTH 5
+#define CURSOR_HEIGHT 5
+
+int mouse_counter;
 
 typedef struct mouse_data {
     uint32_t x_pos;
@@ -12,4 +18,23 @@ typedef struct mouse_data {
     bool click;
 } mouse_data_t;
 
+//This is 3 bytes large
+typedef struct mouse_bytes {
+  uint8_t left : 1;
+  uint8_t right : 1;
+  uint8_t middle : 1;
+  uint8_t unused : 1;
+  uint8_t x_sb : 1;
+  uint8_t y_sb : 1;
+  uint8_t x_overflow : 1; //Not useful
+  uint8_t y_overflow : 1; //Not useful
+  uint8_t x_move;
+  uint8_t y_move;
+} __attribute__((packed)) mouse_bytes_t;
+
+mouse_data_t* data;
+mouse_bytes_t* mousebytes;
+
 void InitialiseMouse();
+
+uint8_t function(uint8_t c);

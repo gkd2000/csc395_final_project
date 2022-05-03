@@ -10,6 +10,7 @@
 #include "char.h"
 #include "posix.h"
 #include "stivale-hdr.h"
+#include "mouse.h"
 
 // Struct for storing what was happening when an interrupt occurred
 typedef struct interrupt_context {
