@@ -1,4 +1,5 @@
 #include "mouse.h"
+#include "font.h"
 
 int test_x = 50;
 int test_y = 50;
@@ -10,30 +11,43 @@ int mouse_counter;
 
 //Note: This is a prototype version
 void draw_cursor() {
-    for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y + 20; j < test_y + 20 + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 255, 0, 255);
-        }
-      }
-      test_x += 5;
+    // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+    //     for(int j = test_y + 20; j < test_y + 20 + CURSOR_HEIGHT; j++) {
+    //       draw_pixel(i, j, 255, 0, 255);
+    //     }
+    //   }
+    //   test_x += 5;
   for(int i = data->x_pos; i < data->x_pos + CURSOR_WIDTH; i++) {
     for(int j = data->y_pos; j < data->y_pos + CURSOR_HEIGHT; j++) {
       draw_pixel(i, j, 255, 255, 255);
+    }
+  }
+
+
+
+	int mask[8]={1,2,4,8,16,32,64,128};
+  for(int w = 0; w < 8; w++) {
+    // int char_h = 8;
+    for(int h = 0; h < 8; h++) {
+      draw_pixel(w+500, h+500, (letters[65][h] & mask[w]) * 255, (letters[65][h] & mask[w]) * 255, (letters[65][h] & mask[w]) * 255);
+      // char_h++;
     }
   }
 }
 
 //Changes the processed_data location
 void update_cursor() {
-  data->x_pos += (mousebytes->x_sb == 1 ? mousebytes->x_move | 0xFFFFFF00 : mousebytes->x_move);
-  data->y_pos += (mousebytes->y_sb == 1 ? mousebytes->y_move | 0xFFFFFF00 : mousebytes->y_move);
+  // data->x_pos += (mousebytes->x_sb == 1 ? mousebytes->x_move | 0xFFFFFF00 : mousebytes->x_move);
+  // data->y_pos += (mousebytes->y_sb == 1 ? mousebytes->y_move | 0xFFFFFF00 : mousebytes->y_move);
+  data->x_pos += (mousebytes->x_sb == 1 ? (~mousebytes->x_move + 1) * -1 : mousebytes->x_move) / 50;
+  data->y_pos += (mousebytes->y_sb == 1 ? (~mousebytes->y_move + 1) * -1 : mousebytes->y_move) / 5;
 
-    for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y + 10; j < test_y + 10 + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 255, 0, 255);
-        }
-      }
-      test_x += 5;
+    // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+    //     for(int j = test_y + 10; j < test_y + 10 + CURSOR_HEIGHT; j++) {
+    //       draw_pixel(i, j, 255, 0, 255);
+    //     }
+    //   }
+    //   test_x += 5;
   draw_cursor();
 }
 
@@ -144,101 +158,109 @@ void InitialiseMouse() {
 void store_mouse_data(uint8_t packet) {
   switch(mouse_counter) {
     case 0 :
-    for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 255, 0, 0);
-        }
-      }
-      test_x += 5;
-      if(packet == NULL || packet == 0) {
-        for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-          for(int j = test_y + 50; j < test_y + 50 + CURSOR_HEIGHT; j++) {
-            draw_pixel(i, j, 255, 0, 0);
-          }
-        }
-      } else {
-        for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-          for(int j = test_y + 50; j < test_y + 50 + CURSOR_HEIGHT; j++) {
-            draw_pixel(i, j, 0, 255, 0);
-          }
-        }
-      }
+    // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+    //     for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
+    //       draw_pixel(i, j, 255, 0, 0);
+    //     }
+    //   }
+    //   test_x += 5;
+    //   if(packet == NULL || packet == 0) {
+    //     for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+    //       for(int j = test_y + 50; j < test_y + 50 + CURSOR_HEIGHT; j++) {
+    //         draw_pixel(i, j, 255, 0, 0);
+    //       }
+    //     }
+    //   } else {
+    //     for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+    //       for(int j = test_y + 50; j < test_y + 50 + CURSOR_HEIGHT; j++) {
+    //         draw_pixel(i, j, 0, 255, 0);
+    //       }
+    //     }
+    //   }
       mousebytes->left = packet & 0x1;
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 0, 255, 0);
-        }
-      }
-      test_x += 5;
+    //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+    //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
+    //       draw_pixel(i, j, 0, 255, 0);
+    //     }
+    //   }
+    //   test_x += 5;
       mousebytes->right = packet & 0x2;
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 0, 255, 0);
-        }
-      }
-      test_x += 5;
+    //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+    //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
+    //       draw_pixel(i, j, 0, 255, 0);
+    //     }
+    //   }
+    //   test_x += 5;
       mousebytes->middle = packet & 0x4;
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 0, 255, 0);
-        }
-      }
-      test_x += 5;
+    //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+    //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
+    //       draw_pixel(i, j, 0, 255, 0);
+    //     }
+    //   }
+      // test_x += 5;
       mousebytes->x_sb = packet & 0x10;
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 0, 255, 0);
+      for(int i = 600; i < 600 + CURSOR_WIDTH; i++) {
+        for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
+          if(mousebytes->x_sb == 1) {
+            draw_pixel(i, j, 0, 255, 0);
+          } else {
+            draw_pixel(i, j, 0, 0, 255);
+          }
         }
       }
-      test_x += 5;
+      // test_x += 5;
       mousebytes->y_sb = packet & 0x20;
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 0, 255, 0);
+      for(int i = 650; i < 650 + CURSOR_WIDTH; i++) {
+        for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
+          if(mousebytes->y_sb == 1) {
+            draw_pixel(i+40, j+40, 255, 0, 0);
+          } else {
+            draw_pixel(i+40, j+40, 255, 0, 255);
+          }
         }
       }
-      test_x += 5;
+      // test_x += 5;
       mousebytes->x_overflow = packet & 0x40;
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 0, 255, 0);
-        }
-      }
-      test_x += 5;
+      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+      //   for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
+      //     draw_pixel(i, j, 0, 255, 0);
+      //   }
+      // }
+      // test_x += 5;
       mousebytes->y_overflow = packet & 0x80;
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 0, 255, 0);
-        }
-      }
-      test_x += 5;
+      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+      //   for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
+      //     draw_pixel(i, j, 0, 255, 0);
+      //   }
+      // }
+      // test_x += 5;
       mouse_counter++;
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 255, 255, 0);
-        }
-      }
-      test_x += 5;
+      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+      //   for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
+      //     draw_pixel(i, j, 255, 255, 0);
+      //   }
+      // }
+      // test_x += 5;
       break;
     case 1 :
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 0, 255, 0);
-        }
-      }
-      test_x += 5;
-    //   mousebytes->x_move = packet;
+      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+      //   for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
+      //     draw_pixel(i, j, 0, 255, 0);
+      //   }
+      // }
+      // test_x += 5;
+      mousebytes->x_move = packet;
       mouse_counter++;
       break;
     case 2 :
       mousebytes->y_move = packet;
       mouse_counter = 0;
-      for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-        for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
-          draw_pixel(i, j, 0, 0, 255);
-        }
-      }
-      test_x += 5;
+      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
+      //   for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
+      //     draw_pixel(i, j, 0, 0, 255);
+      //   }
+      // }
+      // test_x += 5;
       // Call a function which processes the packet
       update_cursor();
       break;
