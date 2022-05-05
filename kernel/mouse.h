@@ -1,16 +1,17 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
 
 #include "unistd.h"
 #include "port.h"
 #include "pic.h"
 #include "graphics.h"
+#include "mem.h"
 
 #define CURSOR_WIDTH 5
 #define CURSOR_HEIGHT 5
-
-int mouse_counter;
 
 typedef struct mouse_data {
     uint32_t x_pos;
@@ -37,4 +38,7 @@ mouse_bytes_t* mousebytes;
 
 void InitialiseMouse();
 
-uint8_t function(uint8_t c);
+void store_mouse_data(uint8_t packet);
+
+void do_nothing(uint8_t packet);
+void initialize_cursor();

@@ -172,6 +172,8 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
     }
 }
 
+int num_mouse_interrupts = 0;
+
 // Handler for mouse event
 __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx) {
   unsigned char* pixel = (unsigned char*) global_framebuffer->framebuffer_addr;
@@ -179,8 +181,7 @@ __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx
   x_start += 10;
   y_start += 10;
   // uint8_t c = getchar(inb(0x60));
-  uint8_t c = inb(0x60);
-  store_mouse_data(c);
+  
   for(int i = x_start; i < x_start+10; i++) {
     for(int j = y_start; j < y_start+10; j++) {
       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
@@ -188,6 +189,14 @@ __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx
       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 0;
     }
   }
+  uint8_t c = inb(0x60);
+  if(num_mouse_interrupts > 4) {
+   store_mouse_data(c);
+  } else {
+    do_nothing(c);
+    num_mouse_interrupts++;
+  }
+  
   outb(PIC1_COMMAND, PIC_EOI);
   outb(PIC2_COMMAND, PIC_EOI);
   // char d = getchar(inb(0x60));

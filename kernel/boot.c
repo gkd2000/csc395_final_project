@@ -200,14 +200,16 @@ void _start(struct stivale2_struct *hdr) {
   pic_unmask_irq(1);
   pic_unmask_irq(2);
   pic_unmask_irq(12);
-  initialize_cursor();
-  InitialiseMouse();
 
   //outb(0x64, 0x20);
 
   // Unmap the lower half of memory
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
   unmap_lower_half(root);
+
+  
+  initialize_cursor();
+  InitialiseMouse();
 
   // Get information about the modules we've asked the bootloader to load
   struct stivale2_struct_tag_modules *modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);
