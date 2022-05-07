@@ -1,9 +1,10 @@
 #include "mouse.h"
-#include "font.h"
 
 int test_x = 50;
 int test_y = 50;
 int mouse_counter;
+
+uint32_t saved_pixels[CURSOR_HEIGHT * CURSOR_WIDTH]; // Store the colors in hex
 
 // Mouse initialization code from https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06
 
@@ -109,22 +110,72 @@ void draw_cursor() {
 
 
 
-	int mask[8]={1,2,4,8,16,32,64,128};
-  for(int w = 0; w < 8; w++) {
-    // int char_h = 8;
-    for(int h = 0; h < 8; h++) {
-      draw_pixel(w+500, h+500, (letters[65][h] & mask[w]) * 255, (letters[65][h] & mask[w]) * 255, (letters[65][h] & mask[w]) * 255);
-      // char_h++;
+  // gkprint_c('A', 500, 500, WHITE);
+  // gkprint_d(6, 508, 500, WHITE);
+  // gkprint_d(17, 516, 500, WHITE);
+  // gkprint_d(123456, 532, 500, WHITE);
+}
+
+void save_background(int32_t x_start, int32_t y_start) {
+  unsigned char* framebuffer_start = (unsigned char*) global_framebuffer->framebuffer_addr;
+  for(int i = 0; i < CURSOR_WIDTH; i++) {
+    for(int j = 0; j < CURSOR_HEIGHT; j++) {
+      int index = (x_start + i) * (global_framebuffer->framebuffer_bpp / 8) + ((y_start + j) * global_framebuffer->framebuffer_pitch);
+      uint32_t blue = framebuffer_start[index];
+      uint32_t green = (framebuffer_start[index + 1]) << 8;
+      uint32_t red = (framebuffer_start[index + 2]) << 16;
+      uint32_t color = blue | green | red;
+      gkprint_d(color, 900, 200 + (i + j*CURSOR_WIDTH) * 8, WHITE);
+      saved_pixels[i + j * CURSOR_WIDTH] = color;
     }
   }
 }
 
 //Changes the processed_data location
 void update_cursor() {
-  // data->x_pos += (mousebytes->x_sb == 1 ? mousebytes->x_move | 0xFFFFFF00 : mousebytes->x_move);
-  // data->y_pos += (mousebytes->y_sb == 1 ? mousebytes->y_move | 0xFFFFFF00 : mousebytes->y_move);
-  data->x_pos += (mousebytes->x_sb == 1 ? (~mousebytes->x_move + 1) * -1 : mousebytes->x_move) / 50;
-  data->y_pos += (mousebytes->y_sb == 1 ? (~mousebytes->y_move + 1) * -1 : mousebytes->y_move) / 5;
+  // data->x_pos += (mousebytes->x_sb == 1 ? mousebytes->x_move | 0xFFFFFF00 : mousebytes->x_move) / 50;
+  // data->y_pos += (mousebytes->y_sb == 1 ? mousebytes->y_move | 0xFFFFFF00 : mousebytes->y_move) / 50;
+  // data->x_pos += (mousebytes->x_sb == 1 ? (~mousebytes->x_move + 1) * -1 : mousebytes->x_move) / 50;
+  // data->y_pos += (mousebytes->y_sb == 1 ? (~mousebytes->y_move + 1) * -1 : mousebytes->y_move) / 50;
+
+  for(int i = data->x_pos; i < data->x_pos + CURSOR_WIDTH; i++) {
+    for(int j = data->y_pos; j < data->y_pos + CURSOR_HEIGHT; j++) {
+      draw_pixel(i, j, (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16, (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8, saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF);
+    }
+  }
+
+  if(mousebytes->x_sb == 1) {
+    // data->x_pos -= ((~(mousebytes->x_move)) + 1) / 50;
+    data->x_pos += (mousebytes->x_move - 255) / 20;
+  } else {
+    data->x_pos += mousebytes->x_move / 20;
+  }
+
+  if(mousebytes->y_sb == 1) {
+    // data->y_pos -= ((~(mousebytes->y_move)) + 1) / 50;
+    data->y_pos -= (mousebytes->y_move - 255) / 20;
+  } else {
+    data->y_pos -= mousebytes->y_move / 20;
+  }
+
+  if(data->x_pos < 0) {
+    data->x_pos = 0;
+  }
+  
+  if(data->x_pos > global_framebuffer->framebuffer_width - 6) {
+    data->x_pos = global_framebuffer->framebuffer_width - 6;
+  }
+
+  if(data->y_pos < 0) {
+    data->y_pos = 0;
+  }
+  
+  if(data->y_pos > global_framebuffer->framebuffer_height - 6) {
+    data->y_pos = global_framebuffer->framebuffer_height - 6;
+  }
+
+  gkprint_d(data->x_pos, 500, 300, WHITE);
+  gkprint_d(data->y_pos, 500, 308, WHITE);
 
     // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
     //     for(int j = test_y + 10; j < test_y + 10 + CURSOR_HEIGHT; j++) {
@@ -132,6 +183,9 @@ void update_cursor() {
     //     }
     //   }
     //   test_x += 5;
+
+  save_background(data->x_pos, data->y_pos);
+
   draw_cursor();
 }
 
@@ -162,10 +216,11 @@ void initialize_cursor() {
 //         }
 //       }
 //   }
-  data->x_pos = 0;
-  data->y_pos = 0;
+  data->x_pos = 100;
+  data->y_pos = 100;
   data->click = false;
   mouse_counter = 0;
+  save_background(data->x_pos, data->y_pos);
 
   //Draw the cursor from here!
   draw_cursor();
@@ -199,27 +254,52 @@ void store_mouse_data(uint8_t packet) {
     //     }
     //   }
       mousebytes->left = packet & 0x1;
+      if(mousebytes->left == 1) {
+        gkprint_c('L', 200, 200, WHITE);
+      } else {
+        gkprint_c('N', 200, 200, WHITE);
+      }
     //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
     //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
     //       draw_pixel(i, j, 0, 255, 0);
     //     }
     //   }
     //   test_x += 5;
-      mousebytes->right = packet & 0x2;
+      mousebytes->right = (packet & 0x2) >> 1;
+      if(mousebytes->right == 1) {
+        gkprint_c('R', 200, 208, WHITE);
+      } else {
+        gkprint_c('S', 200, 208, WHITE);
+      }
     //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
     //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
     //       draw_pixel(i, j, 0, 255, 0);
     //     }
     //   }
     //   test_x += 5;
-      mousebytes->middle = packet & 0x4;
+      mousebytes->middle = (packet & 0x4) >> 2;
+      if(mousebytes->middle == 1) {
+        gkprint_c('M', 200, 216, WHITE);
+      } else {
+        gkprint_c('O', 200, 216, WHITE);
+      }
     //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
     //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
     //       draw_pixel(i, j, 0, 255, 0);
     //     }
     //   }
       // test_x += 5;
-      mousebytes->x_sb = packet & 0x10;
+
+      //Testing unused bit - it should ALWAYS be 1
+
+      if(((packet & 0x8) >> 3) == 0) {
+        gkprint_c('E', 500, 200, WHITE);
+        gkprint_c('R', 508, 200, WHITE);
+        gkprint_c('R', 516, 200, WHITE);
+      }
+
+      mousebytes->x_sb = (packet & 0x10) >> 4;
+      gkprint_d(mousebytes->x_sb, 500, 500, WHITE);
       for(int i = 600; i < 600 + CURSOR_WIDTH; i++) {
         for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
           if(mousebytes->x_sb == 1) {
@@ -230,7 +310,8 @@ void store_mouse_data(uint8_t packet) {
         }
       }
       // test_x += 5;
-      mousebytes->y_sb = packet & 0x20;
+      mousebytes->y_sb = (packet & 0x20) >> 5;
+      gkprint_d(mousebytes->y_sb, 508, 500, WHITE);
       for(int i = 650; i < 650 + CURSOR_WIDTH; i++) {
         for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
           if(mousebytes->y_sb == 1) {
@@ -271,10 +352,16 @@ void store_mouse_data(uint8_t packet) {
       // }
       // test_x += 5;
       mousebytes->x_move = packet;
+      gkprint_c(' ', 508, 600, WHITE);
+      gkprint_c(' ', 516, 600, WHITE);
+      gkprint_d(mousebytes->x_move, 500, 600, WHITE);
       mouse_counter++;
       break;
     case 2 :
       mousebytes->y_move = packet;
+      gkprint_c(' ', 508, 608, WHITE);
+      gkprint_c(' ', 516, 608, WHITE);
+      gkprint_d(mousebytes->y_move, 500, 608, WHITE);
       mouse_counter = 0;
       // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
       //   for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {

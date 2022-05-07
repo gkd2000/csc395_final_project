@@ -6,6 +6,8 @@
 #include <string.h>
 
 #include "term.h"
+#include "graphics.h"
+#include "font.h"
 
 /**
  * Mimic the basic functionality of printf. Given a format string and
@@ -17,3 +19,6 @@
  */
 void kprintf(const char *format, ...);
 
+void gkprint_c(uint8_t c, uint32_t x_pos, uint32_t y_pos, uint32_t color);
+
+void gkprint_d(uint64_t value, uint32_t x_pos, uint32_t y_pos, uint32_t color);

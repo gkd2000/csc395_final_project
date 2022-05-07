@@ -44,9 +44,9 @@ static struct stivale2_header_tag_framebuffer framebuffer_hdr_tag = {
   .tag = {
     .identifier = STIVALE2_HEADER_TAG_FRAMEBUFFER_ID,
     .next = 0},
-  .framebuffer_width = 2000,
-  .framebuffer_height = 2000,
-  .framebuffer_bpp = 24 //Not a multiple of 8, OR 2!
+  .framebuffer_width = 0,
+  .framebuffer_height = 0,
+  .framebuffer_bpp = 0 //Not a multiple of 8, OR 2!
 };
 
 // Request that a linear framebuffer from the bootloader
@@ -207,6 +207,21 @@ void _start(struct stivale2_struct *hdr) {
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
   unmap_lower_half(root);
 
+  int red = 255;
+  int green = 255;
+  int blue = 255;
+  for(int i = 0; i < 600; i++) {
+    for(int j = 0; j < 600; j++) {
+      if(j % 3 == 0) {
+        red -= 1;
+      } else if(j % 3 == 1) {
+        green -= 1;
+      } else {
+        blue -= 1;
+      }
+      draw_pixel(i, j, red, green, blue);
+    }
+  }
   
   initialize_cursor();
   initialize_mouse();

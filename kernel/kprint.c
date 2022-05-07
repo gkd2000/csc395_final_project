@@ -124,3 +124,58 @@ void kprintf(const char *format, ...) {
   // Finish handling variadic arguments
   va_end(args);
 }
+
+void gkprint_c(uint8_t c, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
+  uint8_t red = (color & 0xFF0000) >> 16;
+  uint8_t green = (color & 0x00FF00) >> 8;
+  uint8_t blue = color & 0x0000FF;
+  int mask[8]={1,2,4,8,16,32,64,128};
+  for(int w = 0; w < 8; w++) {
+    // int char_h = 8;
+    for(int h = 0; h < 8; h++) {
+      draw_pixel(w+x_pos, h+y_pos, (letters[c][h] & mask[w]) * red, (letters[c][h] & mask[w]) * green, (letters[c][h] & mask[w]) * blue);
+      // char_h++;
+    }
+  }
+}
+
+// Recursive helper function for kprint_d
+// void gkprint_d_helper(uint64_t value, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
+//   if (value != 0) {
+//     gkprint_c(value % 10 + 48, x_pos, y_pos, color); //> Print the least significant digit
+    
+//     gkprint_d_helper(value / 10, x_pos + 8, y_pos, color); //> Recursive call
+//   }
+// }
+
+// /**
+//  * Print a number in decimal to the terminal, without leading zeros
+//  * \param value a nonnegative integer
+//  */
+// void gkprint_d(uint64_t value, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
+//   if (value != 0) {
+//     gkprint_d_helper(value, x_pos, y_pos, color);
+//   } else {
+//     gkprint_c('0', x_pos, y_pos, color);
+//   }
+// }
+
+void gkprint_d(uint64_t value, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
+  char arr[20];
+  int counter = 0;
+  for (size_t i = 19; i >= 0; i--) {
+    int current_place = value % 10;
+    arr[i] = current_place;
+    value = value / 10;
+    if (value == 0){
+      counter = i;
+      break;
+    }
+  }
+
+  for(size_t i = counter; i < 20; i++) {
+    if (arr[i] >= 0 && arr[i] <= 9) {
+      gkprint_c(48 + arr[i], x_pos + (i - counter) * 8, y_pos, color);
+    }
+  }
+}

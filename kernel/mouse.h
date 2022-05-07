@@ -8,14 +8,16 @@
 #include "port.h"
 #include "pic.h"
 #include "graphics.h"
+#include "stivale-hdr.h"
 #include "mem.h"
+#include "font.h"
 
 #define CURSOR_WIDTH 5
 #define CURSOR_HEIGHT 5
 
 typedef struct mouse_data {
-    uint32_t x_pos;
-    uint32_t y_pos;
+    int32_t x_pos;
+    int32_t y_pos;
     bool click;
 } mouse_data_t;
 
