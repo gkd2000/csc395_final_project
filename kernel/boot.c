@@ -209,7 +209,7 @@ void _start(struct stivale2_struct *hdr) {
 
   
   initialize_cursor();
-  InitialiseMouse();
+  initialize_mouse();
 
   // Get information about the modules we've asked the bootloader to load
   struct stivale2_struct_tag_modules *modules = find_tag(hdr, STIVALE2_STRUCT_TAG_MODULES_ID);

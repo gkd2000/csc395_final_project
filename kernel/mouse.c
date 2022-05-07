@@ -5,9 +5,93 @@ int test_x = 50;
 int test_y = 50;
 int mouse_counter;
 
-// Mouse initialization code from https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse
+// Mouse initialization code from https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06
 
-// Todo: reformat this, cite the author better, comment it clearly
+/**
+ * Source: https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06
+ * Wait for a response from the mouse. 
+ * \param type determines the byte we're waiting on and the value we're waiting for it to be
+ */
+void mouse_wait(unsigned char type) {
+  // How long do we wait before we give up?
+  int time_out = 100000;
+
+  if (type == 0) {
+    // Wait for the least significant bit returned by the mouse to be set
+    while (time_out--) {
+      if ((inb(0x64) & 1) == 1)
+        return;
+    }
+    return;
+  } else {
+    // Wait for the second-least significant bit returned by the mouse to be turned off
+    while (time_out--) {
+      if ((inb(0x64) & 2) == 0)
+        return;
+    } 
+    return;
+  }
+}
+
+/**
+ * Source: https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06
+ * Send some data (a message) to the mouse 
+ * \param data the data to be sent
+ */
+void mouse_write(unsigned char data) {
+  // Tell the mouse we're going to send it something
+  mouse_wait(1);
+  outb(0x64, 0xd4);
+
+  // Wait for the mouse to be ready and then send data
+  mouse_wait(1);
+  outb(0x60, data);
+}
+
+/**
+ * Source: https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06
+ * Read a message from the mouse
+ * \returns the message read
+ */
+unsigned char mouse_read() {
+  mouse_wait(0);
+  // Read from the mouse and return that value
+  return inb(0x60);
+}
+
+/**
+ * Source: https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06
+ * Initialize the mouse so that it sends interrupts over IRQ 12
+ * \param type determines the byte we're waiting on and the value we're waiting for it to be
+ */
+void initialize_mouse() {
+
+  // Enable the auxiliary mouse device
+  mouse_wait(1);
+  outb(0x64, 0xA8);
+  
+  //Enable the interrupts
+  mouse_wait(1);
+  outb(0x64, 0x20);
+  mouse_wait(0);
+  uint8_t status =(inb(0x60) | 2);
+  mouse_wait(1);
+  outb(0x64, 0x60);
+  mouse_wait(1);
+  outb(0x60, status);
+  
+  mouse_write(0xFF);
+  mouse_read(); 
+  //Tell the mouse to use default settings
+  mouse_write(0xF6);
+  mouse_read(); 
+  
+  //Enable the mouse
+  mouse_write(0xF4);
+  mouse_read();
+}
+
+// Stuff below here is stuff we wrote
 
 //Note: This is a prototype version
 void draw_cursor() {
@@ -91,69 +175,6 @@ void initialize_cursor() {
 // void mouse_input() {
 
 // }
-
-void MouseWait(unsigned char type) {
-    int time_out = 100000;
-
-    if (type == 0) {
-        while (time_out--) {
-            if ((inb(0x64) & 1) == 1)
-                return;
-        }
-        return;
-    }
-    else {
-        while (time_out--) {
-            if ((inb(0x64) & 2) == 0)
-                return;
-        } 
-        return;
-    }
-}
-
-void MouseWrite(unsigned char data) {
-    MouseWait(1);
-    outb(0x64, 0xd4);
-
-    MouseWait(1);
-    outb(0x60, data);
-}
-
-unsigned char MouseRead() {
-    MouseWait(0);
-    return inb(0x60);
-}
-
-uint8_t function(uint8_t c) {
-  return c + 2;
-}
-
-void InitialiseMouse() {
-
-    // Enable the auxiliary mouse device
-    MouseWait(1);
-    outb(0x64, 0xA8);
-    
-    //Enable the interrupts
-    MouseWait(1);
-    outb(0x64, 0x20);
-    MouseWait(0);
-    uint8_t status =(inb(0x60) | 2);
-    MouseWait(1);
-    outb(0x64, 0x60);
-    MouseWait(1);
-    outb(0x60, status);
-    
-    MouseWrite(0xFF);
-    MouseRead(); 
-    //Tell the mouse to use default settings
-    MouseWrite(0xF6);
-    MouseRead();  //Acknowledge
-    
-    //Enable the mouse
-    MouseWrite(0xF4);
-    MouseRead();
-}
 
 void store_mouse_data(uint8_t packet) {
   switch(mouse_counter) {
@@ -270,5 +291,5 @@ void store_mouse_data(uint8_t packet) {
 }
 
 void do_nothing(uint8_t packet) {
-    return;
+  return;
 }

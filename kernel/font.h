@@ -1,3 +1,5 @@
+#pragma once
+
 // https://stackoverflow.com/questions/2156572/c-header-file-with-bitmapped-fonts
 // Credit to nimbus_debug
 

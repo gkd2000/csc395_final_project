@@ -36,9 +36,10 @@ typedef struct mouse_bytes {
 mouse_data_t* data;
 mouse_bytes_t* mousebytes;
 
-void InitialiseMouse();
+void initialize_mouse();
 
 void store_mouse_data(uint8_t packet);
 
 void do_nothing(uint8_t packet);
+
 void initialize_cursor();
