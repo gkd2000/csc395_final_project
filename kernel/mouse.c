@@ -125,7 +125,6 @@ void save_background(int32_t x_start, int32_t y_start) {
       uint32_t green = (framebuffer_start[index + 1]) << 8;
       uint32_t red = (framebuffer_start[index + 2]) << 16;
       uint32_t color = blue | green | red;
-      gkprint_d(color, 900, 200 + (i + j*CURSOR_WIDTH) * 8, WHITE);
       saved_pixels[i + j * CURSOR_WIDTH] = color;
     }
   }
@@ -137,10 +136,42 @@ void update_cursor() {
   // data->y_pos += (mousebytes->y_sb == 1 ? mousebytes->y_move | 0xFFFFFF00 : mousebytes->y_move) / 50;
   // data->x_pos += (mousebytes->x_sb == 1 ? (~mousebytes->x_move + 1) * -1 : mousebytes->x_move) / 50;
   // data->y_pos += (mousebytes->y_sb == 1 ? (~mousebytes->y_move + 1) * -1 : mousebytes->y_move) / 50;
+  gkprint_c('r', 750, 185, WHITE);
+  gkprint_c('g', 800, 185, WHITE);
+  gkprint_c('b', 850, 185, WHITE);
+  // int i_print;
+  // int j_print;
+  // for(int i = data->x_pos; i < data->x_pos + CURSOR_WIDTH; i++) {
+  //   for(int j = data->y_pos; j < data->y_pos + CURSOR_HEIGHT; j++) {
+  //     i_print = i - data->x_pos;
+  //     j_print = j - data->y_pos;
+  //     gkprint_c('T', 700, 100, WHITE);
+  //     uint8_t blue = saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0x0000FF;
+  //     uint8_t green = (saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0x00FF00) >> 8;
+  //     uint8_t red = (saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0xFF0000) >> 16;
+  //     gkprint_c('T', 708, 100, WHITE);
+  //     gkprint_d(i + j*CURSOR_WIDTH, 700, 200 + ((i + j*CURSOR_WIDTH) * 8), WHITE);
+  //     gkprint_d(red, 750, 200 + ((i_print + j_print*CURSOR_WIDTH) * 8), WHITE);
+  //     gkprint_d(green, 800, 200 + ((i_print + j_print*CURSOR_WIDTH) * 8), WHITE);
+  //     gkprint_d(blue, 850, 200 + ((i_print + j_print*CURSOR_WIDTH) * 8), WHITE);
+  //     draw_pixel(i, j, (saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0xFF0000) >> 16, (saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0x00FF00) >> 8, saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0x0000FF);
+  //   }
+  // }
 
-  for(int i = data->x_pos; i < data->x_pos + CURSOR_WIDTH; i++) {
-    for(int j = data->y_pos; j < data->y_pos + CURSOR_HEIGHT; j++) {
-      draw_pixel(i, j, (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16, (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8, saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF);
+  int x_pos = data->x_pos;
+  int y_pos = data->y_pos;
+  for(int i = 0; i < CURSOR_WIDTH; i++) {
+    for(int j = 0; j < CURSOR_HEIGHT; j++) {
+      gkprint_c('T', 700, 100, WHITE);
+      uint8_t blue = saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF;
+      uint8_t green = (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8;
+      uint8_t red = (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16;
+      gkprint_c('T', 708, 100, WHITE);
+      gkprint_d(i + j*CURSOR_WIDTH, 700, 200 + ((i + j*CURSOR_WIDTH) * 8), WHITE);
+      gkprint_d(red, 750, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      gkprint_d(green, 800, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      gkprint_d(blue, 850, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      draw_pixel(i + x_pos, j + y_pos, (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16, (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8, saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF);
     }
   }
 
