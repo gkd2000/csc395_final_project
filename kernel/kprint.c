@@ -125,11 +125,24 @@ void kprintf(const char *format, ...) {
   va_end(args);
 }
 
+/**
+ * Print a character to the screen in graphics mode, with foreground color as specified
+ * and black background color
+ * \param c     the character to be printed
+ * \param x_pos x-coordinate (in pixels) where the top left corner of the character should go
+ * \param y_pos y-coordinate (in pixels) where the top left corner of the character should go
+ * \param color hexadecimal color code to print the character in
+ */
 void gkprint_c(uint8_t c, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
+  // Decompose color into RGB
   uint8_t red = (color & 0xFF0000) >> 16;
   uint8_t green = (color & 0x00FF00) >> 8;
   uint8_t blue = color & 0x0000FF;
+
+  // Masks corresponding to each column of an 8x8 character
   int mask[8]={1,2,4,8,16,32,64,128};
+
+  // Iterate over the 8x8 square where the character will go, filling in pixels 
   for(int w = 0; w < 8; w++) {
     // int char_h = 8;
     for(int h = 0; h < 8; h++) {
@@ -139,36 +152,29 @@ void gkprint_c(uint8_t c, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
   }
 }
 
-// Recursive helper function for kprint_d
-// void gkprint_d_helper(uint64_t value, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
-//   if (value != 0) {
-//     gkprint_c(value % 10 + 48, x_pos, y_pos, color); //> Print the least significant digit
-    
-//     gkprint_d_helper(value / 10, x_pos + 8, y_pos, color); //> Recursive call
-//   }
-// }
-
-// /**
-//  * Print a number in decimal to the terminal, without leading zeros
-//  * \param value a nonnegative integer
-//  */
-// void gkprint_d(uint64_t value, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
-//   if (value != 0) {
-//     gkprint_d_helper(value, x_pos, y_pos, color);
-//   } else {
-//     gkprint_c('0', x_pos, y_pos, color);
-//   }
-// }
-
+/**
+ * Print an integer in decimal to the screen in graphics mode, without leading zeroes. 
+ * Foreground color is specified by caller; background color is black
+ * \param value the number to be printed
+ * \param x_pos x-coordinate (in pixels) where the top left corner of the character should go
+ * \param y_pos y-coordinate (in pixels) where the top left corner of the character should go
+ * \param color hexadecimal color code to print the character in
+ */
 void gkprint_d(uint64_t value, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
   char arr[20];
-  int counter = 0;
-  for (size_t i = 19; i >= 0; i--) {
-    int current_place = value % 10;
-    arr[i] = current_place;
+  size_t counter = 0;
+  int current_place;
+
+  // Fill in arr (starting from the last index) with the digits of value, from least to most significant
+  for (counter = 19; counter >= 0; counter--) {
+    // Set the current index in arr to be the rightmost digit of value
+    current_place = value % 10;
+    arr[counter] = current_place;
+
     value = value / 10;
+
+    // We've recorded all the digits of value. Stop here and record where we are in the array
     if (value == 0){
-      counter = i;
       break;
     }
   }

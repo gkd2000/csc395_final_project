@@ -2,30 +2,36 @@
 
 int test_x = 50;
 int test_y = 50;
-int mouse_counter;
+int mouse_counter; //> Keep track of which byte in the 3-byte sequence we are receiving from the mouse
 
-uint32_t saved_pixels[CURSOR_HEIGHT * CURSOR_WIDTH]; // Store the colors in hex
+// Array for the pixels that were most recently overwritten to draw the cursor. One index per pixel, with
+// colors stored in hexadecimal
+uint32_t saved_pixels[CURSOR_HEIGHT * CURSOR_WIDTH]; 
 
 // Mouse initialization code from https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06
 
 /**
  * Source: https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06
- * Wait for a response from the mouse. 
- * \param type determines the byte we're waiting on and the value we're waiting for it to be
+ * Wait for a particular state of the mouse by polling port 0x64. 
+ * \param type Determines the bit we're waiting on and the value we're waiting for it to be
+ *             If type = READY_TO_READ = 0, we're waiting until there is data available to be read on port 0x60
+ *             If type = READY_TO_SEND = 1, then the mouse is ready to receive data or a command (on port 0x60 or 0x64)
  */
 void mouse_wait(unsigned char type) {
   // How long do we wait before we give up?
   int time_out = 100000;
 
-  if (type == 0) {
-    // Wait for the least significant bit returned by the mouse to be set
+  if (type == READY_TO_READ) {
+    // Wait for the least significant bit returned by the mouse to be set:
+    // it is set if there is data available to be read on port 0x60
     while (time_out--) {
       if ((inb(0x64) & 1) == 1)
         return;
     }
     return;
   } else {
-    // Wait for the second-least significant bit returned by the mouse to be turned off
+    // Wait for the second-least significant bit returned by the mouse to be turned off:
+    // indicates that the mouse is ready to receive data or a command (either on port 0x60 or port 0x64)
     while (time_out--) {
       if ((inb(0x64) & 2) == 0)
         return;
@@ -36,17 +42,15 @@ void mouse_wait(unsigned char type) {
 
 /**
  * Source: https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06
- * Send some data (a message) to the mouse 
+ * Send some data (a command) to the mouse 
  * \param data the data to be sent
  */
 void mouse_write(unsigned char data) {
-  // Tell the mouse we're going to send it something
-  mouse_wait(1);
-  outb(0x64, 0xd4);
+  mouse_wait(READY_TO_SEND); //> Wait until the mouse is ready to receive a message
+  outb(0x64, 0xd4); //> Tell the mouse we're going to send it something on port 0x60
 
-  // Wait for the mouse to be ready and then send data
-  mouse_wait(1);
-  outb(0x60, data);
+  mouse_wait(READY_TO_SEND); //> Wait until the mouse is ready to receive a message
+  outb(0x60, data); //> Send the data
 }
 
 /**
@@ -55,9 +59,8 @@ void mouse_write(unsigned char data) {
  * \returns the message read
  */
 unsigned char mouse_read() {
-  mouse_wait(0);
-  // Read from the mouse and return that value
-  return inb(0x60);
+  mouse_wait(READY_TO_READ); //> Wait until there's data for us to read (on port 0x60)
+  return inb(0x60); //> Read from the mouse and return that value
 }
 
 /**
@@ -68,28 +71,31 @@ unsigned char mouse_read() {
 void initialize_mouse() {
 
   // Enable the auxiliary mouse device
-  mouse_wait(1);
+  mouse_wait(READY_TO_SEND);
   outb(0x64, 0xA8);
   
-  //Enable the interrupts
-  mouse_wait(1);
-  outb(0x64, 0x20);
-  mouse_wait(0);
-  uint8_t status =(inb(0x60) | 2);
-  mouse_wait(1);
-  outb(0x64, 0x60);
-  mouse_wait(1);
-  outb(0x60, status);
+  // Enable interrupts on IRQ12
+  mouse_wait(READY_TO_SEND);
+  outb(0x64, 0x20); //> Send command "Get Compaq Status Byte"
+  mouse_wait(READY_TO_READ);
+  uint8_t status =(inb(0x60) | 2); //> Get the actual Compaq Status byte and turn on bit 1: Enable IRQ12
+  mouse_wait(READY_TO_SEND);
+  outb(0x64, 0x60); //> Send command "Set Compaq Status Byte"
+  mouse_wait(READY_TO_SEND);
+  outb(0x60, status); //> Send the modified Compaq Status byte
   
+  // Reset mouse
   mouse_write(0xFF);
-  mouse_read(); 
-  //Tell the mouse to use default settings
+  mouse_read(); //> Read the ACK byte
+
+  // Tell the mouse to use default settings 
+  // (disable streaming, packet rate 100 per second, resolution 4 pixels per mm)
   mouse_write(0xF6);
-  mouse_read(); 
+  mouse_read(); //> Read the ACK byte
   
-  //Enable the mouse
+  // Enable packet streaming
   mouse_write(0xF4);
-  mouse_read();
+  mouse_read(); //> Read the ACK byte
 }
 
 // Stuff below here is stuff we wrote
@@ -118,9 +124,13 @@ void draw_cursor() {
 
 void save_background(int32_t x_start, int32_t y_start) {
   unsigned char* framebuffer_start = (unsigned char*) global_framebuffer->framebuffer_addr;
+  int index;
+  // Idea: reverse the order of the for loops. Then in the inner for loop we can just increment index, and then in the 
+  // outer for loop we increment index by the amount of pixels in a row, and then subtract however many we need to get to the 
+  // left of the cursor (because just adding the row will put us at the right)
   for(int i = 0; i < CURSOR_WIDTH; i++) {
     for(int j = 0; j < CURSOR_HEIGHT; j++) {
-      int index = (x_start + i) * (global_framebuffer->framebuffer_bpp / 8) + ((y_start + j) * global_framebuffer->framebuffer_pitch);
+      index = (x_start + i) * (global_framebuffer->framebuffer_bpp / 8) + ((y_start + j) * global_framebuffer->framebuffer_pitch);
       uint32_t blue = framebuffer_start[index];
       uint32_t green = (framebuffer_start[index + 1]) << 8;
       uint32_t red = (framebuffer_start[index + 2]) << 16;
@@ -139,6 +149,8 @@ void update_cursor() {
   gkprint_c('r', 750, 185, WHITE);
   gkprint_c('g', 800, 185, WHITE);
   gkprint_c('b', 850, 185, WHITE);
+
+  // old version, indexing is weird
   // int i_print;
   // int j_print;
   // for(int i = data->x_pos; i < data->x_pos + CURSOR_WIDTH; i++) {
@@ -158,14 +170,18 @@ void update_cursor() {
   //   }
   // }
 
+  // Fixed indexing
   int x_pos = data->x_pos;
   int y_pos = data->y_pos;
+  uint8_t blue;
+  uint8_t green;
+  uint8_t red;
   for(int i = 0; i < CURSOR_WIDTH; i++) {
     for(int j = 0; j < CURSOR_HEIGHT; j++) {
       gkprint_c('T', 700, 100, WHITE);
-      uint8_t blue = saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF;
-      uint8_t green = (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8;
-      uint8_t red = (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16;
+      blue = saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF;
+      green = (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8;
+      red = (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16;
       gkprint_c('T', 708, 100, WHITE);
       gkprint_d(i + j*CURSOR_WIDTH, 700, 200 + ((i + j*CURSOR_WIDTH) * 8), WHITE);
       gkprint_d(red, 750, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);

@@ -17,24 +17,9 @@
 #include "stivale-hdr.h"
 #include "mouse.h"
 
-// MOUSE FIX!!! We stole some code from a forum. it is in mouse.c. Also, we send the end of interrupt command to PIC2 in the 
-// mouse interrupt handler (in addition to the end of interrupt command we were sending to the PIC1)
+// TODO: Finish commenting the print functions.
 
-/**
- * Meeting with Charlie: added unmask irq2 because he suspects that the irq12 might report to a lower number irq. that didn't
- * change anything but it won't hurt anything to have more irqs unmasked than we need.
- * Added the call to outb on line 189 of boot.c, which sends a command to the pic (we wre trying to change the compaq status byte)
- * I think that this is something that Benjamin tried in our last meeting. It is what makes the red rectangle appear on the 
- * screen even if we don't do anything with the keyboard or mouse.
- * Charlie's suggestions going forward:
- *    follow the instructions on the osdev wiki Mouse page to enable packets (that's low down on the page)
- *    the mouse might just always generate an IRQ1, and so we need to inspect the byte that
- *      we get in that case to see if it came from the keyboard or the mouse
- *    it's possible that we're going to need to receive three consecutive bytes for mouse input. It is also possible that 
- *      we're going to have to look at three consecutive ports, or read bytes using inw or inl (instead of inb)
- *    Look at the forums on the osdev wiki. Someone might have a working example, and there's nothing wrong with using that
- *      as long as we cite them!
- */
+// INFO: Screen resolution is 1024 pixels in width by 768 pixels in height
 
 // Reserve space for the stack
 static uint8_t stack[8192];
@@ -207,21 +192,30 @@ void _start(struct stivale2_struct *hdr) {
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
   unmap_lower_half(root);
 
-  int red = 255;
-  int green = 255;
-  int blue = 255;
-  for(int i = 0; i < 600; i++) {
-    for(int j = 0; j < 600; j++) {
-      if(j % 3 == 0) {
-        red -= 1;
-      } else if(j % 3 == 1) {
-        green -= 1;
-      } else {
-        blue -= 1;
-      }
-      draw_pixel(i, j, red, green, blue);
-    }
-  }
+  // int red = 255;
+  // int green = 255;
+  // int blue = 255;
+  // for(int i = 0; i < 600; i++) {
+  //   for(int j = 0; j < 600; j++) {
+  //     if(j % 3 == 0) {
+  //       red -= 1;
+  //     } else if(j % 3 == 1) {
+  //       green -= 1;
+  //     } else {
+  //       blue -= 1;
+  //     }
+  //     draw_pixel(i, j, red, green, blue);
+  //   }
+  // }
+
+  gkprint_c('W', 286, 150, WHITE);
+  gkprint_c('H', 286, 158, WHITE);
+  gkprint_d(framebuffer->framebuffer_width, 300, 150, WHITE);
+  gkprint_d(framebuffer->framebuffer_height, 300, 158, WHITE);
+
+  draw_rectangle(150, 150, 50, 50, 0xFF0000);
+  gkprint_c('A', 150, 150, WHITE);
+  draw_rectangle(1000, 700, 100, 100, 0x3498eb);
   
   initialize_cursor();
   initialize_mouse();
