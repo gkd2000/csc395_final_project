@@ -15,8 +15,11 @@
 #define CURSOR_WIDTH 5
 #define CURSOR_HEIGHT 5
 
+// Constants for sending and reading messages to/from the mouse
 #define READY_TO_READ 0
 #define READY_TO_SEND 1
+
+#define SENSITIVITY 5
 
 typedef struct mouse_data {
     int32_t x_pos;

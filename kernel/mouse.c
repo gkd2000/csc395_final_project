@@ -140,6 +140,19 @@ void save_background(int32_t x_start, int32_t y_start) {
   }
 }
 
+void print_color_code(uint8_t red, uint8_t green, uint8_t blue, int vert_offset) {
+  gkprint_d(vert_offset, 700, 200 + (vert_offset * 8), WHITE);
+  gkprint_c(' ', 758, 200 + (vert_offset * 8), WHITE);
+  gkprint_c(' ', 766, 200 + (vert_offset * 8), WHITE);
+  gkprint_d(red, 750, 200 + (vert_offset * 8), WHITE);
+  gkprint_c(' ', 808, 200 + (vert_offset * 8), WHITE);
+  gkprint_c(' ', 816, 200 + (vert_offset * 8), WHITE);
+  gkprint_d(green, 800, 200 + (vert_offset * 8), WHITE);
+  gkprint_c(' ', 856, 200 + (vert_offset * 8), WHITE);
+  gkprint_c(' ', 866, 200 + (vert_offset * 8), WHITE);
+  gkprint_d(blue, 850, 200 + (vert_offset * 8), WHITE);
+}
+
 //Changes the processed_data location
 void update_cursor() {
   // data->x_pos += (mousebytes->x_sb == 1 ? mousebytes->x_move | 0xFFFFFF00 : mousebytes->x_move) / 50;
@@ -178,47 +191,48 @@ void update_cursor() {
   uint8_t red;
   for(int i = 0; i < CURSOR_WIDTH; i++) {
     for(int j = 0; j < CURSOR_HEIGHT; j++) {
-      gkprint_c('T', 700, 100, WHITE);
       blue = saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF;
       green = (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8;
       red = (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16;
-      gkprint_c('T', 708, 100, WHITE);
-      gkprint_d(i + j*CURSOR_WIDTH, 700, 200 + ((i + j*CURSOR_WIDTH) * 8), WHITE);
-      gkprint_d(red, 750, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
-      gkprint_d(green, 800, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
-      gkprint_d(blue, 850, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      print_color_code(red, green, blue, i + j * CURSOR_WIDTH);
+      // gkprint_d(i + j * CURSOR_WIDTH, 700, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      // gkprint_c(' ', 758, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      // gkprint_c(' ', 766, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      // gkprint_d(red, 750, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      // gkprint_d(green, 800, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      // gkprint_d(blue, 850, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
       draw_pixel(i + x_pos, j + y_pos, (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16, (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8, saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF);
     }
   }
 
   if(mousebytes->x_sb == 1) {
     // data->x_pos -= ((~(mousebytes->x_move)) + 1) / 50;
-    data->x_pos += (mousebytes->x_move - 255) / 20;
+    data->x_pos += (mousebytes->x_move - 255) / SENSITIVITY;
   } else {
-    data->x_pos += mousebytes->x_move / 20;
+    data->x_pos += mousebytes->x_move / SENSITIVITY;
   }
 
   if(mousebytes->y_sb == 1) {
     // data->y_pos -= ((~(mousebytes->y_move)) + 1) / 50;
-    data->y_pos -= (mousebytes->y_move - 255) / 20;
+    data->y_pos -= (mousebytes->y_move - 255) / SENSITIVITY;
   } else {
-    data->y_pos -= mousebytes->y_move / 20;
+    data->y_pos -= mousebytes->y_move / SENSITIVITY;
   }
 
   if(data->x_pos < 0) {
     data->x_pos = 0;
   }
   
-  if(data->x_pos > global_framebuffer->framebuffer_width - 6) {
-    data->x_pos = global_framebuffer->framebuffer_width - 6;
+  if(data->x_pos > global_framebuffer->framebuffer_width - (CURSOR_WIDTH + 1)) {
+    data->x_pos = global_framebuffer->framebuffer_width - (CURSOR_WIDTH + 1);
   }
 
   if(data->y_pos < 0) {
     data->y_pos = 0;
   }
   
-  if(data->y_pos > global_framebuffer->framebuffer_height - 6) {
-    data->y_pos = global_framebuffer->framebuffer_height - 6;
+  if(data->y_pos > global_framebuffer->framebuffer_height - (CURSOR_HEIGHT + 1)) {
+    data->y_pos = global_framebuffer->framebuffer_height - (CURSOR_HEIGHT + 1);
   }
 
   gkprint_d(data->x_pos, 500, 300, WHITE);

@@ -137,7 +137,6 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
 
 // Handler for a keyboard event
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx) {
-    unsigned char* pixel = (unsigned char*) global_framebuffer->framebuffer_addr;
     // Read the character and prepare to accept new inputs
     char c = getchar(inb(0x60));
     // uint8_t c = inb(0x60);
@@ -176,7 +175,6 @@ int num_mouse_interrupts = 0;
 
 // Handler for mouse event
 __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx) {
-  unsigned char* pixel = (unsigned char*) global_framebuffer->framebuffer_addr;
   // Read the character and prepare to accept new inputs
   x_start += 10;
   y_start += 10;

@@ -49,12 +49,12 @@ static struct stivale2_tag unmap_null_hdr_tag = {
 };
 
 // Request a terminal from the bootloader
-static struct stivale2_header_tag_terminal terminal_hdr_tag = {
+/*static struct stivale2_header_tag_terminal terminal_hdr_tag = {
     .tag = {
         .identifier = STIVALE2_HEADER_TAG_TERMINAL_ID,
         .next = (uintptr_t)&unmap_null_hdr_tag},
     .flags = 0
-};
+};*/
 
 
 // Declare the header for the bootloader
@@ -130,7 +130,6 @@ void _start(struct stivale2_struct *hdr) {
   struct stivale2_struct_tag_framebuffer *framebuffer = find_tag(hdr, STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID);
   global_framebuffer = framebuffer;
   
-  unsigned char* pixel = (unsigned char*) framebuffer->framebuffer_addr;
   // TODO: Try to map something
   // if(vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, framebuffer->framebuffer_addr + virtual->addr, true, true, false)) {
   //   pixel = (unsigned char*) (framebuffer->framebuffer_addr + virtual->addr);
@@ -192,30 +191,36 @@ void _start(struct stivale2_struct *hdr) {
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
   unmap_lower_half(root);
 
-  // int red = 255;
-  // int green = 255;
-  // int blue = 255;
-  // for(int i = 0; i < 600; i++) {
-  //   for(int j = 0; j < 600; j++) {
-  //     if(j % 3 == 0) {
-  //       red -= 1;
-  //     } else if(j % 3 == 1) {
-  //       green -= 1;
-  //     } else {
-  //       blue -= 1;
-  //     }
-  //     draw_pixel(i, j, red, green, blue);
-  //   }
-  // }
+  int red = 255;
+  int green = 255;
+  int blue = 255;
+  for(int i = 0; i < 600; i++) {
+    for(int j = 0; j < 600; j++) {
+      // if(j % 3 == 0) {
+      //   red -= 1;
+      // } else if(j % 3 == 1) {
+      //   green -= 1;
+      // } else {
+      //   blue -= 1;
+      // }
+      draw_pixel(i, j, red, green, blue);
+    }
+    if(red > 0) {
+      red--;
+    } else if(green > 0) {
+      green--;
+    } else {
+      blue--;
+    }
+  }
 
   gkprint_c('W', 286, 150, WHITE);
   gkprint_c('H', 286, 158, WHITE);
   gkprint_d(framebuffer->framebuffer_width, 300, 150, WHITE);
   gkprint_d(framebuffer->framebuffer_height, 300, 158, WHITE);
 
-  draw_rectangle(150, 150, 50, 50, 0xFF0000);
-  gkprint_c('A', 150, 150, WHITE);
-  draw_rectangle(1000, 700, 100, 100, 0x3498eb);
+  // draw_rectangle(150, 150, 50, 50, 0xFF0000);
+  // draw_rectangle(1000, 700, 100, 100, 0x3498eb);
   
   initialize_cursor();
   initialize_mouse();
