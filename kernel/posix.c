@@ -95,10 +95,12 @@ int64_t sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t off
   int exec = prot & 4;
 
   for (int j = 0; j < number_of_pages; j++) {
-    // Map one page
-    if (!vm_map(root, addr_start_page + j * PAGE_SIZE, 1, write, exec)) {
-      kprintf("mem map failed\n");
-    }
+    // Map one page * \param x_pos x-coordinate (in pixels) of the pixel
+ * \param y_pos y-coordinate (in pixels) of the pixel
+ * \param r     red component of the color
+ * \param g     green component of the color
+ * \param b     blue component of the color
+ */
   }
   return addr_start_page;
 }
@@ -143,4 +145,34 @@ int64_t sys_exit(int status) {
     }
   }
   return status;
+}
+
+/**
+ * ///////////////////////////
+ * \param x_pos x-coordinate (in pixels) of the pixel
+ * \param y_pos y-coordinate (in pixels) of the pixel
+ * \param r     red component of the color
+ * \param g     green component of the color
+ * \param b     blue component of the color
+ */
+int64_t sys_drawpixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint8_t b) {
+  draw_pixel(x_pos, y_pos, r, g, b);
+
+  return 1;
+}
+
+/**
+ *
+ */
+int64_t sys_readmouse(uintptr_t mouse_data) {
+  mouse_data_t* src_mdata = (mouse_data_t*) mouse_data;
+
+  //Copy updated mouse data from kernel version to user version
+  src_mdata->x_pos = data->x_pos;
+  src_mdata->y_pos = data->y_pos;
+  src_mdata->left_click = data->left_click;
+  src_mdata->right_click = data->right_click;
+  src_mdata->middle_click = data->middle_click;
+
+  return 1;
 }

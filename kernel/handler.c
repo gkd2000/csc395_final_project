@@ -187,13 +187,23 @@ __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx
   //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 0;
   //   }
   // }
+
+  // WORKING VERSION WHEN inb is not volatile
+  // uint8_t c = inb(0x60);
+  // if(num_mouse_interrupts > 3) {
+  //  store_mouse_data(c);
+  // } else {
+  //   do_nothing(c);
+  //   num_mouse_interrupts++;
+  // }
+
   uint8_t c = inb(0x60);
-  if(num_mouse_interrupts > 3) {
-   store_mouse_data(c);
-  } else {
-    do_nothing(c);
-    num_mouse_interrupts++;
-  }
+  // if(num_mouse_interrupts > 3) {
+    store_mouse_data(c);
+  // } else {
+    // do_nothing(c);
+    // num_mouse_interrupts++;
+  // }
   
   outb(PIC1_COMMAND, PIC_EOI);
   outb(PIC2_COMMAND, PIC_EOI);

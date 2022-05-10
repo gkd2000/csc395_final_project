@@ -279,18 +279,15 @@ void initialize_cursor() {
 //   }
   data->x_pos = 100;
   data->y_pos = 100;
-  data->click = false;
+  data->left_click = false;
+  data->right_click = false;
+  data->middle_click = false;
   mouse_counter = 0;
   save_background(data->x_pos, data->y_pos);
 
   //Draw the cursor from here!
   draw_cursor();
 }
-
-//Handler calls this function when the mouse moves (?)
-// void mouse_input() {
-
-// }
 
 void store_mouse_data(uint8_t packet) {
   switch(mouse_counter) {
@@ -317,8 +314,10 @@ void store_mouse_data(uint8_t packet) {
       mousebytes->left = packet & 0x1;
       if(mousebytes->left == 1) {
         gkprint_c('L', 200, 200, WHITE);
+        data->left_click = true;
       } else {
         gkprint_c('N', 200, 200, WHITE);
+        data->left_click = false;
       }
     //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
     //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
@@ -329,8 +328,10 @@ void store_mouse_data(uint8_t packet) {
       mousebytes->right = (packet & 0x2) >> 1;
       if(mousebytes->right == 1) {
         gkprint_c('R', 200, 208, WHITE);
+        data->right_click = true;
       } else {
         gkprint_c('S', 200, 208, WHITE);
+        data->right_click = false;
       }
     //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
     //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
@@ -341,8 +342,10 @@ void store_mouse_data(uint8_t packet) {
       mousebytes->middle = (packet & 0x4) >> 2;
       if(mousebytes->middle == 1) {
         gkprint_c('M', 200, 216, WHITE);
+        data->middle_click = true;
       } else {
         gkprint_c('O', 200, 216, WHITE);
+        data->middle_click = false;
       }
     //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
     //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
@@ -351,12 +354,14 @@ void store_mouse_data(uint8_t packet) {
     //   }
       // test_x += 5;
 
-      //Testing unused bit - it should ALWAYS be 1
-
+      //Testing unused bit - it should ALWAYS be 1. If the unused bit is not 1, skip bytes until we are back in alignment
       if(((packet & 0x8) >> 3) == 0) {
-        gkprint_c('E', 500, 200, WHITE);
-        gkprint_c('R', 508, 200, WHITE);
-        gkprint_c('R', 516, 200, WHITE);
+        //Error checking
+        // gkprint_c('E', 500, 200, WHITE);
+        // gkprint_c('R', 508, 200, WHITE);
+        // gkprint_c('R', 516, 200, WHITE);
+
+        return;
       }
 
       mousebytes->x_sb = (packet & 0x10) >> 4;

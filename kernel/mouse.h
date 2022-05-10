@@ -24,7 +24,9 @@
 typedef struct mouse_data {
     int32_t x_pos;
     int32_t y_pos;
-    bool click;
+    bool left_click;
+    bool right_click;
+    bool middle_click;
 } mouse_data_t;
 
 //This is 3 bytes large

@@ -10,12 +10,16 @@
 #include "char.h"
 #include "mem.h"
 #include "elf.h"
+#include "graphics.h"
+#include "mouse.h"
 
 #define SYS_read 0
 #define SYS_write 1
 #define SYS_mmap 2
 #define SYS_exec 3
 #define SYS_exit 4
+#define SYS_drawpixel 5
+#define SYS_readmouse 6
 
 #define BACKSPACE 8
 
@@ -76,3 +80,7 @@ int64_t sys_exit(int status);
 
 // Save information about the modules loaded by the bootloader in a global variable
 void module_setup(struct stivale2_struct_tag_modules *modules);
+
+int64_t sys_drawpixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint8_t b);
+
+int64_t sys_readmouse(uintptr_t mouse_data);
