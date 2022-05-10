@@ -95,12 +95,10 @@ int64_t sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t off
   int exec = prot & 4;
 
   for (int j = 0; j < number_of_pages; j++) {
-    // Map one page * \param x_pos x-coordinate (in pixels) of the pixel
- * \param y_pos y-coordinate (in pixels) of the pixel
- * \param r     red component of the color
- * \param g     green component of the color
- * \param b     blue component of the color
- */
+    // Map one page
+    if (!vm_map(root, addr_start_page + j * PAGE_SIZE, 1, write, exec)) {
+      kprintf("mem map failed\n");
+    }
   }
   return addr_start_page;
 }

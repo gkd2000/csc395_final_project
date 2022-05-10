@@ -13,3 +13,5 @@ init/init
 shell/shell
 helloworld/helloworld
 helloworld/obj
+paint/paint
+paint/obj

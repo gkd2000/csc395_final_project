@@ -230,6 +230,8 @@ void _start(struct stivale2_struct *hdr) {
   // Save information about the modules to be accessed later when we make an exec system call
   module_setup(modules);
 
+  sys_exec("paint", NULL);
+
   // Test for mmap (lines 125 - 143). The code generates a page fault if mmap is not called.
   // Map to a specified address
   // char* test_page = (char*) 0x400000000;
