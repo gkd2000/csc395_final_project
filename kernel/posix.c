@@ -174,3 +174,8 @@ int64_t sys_readmouse(uintptr_t mouse_data) {
 
   return 1;
 }
+
+int64_t sys_update_cursor_background(int32_t color) {
+  update_saved_pixels(color);
+  return 1;
+}

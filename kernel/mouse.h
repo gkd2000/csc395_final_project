@@ -11,6 +11,7 @@
 #include "stivale-hdr.h"
 #include "mem.h"
 #include "font.h"
+#include "assembly.h"
 
 #define CURSOR_WIDTH 5
 #define CURSOR_HEIGHT 5
@@ -53,3 +54,5 @@ void store_mouse_data(uint8_t packet);
 void do_nothing(uint8_t packet);
 
 void initialize_cursor();
+
+void update_saved_pixels(int32_t color);

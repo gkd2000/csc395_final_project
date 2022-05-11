@@ -245,6 +245,9 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
   case SYS_readmouse:
     return sys_readmouse(arg0);
 
+  case SYS_update_cursor_background:
+    return sys_update_cursor_background(arg0);
+
   default:
     return 0;
   }

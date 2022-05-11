@@ -1,5 +1,9 @@
 #include "mouse.h"
 
+// We think the drawing is so sporadic because things are slow, but we aren't sure
+// TODO: optimize looping in save_background
+//       change what the newest system call does so we aren't writing to saved_pixels twice. then maybe it won't be as slow
+
 int test_x = 50;
 int test_y = 50;
 int mouse_counter; //> Keep track of which byte in the 3-byte sequence we are receiving from the mouse
@@ -120,6 +124,12 @@ void draw_cursor() {
   // gkprint_d(6, 508, 500, WHITE);
   // gkprint_d(17, 516, 500, WHITE);
   // gkprint_d(123456, 532, 500, WHITE);
+}
+
+void update_saved_pixels(int32_t color) {
+  for(int i = 0; i < CURSOR_WIDTH * CURSOR_HEIGHT; i++) {
+    saved_pixels[i] = color;
+  }
 }
 
 void save_background(int32_t x_start, int32_t y_start) {
@@ -251,8 +261,14 @@ void update_cursor() {
 }
 
 void initialize_cursor() {
-  data = malloc(sizeof(mouse_data_t)); //> struct which stores the processed/important data from the mouse
-  mousebytes = malloc(sizeof(mouse_bytes_t)); //> struct which stores the raw data from the mouse
+  // data = malloc(sizeof(mouse_data_t)); //> struct which stores the processed/important data from the mouse
+  uintptr_t data_addr = 0xffff800034001000;
+  vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, data_addr, 0, 1, 0);
+  data = (mouse_data_t*) data_addr;
+  uintptr_t mousebytes_addr = 0xffff800035001000;
+  vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, mousebytes_addr, 0, 1, 0);
+  mousebytes = (mouse_bytes_t*) mousebytes_addr;
+  // mousebytes = malloc(sizeof(mouse_bytes_t)); //> struct which stores the raw data from the mouse
 
 //   if(mousebytes == NULL) {
 //       for(int i = 100; i < 120; i++) {
