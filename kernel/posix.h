@@ -21,6 +21,7 @@
 #define SYS_drawpixel 5
 #define SYS_readmouse 6
 #define SYS_update_cursor_background 7
+#define SYS_gwrite 8
 
 #define BACKSPACE 8
 
@@ -87,3 +88,5 @@ int64_t sys_drawpixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint
 int64_t sys_readmouse(uintptr_t mouse_data);
 
 int64_t sys_update_cursor_background(int32_t color);
+
+int64_t sys_gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, intptr_t buffer, size_t size);

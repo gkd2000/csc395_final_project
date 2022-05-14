@@ -24,6 +24,9 @@ int _start() {
     }
   }
 
+  char* arr = "test";
+  gwrite(200, 200, 0xFFFFFF, arr, 4);
+
   while(true) {
     readmouse((uintptr_t) user_mouse);
     // char buf[5];

@@ -15,7 +15,7 @@ void module_setup(struct stivale2_struct_tag_modules *modules) {
  * \param size   number of characters to be written
  * \return -1 on failure, number of characters written to fd on success
  */
-int64_t sys_write(uint64_t fd, intptr_t buffer, size_t size) {
+int64_t sys_write(uint64_t fd, intptr_t buffer, uint64_t size) {
   if ((fd != 1) && (fd != 2)) {
     // fd was not stdout or stderr
     return -1;
@@ -178,5 +178,15 @@ int64_t sys_readmouse(uintptr_t mouse_data) {
 int64_t sys_update_cursor_background(int32_t color) {
   update_saved_pixels(color);
   // restore_background = false;
+  return 1;
+}
+
+int64_t sys_gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, intptr_t buffer, size_t size) {
+  char* arr = (char*) buffer;
+
+  for(size_t i = 0; i < size; i++) {
+    gkprint_c(arr[i], x_pos + (8*i), y_pos, color);
+  }
+
   return 1;
 }

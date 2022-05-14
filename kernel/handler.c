@@ -248,6 +248,9 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
   case SYS_update_cursor_background:
     return sys_update_cursor_background(arg0);
 
+  case SYS_gwrite:
+    return sys_gwrite(arg0, arg1, arg2, arg3, arg4);
+
   default:
     return 0;
   }
