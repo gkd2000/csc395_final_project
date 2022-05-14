@@ -214,10 +214,11 @@ void _start(struct stivale2_struct *hdr) {
     }
   }
 
-  gkprint_c('W', 286, 150, WHITE);
-  gkprint_c('H', 286, 158, WHITE);
-  gkprint_d(framebuffer->framebuffer_width, 300, 150, WHITE);
-  gkprint_d(framebuffer->framebuffer_height, 300, 158, WHITE);
+  // Print dimensions of the screen in pixels
+  // gkprint_c('W', 286, 150, WHITE);
+  // gkprint_c('H', 286, 158, WHITE);
+  // gkprint_d(framebuffer->framebuffer_width, 300, 150, WHITE);
+  // gkprint_d(framebuffer->framebuffer_height, 300, 158, WHITE);
 
   // draw_rectangle(150, 150, 50, 50, 0xFF0000);
   // draw_rectangle(1000, 700, 100, 100, 0x3498eb);

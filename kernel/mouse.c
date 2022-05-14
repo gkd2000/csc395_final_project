@@ -104,7 +104,9 @@ void initialize_mouse() {
 
 // Stuff below here is stuff we wrote
 
-//Note: This is a prototype version
+/**
+ * Draws the cursor at the latest x-position and y-position reported by the mouse.
+ */
 void draw_cursor() {
     // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
     //     for(int j = test_y + 20; j < test_y + 20 + CURSOR_HEIGHT; j++) {
@@ -126,30 +128,87 @@ void draw_cursor() {
   // gkprint_d(123456, 532, 500, WHITE);
 }
 
+/**
+ * Updates the saved_pixels array, which stores what will be drawn in place of the
+ * cursor once the cursor is moved, to be all one color.
+ * \param color hexadecimal color code for the color to fill the array with
+ */
 void update_saved_pixels(int32_t color) {
   for(int i = 0; i < CURSOR_WIDTH * CURSOR_HEIGHT; i++) {
     saved_pixels[i] = color;
   }
 }
 
+/**
+ * Stores the contents of the framebuffer which occur in a rectangle the size of the cursor at a specified
+ * position. Contents are stored to the saved_pixel array, so that we can restore the background once the 
+ * cursor moves.
+ * \param x_start x-coordinate of the top left corner of the rectangle to save
+ * \param y_start y-coordinate of the top left corner of the rectangle to save
+ */
 void save_background(int32_t x_start, int32_t y_start) {
-  unsigned char* framebuffer_start = (unsigned char*) global_framebuffer->framebuffer_addr;
+  // Find the framebuffer
+  unsigned char* framebuffer_start = (unsigned char*) global_framebuffer->framebuffer_addr; 
+  // Starting index at which we should access the framebuffer
+  int index; 
+  uint32_t blue;
+  uint32_t green;
+  uint32_t red;
+  uint32_t color;
+  for(int i = 0; i < CURSOR_WIDTH; i++) {
+    for(int j = 0; j < CURSOR_HEIGHT; j++) {
+      index = (x_start + i) * (global_framebuffer->framebuffer_bpp / 8) + ((y_start + j) * global_framebuffer->framebuffer_pitch);
+      blue = framebuffer_start[index];
+      green = (framebuffer_start[index + 1]) << 8;
+      red = (framebuffer_start[index + 2]) << 16;
+      color = blue | green | red;
+      saved_pixels[i + j * CURSOR_WIDTH] = color;
+    }
+  }
+  // Idea: reverse the order of the for loops. Then in the inner for loop we can just increment index, and then in the 
+  // outer for loop we increment index by the amount of pixels in a row, and then subtract however many we need to get to the 
+  // left of the cursor (because just adding the row will put us at the right)
+  // Implemented below, but I don't think it actually saves any time
+  // for(int y = 0; y < CURSOR_HEIGHT; y++) {
+  //   for(int x = 0; x < CURSOR_WIDTH; x++) {
+  //     int index2 = (x_start + x) * (global_framebuffer->framebuffer_bpp / 8) + ((y_start + y) * global_framebuffer->framebuffer_pitch);
+  //     if(index1 != index2) {
+  //       gkprint_c('F', 800, 400 + ((x + y * CURSOR_WIDTH) * 8), WHITE);
+  //     }
+  //     uint32_t blue = framebuffer_start[index1];
+  //     uint32_t green = (framebuffer_start[index1 + 1]) << 8;
+  //     uint32_t red = (framebuffer_start[index1 + 2]) << 16;
+  //     uint32_t color = blue | green | red;
+  //     saved_pixels[x + y * CURSOR_WIDTH] = color;
+  //     index1 += (global_framebuffer->framebuffer_bpp / 8);
+  //   }
+  //   index1 += (global_framebuffer->framebuffer_pitch - ((global_framebuffer->framebuffer_bpp / 8) * (CURSOR_WIDTH )));
+  // }
+}
+
+/*
+void overwrite_background(int32_t x_start, int32_t y_start) {
+  // unsigned char* framebuffer_start = (unsigned char*) global_framebuffer->framebuffer_addr;
   int index;
   // Idea: reverse the order of the for loops. Then in the inner for loop we can just increment index, and then in the 
   // outer for loop we increment index by the amount of pixels in a row, and then subtract however many we need to get to the 
   // left of the cursor (because just adding the row will put us at the right)
   for(int i = 0; i < CURSOR_WIDTH; i++) {
     for(int j = 0; j < CURSOR_HEIGHT; j++) {
-      index = (x_start + i) * (global_framebuffer->framebuffer_bpp / 8) + ((y_start + j) * global_framebuffer->framebuffer_pitch);
-      uint32_t blue = framebuffer_start[index];
-      uint32_t green = (framebuffer_start[index + 1]) << 8;
-      uint32_t red = (framebuffer_start[index + 2]) << 16;
+      // index = (x_start + i) * (global_framebuffer->framebuffer_bpp / 8) + ((y_start + j) * global_framebuffer->framebuffer_pitch);
+      uint32_t blue = 0;
+      uint32_t green = 0;
+      uint32_t red = 255;
       uint32_t color = blue | green | red;
       saved_pixels[i + j * CURSOR_WIDTH] = color;
     }
   }
-}
+}*/
 
+/**
+ * For logging purposes. Print the RGB color code given at the specified vertical offset. Overwrites 
+ * whatever was there before so that stray digits don't stick around
+ */
 void print_color_code(uint8_t red, uint8_t green, uint8_t blue, int vert_offset) {
   gkprint_d(vert_offset, 700, 200 + (vert_offset * 8), WHITE);
   gkprint_c(' ', 758, 200 + (vert_offset * 8), WHITE);
@@ -163,48 +222,35 @@ void print_color_code(uint8_t red, uint8_t green, uint8_t blue, int vert_offset)
   gkprint_d(blue, 850, 200 + (vert_offset * 8), WHITE);
 }
 
-//Changes the processed_data location
+/**
+ * Move the cursor to a new location on the screen determined by the mouse's position, and
+ * restore the background previously obscured by the cursor.
+ */
 void update_cursor() {
   // data->x_pos += (mousebytes->x_sb == 1 ? mousebytes->x_move | 0xFFFFFF00 : mousebytes->x_move) / 50;
   // data->y_pos += (mousebytes->y_sb == 1 ? mousebytes->y_move | 0xFFFFFF00 : mousebytes->y_move) / 50;
   // data->x_pos += (mousebytes->x_sb == 1 ? (~mousebytes->x_move + 1) * -1 : mousebytes->x_move) / 50;
   // data->y_pos += (mousebytes->y_sb == 1 ? (~mousebytes->y_move + 1) * -1 : mousebytes->y_move) / 50;
-  gkprint_c('r', 750, 185, WHITE);
-  gkprint_c('g', 800, 185, WHITE);
-  gkprint_c('b', 850, 185, WHITE);
 
-  // old version, indexing is weird
-  // int i_print;
-  // int j_print;
-  // for(int i = data->x_pos; i < data->x_pos + CURSOR_WIDTH; i++) {
-  //   for(int j = data->y_pos; j < data->y_pos + CURSOR_HEIGHT; j++) {
-  //     i_print = i - data->x_pos;
-  //     j_print = j - data->y_pos;
-  //     gkprint_c('T', 700, 100, WHITE);
-  //     uint8_t blue = saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0x0000FF;
-  //     uint8_t green = (saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0x00FF00) >> 8;
-  //     uint8_t red = (saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0xFF0000) >> 16;
-  //     gkprint_c('T', 708, 100, WHITE);
-  //     gkprint_d(i + j*CURSOR_WIDTH, 700, 200 + ((i + j*CURSOR_WIDTH) * 8), WHITE);
-  //     gkprint_d(red, 750, 200 + ((i_print + j_print*CURSOR_WIDTH) * 8), WHITE);
-  //     gkprint_d(green, 800, 200 + ((i_print + j_print*CURSOR_WIDTH) * 8), WHITE);
-  //     gkprint_d(blue, 850, 200 + ((i_print + j_print*CURSOR_WIDTH) * 8), WHITE);
-  //     draw_pixel(i, j, (saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0xFF0000) >> 16, (saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0x00FF00) >> 8, saved_pixels[i_print + j_print * CURSOR_WIDTH] & 0x0000FF);
-  //   }
-  // }
+  // Print for logging
+  // gkprint_c('r', 750, 185, WHITE);
+  // gkprint_c('g', 800, 185, WHITE);
+  // gkprint_c('b', 850, 185, WHITE);
 
-  // Fixed indexing
+  // Store the current x and y position of the cursor
   int x_pos = data->x_pos;
   int y_pos = data->y_pos;
   uint8_t blue;
   uint8_t green;
   uint8_t red;
+
+  // Loop over the saved_pixels array to restore the background where the cursor currently is
   for(int i = 0; i < CURSOR_WIDTH; i++) {
     for(int j = 0; j < CURSOR_HEIGHT; j++) {
       blue = saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF;
       green = (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8;
       red = (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16;
-      print_color_code(red, green, blue, i + j * CURSOR_WIDTH);
+      // print_color_code(red, green, blue, i + j * CURSOR_WIDTH);
       // gkprint_d(i + j * CURSOR_WIDTH, 700, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
       // gkprint_c(' ', 758, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
       // gkprint_c(' ', 766, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
@@ -215,20 +261,20 @@ void update_cursor() {
     }
   }
 
+  // Update the stored mouse position
   if(mousebytes->x_sb == 1) {
-    // data->x_pos -= ((~(mousebytes->x_move)) + 1) / 50;
     data->x_pos += (mousebytes->x_move - 255) / SENSITIVITY;
   } else {
     data->x_pos += mousebytes->x_move / SENSITIVITY;
   }
 
   if(mousebytes->y_sb == 1) {
-    // data->y_pos -= ((~(mousebytes->y_move)) + 1) / 50;
     data->y_pos -= (mousebytes->y_move - 255) / SENSITIVITY;
   } else {
     data->y_pos -= mousebytes->y_move / SENSITIVITY;
   }
 
+  // If the mouse is off the screen, update its position to be just inside the screen 
   if(data->x_pos < 0) {
     data->x_pos = 0;
   }
@@ -245,8 +291,8 @@ void update_cursor() {
     data->y_pos = global_framebuffer->framebuffer_height - (CURSOR_HEIGHT + 1);
   }
 
-  gkprint_d(data->x_pos, 500, 300, WHITE);
-  gkprint_d(data->y_pos, 500, 308, WHITE);
+  // gkprint_d(data->x_pos, 500, 300, WHITE);
+  // gkprint_d(data->y_pos, 500, 308, WHITE);
 
     // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
     //     for(int j = test_y + 10; j < test_y + 10 + CURSOR_HEIGHT; j++) {
@@ -255,122 +301,91 @@ void update_cursor() {
     //   }
     //   test_x += 5;
 
+  // if(restore_background) {
+  //   save_background(data->x_pos, data->y_pos);
+  // } else {
+  //   overwrite_background(data->x_pos, data->y_pos);
+  // }
+
+  // Save the pixels that occur at the new mouse position (where we're about to move the cursor to)
   save_background(data->x_pos, data->y_pos);
 
+  // Draw the cursor
+  // draw_rectangle(data->x_pos, data->y_pos, CURSOR_WIDTH, CURSOR_HEIGHT, WHITE);
   draw_cursor();
 }
 
+/**
+ * Make space for cursor-related data structures, and initialize them to reasonable values.
+ */
 void initialize_cursor() {
-  // data = malloc(sizeof(mouse_data_t)); //> struct which stores the processed/important data from the mouse
+  uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
+  // Make space for processed mouse data (in the higher half because we unmap the lower half later)
   uintptr_t data_addr = 0xffff800034001000;
-  vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, data_addr, 0, 1, 0);
+  vm_map(root, data_addr, 0, 1, 0);
   data = (mouse_data_t*) data_addr;
+
+  // Make space for raw data from the mouse (in the higher half because we unmap the lower half later)
   uintptr_t mousebytes_addr = 0xffff800035001000;
-  vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, mousebytes_addr, 0, 1, 0);
+  vm_map(root, mousebytes_addr, 0, 1, 0);
   mousebytes = (mouse_bytes_t*) mousebytes_addr;
-  // mousebytes = malloc(sizeof(mouse_bytes_t)); //> struct which stores the raw data from the mouse
 
-//   if(mousebytes == NULL) {
-//       for(int i = 100; i < 120; i++) {
-//         for(int j = 100 + 10; j < 120; j++) {
-//           draw_pixel(i, j, 255, 0, 255);
-//         }
-//       }
-//   }
-
-//   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
-//   uintptr_t addr_mousebytes = 0x500000;
-//   if(vm_map(root, addr_mousebytes, true, true, false)) {
-//       for(int i = 100; i < 120; i++) {
-//         for(int j = 100 + 10; j < 120; j++) {
-//           draw_pixel(i, j, 255, 0, 255);
-//         }
-//       }
-//   } else {
-//       for(int i = 100; i < 120; i++) {
-//         for(int j = 100 + 10; j < 120; j++) {
-//           draw_pixel(i, j, 255, 0, 0);
-//         }
-//       }
-//   }
+  // Initialize the fields of our raw data struct
   data->x_pos = 100;
   data->y_pos = 100;
   data->left_click = false;
   data->right_click = false;
   data->middle_click = false;
-  mouse_counter = 0;
+
+  mouse_counter = 0; //> Keeps track of which byte in a 3-byte sequence we're receiving
+  restore_background = true; //> 
+
+  // Save the background where the cursor will be initially drawn 
   save_background(data->x_pos, data->y_pos);
 
-  //Draw the cursor from here!
+  // Draw the cursor
   draw_cursor();
 }
 
+// Idea: don't store click data to mousebytes (unprocessed mouse data). Instead, put it directly in data (processed one), since
+// we don't have to process clicks further than that.
+/**
+ * Given a byte from the mouse, store it in the appropriate place in the struct which holds raw mouse data.
+ * \param packet a byte read from the mouse (one in a 3-byte sequence)
+ */
 void store_mouse_data(uint8_t packet) {
   switch(mouse_counter) {
     case 0 :
-    // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-    //     for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
-    //       draw_pixel(i, j, 255, 0, 0);
-    //     }
-    //   }
-    //   test_x += 5;
-    //   if(packet == NULL || packet == 0) {
-    //     for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-    //       for(int j = test_y + 50; j < test_y + 50 + CURSOR_HEIGHT; j++) {
-    //         draw_pixel(i, j, 255, 0, 0);
-    //       }
-    //     }
-    //   } else {
-    //     for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-    //       for(int j = test_y + 50; j < test_y + 50 + CURSOR_HEIGHT; j++) {
-    //         draw_pixel(i, j, 0, 255, 0);
-    //       }
-    //     }
-    //   }
-      mousebytes->left = packet & 0x1;
-      if(mousebytes->left == 1) {
-        gkprint_c('L', 200, 200, WHITE);
-        data->left_click = true;
-      } else {
-        gkprint_c('N', 200, 200, WHITE);
-        data->left_click = false;
-      }
-    //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-    //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-    //       draw_pixel(i, j, 0, 255, 0);
-    //     }
-    //   }
-    //   test_x += 5;
-      mousebytes->right = (packet & 0x2) >> 1;
-      if(mousebytes->right == 1) {
-        gkprint_c('R', 200, 208, WHITE);
-        data->right_click = true;
-      } else {
-        gkprint_c('S', 200, 208, WHITE);
-        data->right_click = false;
-      }
-    //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-    //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-    //       draw_pixel(i, j, 0, 255, 0);
-    //     }
-    //   }
-    //   test_x += 5;
-      mousebytes->middle = (packet & 0x4) >> 2;
-      if(mousebytes->middle == 1) {
-        gkprint_c('M', 200, 216, WHITE);
-        data->middle_click = true;
-      } else {
-        gkprint_c('O', 200, 216, WHITE);
-        data->middle_click = false;
-      }
-    //   for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-    //     for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-    //       draw_pixel(i, j, 0, 255, 0);
-    //     }
-    //   }
-      // test_x += 5;
+      // First byte in 3-byte sequence
+      mousebytes->left = packet & 0x1; //> Is the mouse being left-clicked?
+      data->left_click = mousebytes->left;
+      // if(mousebytes->left == 1) {
+      //   // gkprint_c('L', 200, 200, WHITE);
+      //   data->left_click = true;
+      // } else {
+      //   // gkprint_c('N', 200, 200, WHITE);
+      //   data->left_click = false;
+      // }
+      mousebytes->right = (packet & 0x2) >> 1; //> Is the mouse being right-clicked?
+      data->right_click = mousebytes->right;
+      // if(mousebytes->right == 1) {
+      //   // gkprint_c('R', 200, 208, WHITE);
+      //   data->right_click = true;
+      // } else {
+      //   // gkprint_c('S', 200, 208, WHITE);
+      //   data->right_click = false;
+      // }
+      mousebytes->middle = (packet & 0x4) >> 2; //> Is the mouse being middle-clicked?
+      data->middle_click = mousebytes->middle;
+      // if(mousebytes->middle == 1) {
+      //   // gkprint_c('M', 200, 216, WHITE);
+      //   data->middle_click = true;
+      // } else {
+      //   // gkprint_c('O', 200, 216, WHITE);
+      //   data->middle_click = false;
+      // }
 
-      //Testing unused bit - it should ALWAYS be 1. If the unused bit is not 1, skip bytes until we are back in alignment
+      // Testing unused bit - it should ALWAYS be 1. If the unused bit is not 1, skip bytes until we are back in alignment
       if(((packet & 0x8) >> 3) == 0) {
         //Error checking
         // gkprint_c('E', 500, 200, WHITE);
@@ -380,70 +395,48 @@ void store_mouse_data(uint8_t packet) {
         return;
       }
 
-      mousebytes->x_sb = (packet & 0x10) >> 4;
-      gkprint_d(mousebytes->x_sb, 500, 500, WHITE);
-      for(int i = 600; i < 600 + CURSOR_WIDTH; i++) {
-        for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
-          if(mousebytes->x_sb == 1) {
-            draw_pixel(i, j, 0, 255, 0);
-          } else {
-            draw_pixel(i, j, 0, 0, 255);
-          }
-        }
-      }
-      // test_x += 5;
-      mousebytes->y_sb = (packet & 0x20) >> 5;
-      gkprint_d(mousebytes->y_sb, 508, 500, WHITE);
-      for(int i = 650; i < 650 + CURSOR_WIDTH; i++) {
-        for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
-          if(mousebytes->y_sb == 1) {
-            draw_pixel(i+40, j+40, 255, 0, 0);
-          } else {
-            draw_pixel(i+40, j+40, 255, 0, 255);
-          }
-        }
-      }
-      // test_x += 5;
-      mousebytes->x_overflow = packet & 0x40;
-      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-      //   for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-      //     draw_pixel(i, j, 0, 255, 0);
+      mousebytes->x_sb = (packet & 0x10) >> 4; //> Indicates sign (positive or negative) of direction of x-movement
+      // gkprint_d(mousebytes->x_sb, 500, 500, WHITE);
+      // for(int i = 600; i < 600 + CURSOR_WIDTH; i++) {
+      //   for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
+      //     if(mousebytes->x_sb == 1) {
+      //       draw_pixel(i, j, 0, 255, 0);
+      //     } else {
+      //       draw_pixel(i, j, 0, 0, 255);
+      //     }
       //   }
       // }
-      // test_x += 5;
-      mousebytes->y_overflow = packet & 0x80;
-      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-      //   for(int j = test_y + 50; j < test_y + 40 + CURSOR_HEIGHT; j++) {
-      //     draw_pixel(i, j, 0, 255, 0);
+      mousebytes->y_sb = (packet & 0x20) >> 5; //> Indicates sign (positive or negative) of direction of y-movement
+      // gkprint_d(mousebytes->y_sb, 508, 500, WHITE);
+      // for(int i = 650; i < 650 + CURSOR_WIDTH; i++) {
+      //   for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
+      //     if(mousebytes->y_sb == 1) {
+      //       draw_pixel(i+40, j+40, 255, 0, 0);
+      //     } else {
+      //       draw_pixel(i+40, j+40, 255, 0, 255);
+      //     }
       //   }
       // }
-      // test_x += 5;
+      // mousebytes->x_overflow = packet & 0x40;
+
+      // mousebytes->y_overflow = packet & 0x80;
+
       mouse_counter++;
-      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-      //   for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
-      //     draw_pixel(i, j, 255, 255, 0);
-      //   }
-      // }
-      // test_x += 5;
       break;
     case 1 :
-      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-      //   for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
-      //     draw_pixel(i, j, 0, 255, 0);
-      //   }
-      // }
-      // test_x += 5;
+      // Second byte in 3-byte sequence
       mousebytes->x_move = packet;
-      gkprint_c(' ', 508, 600, WHITE);
-      gkprint_c(' ', 516, 600, WHITE);
-      gkprint_d(mousebytes->x_move, 500, 600, WHITE);
+      // gkprint_c(' ', 508, 600, WHITE);
+      // gkprint_c(' ', 516, 600, WHITE);
+      // gkprint_d(mousebytes->x_move, 500, 600, WHITE);
       mouse_counter++;
       break;
     case 2 :
+      // Third byte in 3-byte sequence
       mousebytes->y_move = packet;
-      gkprint_c(' ', 508, 608, WHITE);
-      gkprint_c(' ', 516, 608, WHITE);
-      gkprint_d(mousebytes->y_move, 500, 608, WHITE);
+      // gkprint_c(' ', 508, 608, WHITE);
+      // gkprint_c(' ', 516, 608, WHITE);
+      // gkprint_d(mousebytes->y_move, 500, 608, WHITE);
       mouse_counter = 0;
       // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
       //   for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
@@ -451,14 +444,10 @@ void store_mouse_data(uint8_t packet) {
       //   }
       // }
       // test_x += 5;
-      // Call a function which processes the packet
+      // We have received a complete packet of data from the mouse! Process it
       update_cursor();
       break;
     default :
       break;
   }
-}
-
-void do_nothing(uint8_t packet) {
-  return;
 }

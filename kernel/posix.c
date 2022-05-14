@@ -146,7 +146,7 @@ int64_t sys_exit(int status) {
 }
 
 /**
- * ///////////////////////////
+ * Draw a pixel at the specified location on the screen
  * \param x_pos x-coordinate (in pixels) of the pixel
  * \param y_pos y-coordinate (in pixels) of the pixel
  * \param r     red component of the color
@@ -160,7 +160,7 @@ int64_t sys_drawpixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint
 }
 
 /**
- *
+ * Get the most recent data from the mouse
  */
 int64_t sys_readmouse(uintptr_t mouse_data) {
   mouse_data_t* src_mdata = (mouse_data_t*) mouse_data;
@@ -177,5 +177,6 @@ int64_t sys_readmouse(uintptr_t mouse_data) {
 
 int64_t sys_update_cursor_background(int32_t color) {
   update_saved_pixels(color);
+  // restore_background = false;
   return 1;
 }
