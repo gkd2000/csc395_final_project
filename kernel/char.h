@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 // Size of the circular buffer for keyboard input
 #define BUFFER_SIZE 10000
@@ -38,12 +39,14 @@ void buffer_delete();
 void buffer_put(char c);
 
 /**
- * Read one character from the keyboard buffer. If the keyboard buffer is empty this function will
- * block until a key is pressed.
+ * Read one character from the keyboard buffer. If blocking is true and the keyboard buffer is empty,
+ * this function will block until a key is pressed.
  *
- * \returns the next character input from the keyboard
+ * \param blocking should this function block until keyboard input is available?
+ * \returns the next character input from the keyboard, or 0 if non-blocking was requested and the
+ *          keyboard buffer was empty
  */
-char kgetc();
+char kgetc(bool blocking);
 
 /**
  * Read a line of characters from the keyboard. Read characters until the buffer fills or a newline

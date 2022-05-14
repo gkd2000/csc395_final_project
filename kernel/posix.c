@@ -3,6 +3,9 @@
 // Keep track of virtual memory handed out by mmap
 intptr_t addre = 0x60000000;
 
+// Place to store the modules loaded by the bootloader
+static struct stivale2_struct_tag_modules* modules_list;
+
 // Save information about the modules loaded by the bootloader in a global variable
 void module_setup(struct stivale2_struct_tag_modules *modules) {
   modules_list = modules;
@@ -34,24 +37,33 @@ int64_t sys_write(uint64_t fd, intptr_t buffer, uint64_t size) {
  * Mimics functionality of C standard library read function.
  * Reads size bytes of data from the location referenced by fd
  * into buffer.
- * \param fd     the location to read from. Must be 0 (standard input)
+ * \param fd     the location to read from. Must be 0 (standard input) or 3 (standard input, non-blocking)
  * \param buffer location to store bytes read from filedes
  * \param size   number of bytes to read
- * \returns the number of bytes read, or -1 on error
+ * \returns the number of bytes read (possibly 0 for non-blocking file descriptor), or -1 on error
  */
 int64_t sys_read(uint64_t fd, intptr_t buffer, uint64_t size) {
-  if (fd) {
+  if (fd != STDIN && fd != STDIN_NONBLOCKING) {
     // invalid file descriptor
     return -1;
   }
 
-  char c = kgetc();
+  // Determine whether the call is supposed to blocking
+  bool blocking;
+  if(fd == STDIN) {
+    blocking = true;
+  } else {
+    blocking = false;
+  }
+
+  // Read a character (this is where blocking happens if it was requested)
+  char c = kgetc(blocking);
   char* output = (char *) buffer;
   size_t length = 0;
   output[length++] = c;
   // Read size characters from stdin
   while (length < size) {
-    c = kgetc();
+    c = kgetc(blocking);
     if (c == BACKSPACE) {
       // We read a backspace, change our index to overwrite the last character stored
       length = length ? length - 1 : 0;
@@ -152,6 +164,7 @@ int64_t sys_exit(int status) {
  * \param r     red component of the color
  * \param g     green component of the color
  * \param b     blue component of the color
+ * \returns 1
  */
 int64_t sys_drawpixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint8_t b) {
   draw_pixel(x_pos, y_pos, r, g, b);
@@ -161,6 +174,8 @@ int64_t sys_drawpixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint
 
 /**
  * Get the most recent data from the mouse
+ * \param mouse_data struct (of type mouse_data_t) to populate with recent data
+ * \returns 1
  */
 int64_t sys_readmouse(uintptr_t mouse_data) {
   mouse_data_t* src_mdata = (mouse_data_t*) mouse_data;
@@ -175,12 +190,28 @@ int64_t sys_readmouse(uintptr_t mouse_data) {
   return 1;
 }
 
+/**
+ * Update the array which stores what will be drawn in place of the cursor once the cursor is moved. 
+ * Set all values of this array to be one color. Thus, the cursor leaves a trail of the specified 
+ * color behind it.
+ * \param color hexadecimal color code for the color to fill the array with
+ * \returns 1
+ */
 int64_t sys_update_cursor_background(int32_t color) {
   update_saved_pixels(color);
   // restore_background = false;
   return 1;
 }
 
+/**
+ * In graphics mode, write a specified number of characters from buffer to the screen at the requested position.
+ * \param x_pos  x-coordinate (in pixels) of the top left corner of the beginning of the string
+ * \param y_pos  y-coordinate (in pixels) of the top left corner of the beginning of the string
+ * \param color  hexadecimal color code specifying the color of the text
+ * \param buffer array of characters to print
+ * \param size   number of characters to print. Must be less than the number of characters in buffer
+ * \returns 1
+ */
 int64_t sys_gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, intptr_t buffer, size_t size) {
   char* arr = (char*) buffer;
 
@@ -189,4 +220,20 @@ int64_t sys_gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, intptr_t buff
   }
 
   return 1;
+}
+
+/**
+ * In graphics mode, make the screen all black and then load and execute a program specified by file.
+ * \param file the program to execute. Must be a null-terminated string
+ * \param argv unused
+ * \returns -1 if no module matching file was found.
+ *    Otherwise, an executable will be run, and so this function should not return.
+ */
+int64_t sys_gexec(char* file, char* argv[]) {
+
+  // Clear the screen (set all pixels to black)
+  clear_screen();
+
+  // Run exec as usual
+  return sys_exec(file, argv);
 }

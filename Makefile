@@ -14,6 +14,7 @@ clean:
 	$(MAKE) -C helloworld clean
 	$(MAKE) -C stdlib clean
 	$(MAKE) -C paint clean
+	$(MAKE) -C graphics-shell clean
 
 .PHONY: kernel
 kernel: stdlib
@@ -39,14 +40,18 @@ stdlib:
 paint: stdlib
 	$(MAKE) -C paint
 
+.PHONY: graphics-shell
+graphics-shell: stdlib
+	$(MAKE) -C graphics-shell
+
 limine:
 	git clone https://github.com/limine-bootloader/limine.git --branch=v2.0-branch-binary --depth=1
 	$(MAKE) -C limine
 
-boot.iso: limine kernel init shell helloworld paint limine.cfg
+boot.iso: limine kernel init shell helloworld paint graphics-shell limine.cfg
 	rm -rf iso_root
 	mkdir -p iso_root
-	cp kernel/kernel.elf init/init shell/shell helloworld/helloworld paint/paint limine.cfg limine/limine.sys limine/limine-cd.bin limine/limine-eltorito-efi.bin iso_root/
+	cp kernel/kernel.elf init/init shell/shell helloworld/helloworld paint/paint graphics-shell/graphics-shell limine.cfg limine/limine.sys limine/limine-cd.bin limine/limine-eltorito-efi.bin iso_root/
 	xorriso -as mkisofs -b limine-cd.bin -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine-eltorito-efi.bin -efi-boot-part --efi-boot-image --protective-msdos-label iso_root -o boot.iso
 	limine/limine-install boot.iso
 	rm -rf iso_root

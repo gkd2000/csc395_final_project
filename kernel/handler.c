@@ -137,73 +137,41 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
 
 // Handler for a keyboard event
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx) {
-    // Read the character and prepare to accept new inputs
-    char c = getchar(inb(0x60));
-    // uint8_t c = inb(0x60);
-    outb(PIC1_COMMAND, PIC_EOI);
-    outb(PIC2_COMMAND, PIC_EOI);
+  // x_start += 8;
+  // if(x_start == 1016) {
+  //   x_start = 0;
+  //   y_start += 8;
+  // }
+  // gkprint_c('k', x_start, y_start, WHITE);
 
-    // if(c == 0xFA) {
-    //   for(int i = x_start; i < x_start+10; i++) {
-    //     for(int j = y_start; j < y_start+10; j++) {
-    //       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
-    //       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 1] = 255;
-    //       pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 255;
-    //     }
-    //   }
-    //   x_start += 10;
-    //   y_start += 10;
-    // }
+  
 
-    // for(int i = x_start; i < x_start+10; i++) {
-    //   for(int j = y_start; j < y_start+10; j++) {
-    //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
-    //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 1] = 0;
-    //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 255;
-    //   }
-    // }
-    // x_start += 10;
-    // y_start += 10;
+  // Read the character and prepare to accept new inputs
+  char c = getchar(inb(0x60));
+  outb(PIC1_COMMAND, PIC_EOI);
+  outb(PIC2_COMMAND, PIC_EOI);
 
-    // If the character can be printed, add it to our buffer
-    if(c != 0 && c <= 127) {
-      buffer_put(c);
-    }
+  // If the character can be printed, add it to our buffer
+  if(c != 0 && c <= 127) {
+    buffer_put(c);
+  }
+  
 }
 
 int num_mouse_interrupts = 0;
 
 // Handler for mouse event
 __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx) {
-  // Read the character and prepare to accept new inputs
-  x_start += 10;
-  y_start += 10;
-  // uint8_t c = getchar(inb(0x60));
-  
-  // for(int i = x_start; i < x_start+10; i++) {
-  //   for(int j = y_start; j < y_start+10; j++) {
-  //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch)] = 0;
-  //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 1] = 255;
-  //     pixel[i * (global_framebuffer->framebuffer_bpp / 8) + (j * global_framebuffer->framebuffer_pitch) + 2] = 0;
-  //   }
+
+  // x_start += 8;
+  // if(x_start == 1016) {
+  //   x_start = 0;
+  //   y_start += 8;
   // }
 
-  // WORKING VERSION WHEN inb is not volatile
-  // uint8_t c = inb(0x60);
-  // if(num_mouse_interrupts > 3) {
-  //  store_mouse_data(c);
-  // } else {
-  //   do_nothing(c);
-  //   num_mouse_interrupts++;
-  // }
-
+  // Read the data and prepare to accept new inputs
   uint8_t c = inb(0x60);
-  // if(num_mouse_interrupts > 3) {
-    store_mouse_data(c);
-  // } else {
-    // do_nothing(c);
-    // num_mouse_interrupts++;
-  // }
+  store_mouse_data(c);
   
   outb(PIC1_COMMAND, PIC_EOI);
   outb(PIC2_COMMAND, PIC_EOI);
@@ -250,6 +218,9 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
 
   case SYS_gwrite:
     return sys_gwrite(arg0, arg1, arg2, arg3, arg4);
+
+  case SYS_gexec:
+    return sys_gexec(arg0, arg1);
 
   default:
     return 0;

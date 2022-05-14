@@ -11,5 +11,6 @@
 #define SYS_readmouse 6
 #define SYS_update_cursor_background 7
 #define SYS_gwrite 8
+#define SYS_gexec 9
 
 int syscall(uint64_t nr, ...);

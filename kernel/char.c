@@ -59,7 +59,7 @@ uint8_t uppercase_table[] = {
  */
 uint8_t getchar(uint8_t ch) {
   // Check if the key was...
-  /*if (ch == 0x2A) {
+  if (ch == 0x2A) {
     // left shift pressed
     lshift = 1;
   } else if (ch == 0x36) {
@@ -92,7 +92,7 @@ uint8_t getchar(uint8_t ch) {
     // key was released
     // This might be unnecessary
     return 0;
-  }*/
+  }
   return 0;
 }
 
@@ -119,13 +119,21 @@ void buffer_put(char c) {
 }
 
 /**
- * Read one character from the keyboard buffer. If the keyboard buffer is empty this function will
- * block until a key is pressed.
+ * Read one character from the keyboard buffer. If blocking is true and the keyboard buffer is empty,
+ * this function will block until a key is pressed.
  *
- * \returns the next character input from the keyboard
+ * \param blocking should this function block until keyboard input is available?
+ * \returns the next character input from the keyboard, or 0 if non-blocking was requested and the
+ *          keyboard buffer was empty
  */
-char kgetc() {
+char kgetc(bool blocking) {
   char c;
+
+  if(count == 0 && !blocking) {
+    // Requested non-blocking, and there's nothing in the buffer. Return immediately
+    return 0;
+  }
+
   // Loop until there is something in the buffer
   while(count == 0);
 
@@ -135,6 +143,19 @@ char kgetc() {
   count--;
   return c;
 }
+
+// OLD kgetc
+/*char kgetc() {
+  char c;
+  // Loop until there is something in the buffer
+  while(count == 0);
+
+  // There's something in the buffer! Get it
+  c = char_buffer[start];
+  start = (start + 1) % BUFFER_SIZE;
+  count--;
+  return c;
+}*/
 
 /**
  * Read a line of characters from the keyboard. Read characters until the buffer fills or a newline
@@ -148,12 +169,12 @@ char kgetc() {
  * \returns The number of characters read, or zero if no characters were read due to an error.
  */
 size_t kgets(char *output, size_t capacity) {
-  char c = kgetc();
+  char c = kgetc(true);
   size_t length = 0;
   output[length++] = c;
 
   while ((length < capacity-1) && (c != '\n')) {
-    c = kgetc();
+    c = kgetc(true);
 
     if (c == 8) {
       length = length ? length-1 : 0;

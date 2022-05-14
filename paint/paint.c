@@ -16,41 +16,31 @@ typedef struct mouse_data {
 
 int _start() {
 
+  // Make space for the data from the mouse
   mouse_data_t* user_mouse = malloc(sizeof(mouse_data_t));
   if (user_mouse == NULL) {
-    for (int i = 0; i < 300; i++) {
-        drawpixel(708, 708 + i, 34, 3, 200);
-      // }
-    }
+    exit(1);
   }
 
-  char* arr = "test";
-  gwrite(200, 200, 0xFFFFFF, arr, 4);
+  // Read a keypress (if there is one to read)
+  char arr[1];
+  read(STDIN_NONBLOCKING, arr, 1);
 
-  while(true) {
+  // Loop until the user presses q
+  while(arr[0] != 'q') {
+
+    // Get mouse data
     readmouse((uintptr_t) user_mouse);
-    // char buf[5];
-    // read(0, buf, 1);
 
+    // If the mouse is clicked, draw behind the cursor (currently in red but maybe we can support other colors soon)
     if(user_mouse->left_click) {
-      // for (int i = 0; i < 300; i++) {
-      //   drawpixel(608, 608 + i, 123, 200, 189);
-      // }
-      // for (int i = 0; i < 100000; i++);
-
-      // for (int i = 0; i < 300; i++) {
-      //   drawpixel(608, 608 + i, 0, 0, 0);
-      // }
-
-      // for (int i = 0; i < 100000; i++);
       update_cursor_background(0xFF0000);
     }
-    // for (int i = 0; i < 5; i++) {
-    //   for (int j = 0; j < 5; j++) {
-    //     drawpixel(user_mouse->x_pos + i, user_mouse->y_pos + j, 255, 0, 0);
-    //   }
-    // }
+
+    // Check for keyboard input
+    read(STDIN_NONBLOCKING, arr, 1);
     
   }
-  return 0;
+
+  exit(0);
 }

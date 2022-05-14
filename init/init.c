@@ -4,6 +4,7 @@
 #include <mman.h>
 #include <syscall.h>
 #include <unistd.h>
+#include <ugraphics.h>
 
 
 void _start() {
@@ -19,7 +20,14 @@ void _start() {
   // test_page[5] = '\n';
   // write(STDOUT, test_page, 6);
 
-  // Start the shell
-  exec("shell", NULL);
+  // Clear the screen
+  // for(int i = 0; i < SCREEN_HEIGHT; i++) {
+  //   for(int j = 0; j < SCREEN_WIDTH; j++) {
+  //     drawpixel(j, i, 0, 0, 0);
+  //   }
+  // }
+  
+  // Start the shell (in graphics mode)
+  gexec("graphics-shell", NULL);
   exit(0);
 }

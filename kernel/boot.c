@@ -231,7 +231,7 @@ void _start(struct stivale2_struct *hdr) {
   // Save information about the modules to be accessed later when we make an exec system call
   module_setup(modules);
 
-  sys_exec("paint", NULL);
+  // sys_exec("paint", NULL);
 
   // Test for mmap (lines 125 - 143). The code generates a page fault if mmap is not called.
   // Map to a specified address
@@ -239,7 +239,7 @@ void _start(struct stivale2_struct *hdr) {
   // sys_mmap(test_page, 9000, 3, 0, 0, 0);
 
   // Let the kernel pick the address to map to
-  char *test_page = (char *)sys_mmap(NULL, 9000, 3, 0, 0, 0);
+  /* char *test_page = (char *)sys_mmap(NULL, 9000, 3, 0, 0, 0);
 
   // Write to the first page mapped
   char *test_str = "test";
@@ -269,14 +269,14 @@ void _start(struct stivale2_struct *hdr) {
   // Map some memory in the higher half. 
   // Generates a page fault when accessed from user mode (commented lines of helloworld)
   intptr_t higher_half_addr = 0xffff800000001000;
-  vm_map(root, higher_half_addr, 0, 1, 0);
+  vm_map(root, higher_half_addr, 0, 1, 0); */
 
   // Launch the init program
-  // for (int i = 0; i < modules->module_count; i++) {
-  //   if (!strcmp(modules->modules[i].string, "init")) {
-  //     run_program(modules->modules[i].begin);
-  //   }
-  // }
+  for (int i = 0; i < modules->module_count; i++) {
+    if (!strcmp(modules->modules[i].string, "init")) {
+      run_program(modules->modules[i].begin);
+    }
+  }
 
   halt();
 }

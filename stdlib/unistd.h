@@ -7,17 +7,18 @@
 #include <string.h>
 #include <syscall.h>
 
-#define STDOUT 1
 #define STDIN 0
+#define STDOUT 1
+#define STDIN_NONBLOCKING 3
 
 /**
  * Mimics functionality of C standard library read function.
- * Reads nbyte bytes of data from the location referenced by fildes
- * into the buffer pointed to by buf.
- * \param filedes the location to read from. Must be 0 (standard input)
- * \param buf     array to store bytes read from filedes
- * \param nbyte   number of bytes to read
- * \returns the number of bytes read, or -1 on error
+ * Reads size bytes of data from the location referenced by fd
+ * into buffer.
+ * \param fd     the location to read from. Must be 0 (standard input) or 3 (standard input, non-blocking)
+ * \param buffer location to store bytes read from filedes
+ * \param size   number of bytes to read
+ * \returns the number of bytes read (possibly 0 for non-blocking file descriptor), or -1 on error
  */
 size_t read(int fildes, void *buf, size_t nbyte);
 

@@ -69,3 +69,29 @@ void draw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t hei
     }
   }
 }
+
+/**
+ * Sets all pixels on the screen to black except the cursor
+ */ 
+void clear_screen() {
+
+  // Get some information about the framebuffer
+  unsigned char* pixel = (unsigned char*) global_framebuffer->framebuffer_addr;
+  uint8_t pixelwidth = global_framebuffer->framebuffer_bpp / 8;
+  uint16_t pitch = global_framebuffer->framebuffer_pitch;
+
+  // Draw the rectangle. Outer loop advances down the rows, inner loop advances across columns
+  for(int y = 0; y < global_framebuffer->framebuffer_height * pitch; y += pitch) {
+    for(int x = 0; x < global_framebuffer->framebuffer_width * pixelwidth; x += pixelwidth) {
+      pixel[x+y] = 0;
+      pixel[x+y+1] = 0;
+      pixel[x+y+2] = 0;
+    }
+  }
+
+  // Clear the saved pixels array so that we don't save background we don't want
+  update_saved_pixels(0x000000);
+
+  // Redraw the cursor 
+  draw_rectangle(data->x_pos, data->y_pos, CURSOR_WIDTH, CURSOR_HEIGHT, WHITE);
+}
