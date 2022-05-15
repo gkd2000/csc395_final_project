@@ -191,28 +191,28 @@ void _start(struct stivale2_struct *hdr) {
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
   unmap_lower_half(root);
 
-  int red = 255;
-  int green = 255;
-  int blue = 255;
-  for(int i = 0; i < 600; i++) {
-    for(int j = 0; j < 600; j++) {
-      // if(j % 3 == 0) {
-      //   red -= 1;
-      // } else if(j % 3 == 1) {
-      //   green -= 1;
-      // } else {
-      //   blue -= 1;
-      // }
-      draw_pixel(i, j, red, green, blue);
-    }
-    if(red > 0) {
-      red--;
-    } else if(green > 0) {
-      green--;
-    } else {
-      blue--;
-    }
-  }
+  // int red = 255;
+  // int green = 255;
+  // int blue = 255;
+  // for(int i = 0; i < 600; i++) {
+  //   for(int j = 0; j < 600; j++) {
+  //     // if(j % 3 == 0) {
+  //     //   red -= 1;
+  //     // } else if(j % 3 == 1) {
+  //     //   green -= 1;
+  //     // } else {
+  //     //   blue -= 1;
+  //     // }
+  //     draw_pixel(i, j, red, green, blue);
+  //   }
+  //   if(red > 0) {
+  //     red--;
+  //   } else if(green > 0) {
+  //     green--;
+  //   } else {
+  //     blue--;
+  //   }
+  // }
 
   // Print dimensions of the screen in pixels
   // gkprint_c('W', 286, 150, WHITE);

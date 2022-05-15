@@ -35,7 +35,7 @@ void draw_pixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint8_t b)
  * \param height height of the rectangle in pixels 
  * \param color  color of the rectangle as a hexadecimal color code
  */ 
-void draw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t height, uint32_t color) {
+void kdraw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t height, uint32_t color) {
 
   // If the position is out of bounds, return immediately
   if(x_pos >= global_framebuffer->framebuffer_width || y_pos >= global_framebuffer->framebuffer_height) {
@@ -93,5 +93,5 @@ void clear_screen() {
   update_saved_pixels(0x000000);
 
   // Redraw the cursor 
-  draw_rectangle(data->x_pos, data->y_pos, CURSOR_WIDTH, CURSOR_HEIGHT, WHITE);
+  kdraw_rectangle(data->x_pos, data->y_pos, CURSOR_WIDTH, CURSOR_HEIGHT, WHITE);
 }

@@ -33,7 +33,7 @@ void draw_pixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint8_t b)
  * \param height height of the rectangle in pixels 
  * \param color  color of the rectangle as a hexadecimal color code
  */ 
-void draw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t height, uint32_t color);
+void kdraw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t height, uint32_t color);
 
 /**
  * Sets all pixels on the screen to black except the cursor

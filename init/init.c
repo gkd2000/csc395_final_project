@@ -23,7 +23,7 @@ void _start() {
   // Clear the screen
   // for(int i = 0; i < SCREEN_HEIGHT; i++) {
   //   for(int j = 0; j < SCREEN_WIDTH; j++) {
-  //     drawpixel(j, i, 0, 0, 0);
+  //     draw_rectangle(j, i, 0, 0, 0);
   //   }
   // }
   

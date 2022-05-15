@@ -207,8 +207,8 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
   case SYS_exit:
     return sys_exit(arg0);
   
-  case SYS_drawpixel:
-    return sys_drawpixel(arg0, arg1, arg2, arg3, arg4);
+  case SYS_draw_rectangle:
+    return sys_draw_rectangle(arg0, arg1, arg2, arg3, arg4);
 
   case SYS_readmouse:
     return sys_readmouse(arg0);

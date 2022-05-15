@@ -166,8 +166,17 @@ int64_t sys_exit(int status) {
  * \param b     blue component of the color
  * \returns 1
  */
-int64_t sys_drawpixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint8_t b) {
-  draw_pixel(x_pos, y_pos, r, g, b);
+int64_t sys_draw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t height, uint32_t color) {
+
+  if(width == 1 && height == 1) {
+    // Decompose hexadecimal color into red, green, and blue components
+    uint8_t red = (color & 0xFF0000) >> 16;
+    uint8_t green = (color & 0x00FF00) >> 8;
+    uint8_t blue = color & 0x0000FF;
+    draw_pixel(x_pos, y_pos, red, green, blue);
+  } else {
+    kdraw_rectangle(x_pos, y_pos, width, height, color);
+  }
 
   return 1;
 }

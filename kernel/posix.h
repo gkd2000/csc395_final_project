@@ -18,7 +18,7 @@
 #define SYS_mmap 2
 #define SYS_exec 3
 #define SYS_exit 4
-#define SYS_drawpixel 5
+#define SYS_draw_rectangle 5
 #define SYS_readmouse 6
 #define SYS_update_cursor_background 7
 #define SYS_gwrite 8
@@ -86,7 +86,7 @@ int64_t sys_exit(int status);
 void module_setup(struct stivale2_struct_tag_modules *modules);
 
 /**
- * Draw a pixel at the specified location on the screen
+ * Draw a rctangle at the specified location on the screen
  * \param x_pos x-coordinate (in pixels) of the pixel
  * \param y_pos y-coordinate (in pixels) of the pixel
  * \param r     red component of the color
@@ -94,7 +94,7 @@ void module_setup(struct stivale2_struct_tag_modules *modules);
  * \param b     blue component of the color
  * \returns 1
  */
-int64_t sys_drawpixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint8_t b);
+int64_t sys_draw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t height, uint32_t color);
 
 /**
  * Get the most recent data from the mouse

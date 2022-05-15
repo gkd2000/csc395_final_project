@@ -154,6 +154,19 @@ char* strncpy(char *dst, const char *src, size_t len);
 int atoi(const char *str);
 
 /**
+ * Mimics the standard C function atoi but with hexadecimal functionality
+ * Convert the initial portion of str to a hex integer representation,
+ * provided that initial portion consists of numbers.
+ * \param str a null-terminated string
+ * \returns the integer representation of the initial portion of str, until a 
+ *          non-numeral character is encountered.
+ *          If str does not begin with numbers, returns 0
+ */
+int atoi_x(const char* str);
+
+char* itoa_x(uint64_t value, char* arr);
+
+/**
  * Allocate sz bytes of memory
  * \param sz number of bytes to be allocated
  * \returns a pointer to the beginning of the allocated memory,

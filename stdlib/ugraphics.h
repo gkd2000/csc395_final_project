@@ -21,7 +21,7 @@
  * \param b     blue component of the color
  * \returns 1
  */
-int64_t drawpixel(uint32_t x_pos, uint32_t y_pos, uint8_t r, uint8_t g, uint8_t b);
+int64_t draw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t height, uint32_t color);
 
 /**
  * Get the most recent data from the mouse

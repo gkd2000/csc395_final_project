@@ -268,7 +268,7 @@ void update_cursor() {
   save_background(data->x_pos, data->y_pos);
 
   // Draw the cursor at the new position
-  draw_rectangle(data->x_pos, data->y_pos, CURSOR_WIDTH, CURSOR_HEIGHT, WHITE);
+  kdraw_rectangle(data->x_pos, data->y_pos, CURSOR_WIDTH, CURSOR_HEIGHT, WHITE);
 }
 
 /**
@@ -300,7 +300,7 @@ void initialize_cursor() {
   save_background(data->x_pos, data->y_pos);
 
   // Draw the cursor
-  draw_rectangle(data->x_pos, data->y_pos, CURSOR_WIDTH, CURSOR_HEIGHT, WHITE);
+  kdraw_rectangle(data->x_pos, data->y_pos, CURSOR_WIDTH, CURSOR_HEIGHT, WHITE);
 }
 
 // Idea: don't store click data to mousebytes (unprocessed mouse data). Instead, put it directly in data (processed one), since

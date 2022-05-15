@@ -127,6 +127,63 @@ int atoi(const char* str) {
 }
 
 /**
+ * Mimics the standard C function atoi but with hexadecimal functionality
+ * Convert the initial portion of str to a hex integer representation,
+ * provided that initial portion consists of numbers.
+ * \param str a null-terminated string
+ * \returns the integer representation of the initial portion of str, until a 
+ *          non-numeral character is encountered.
+ *          If str does not begin with numbers, returns 0
+ */
+int atoi_x(const char* str) {
+  int res = 0;
+  for (int i = 0; i < strlen(str); i++) {
+    if (str[i]>='0' && str[i] <= '9') {
+      res = res*16+str[i]-'0';
+    } else if(str[i]>='a' && str[i] <= 'f') {
+      res = res*16+str[i]-'a';
+    } else if(str[i]>='A' && str[i] <= 'F') {
+      res = res*16+str[i]-'A';
+    } else {
+      return res;
+    }
+  }
+  return res;
+}
+
+/**
+ * Mimics the nonstandard C function itoa but with hexadecimal functionality
+ * Convert a hex integer to a string representation, 
+ * provided that initial portion consists of numbers.
+ * \param value 
+ * \returns 
+ */
+char* itoa_x(uint64_t value, char* arr) {
+  // char* arr;
+  char arr_backwards[20];
+  size_t i;
+  for (i = 0; i < 20; i++) {
+    int cval = value%16;
+    if(cval >= 0 && cval <= 9) {
+      arr_backwards[i] = cval + '0';
+    } else {
+      arr_backwards[i] = cval - 10 + 'A';
+    }
+    value = value/16;
+    if (value == 0){
+      break;
+    }
+  }
+
+  for(int j = 0; j <= i; j++) {
+    arr[j] = arr_backwards[i - j];
+  }
+  arr[i+1] = '\0';
+
+  return arr;
+}
+
+/**
  * Mimics the standard C function strcmp
  * Lexographically compare the null-terminated strings s1 and s2. 
  * \param s1 the first string to compare
