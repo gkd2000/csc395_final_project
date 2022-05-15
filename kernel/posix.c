@@ -212,7 +212,7 @@ int64_t sys_update_cursor_background(int32_t color) {
  * \param size   number of characters to print. Must be less than the number of characters in buffer
  * \returns 1
  */
-int64_t sys_gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, intptr_t buffer, size_t size) {
+int64_t sys_gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, void* buffer, size_t size) {
   char* arr = (char*) buffer;
 
   for(size_t i = 0; i < size; i++) {

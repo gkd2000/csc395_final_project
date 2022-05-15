@@ -14,7 +14,7 @@ typedef struct mouse_data {
     bool middle_click;
 } mouse_data_t;
 
-int _start() {
+void _start() {
 
   // Make space for the data from the mouse
   mouse_data_t* user_mouse = malloc(sizeof(mouse_data_t));

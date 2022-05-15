@@ -42,7 +42,7 @@ int64_t update_cursor_background(int32_t color) {
  * \param size   number of characters to print. Must be less than the number of characters in buffer
  * \returns 1
  */
-int64_t gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, intptr_t buffer, size_t size) {
+int64_t gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, void* buffer, size_t size) {
   return syscall(SYS_gwrite, x_pos, y_pos, color, buffer, size);
 }
 

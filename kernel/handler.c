@@ -217,10 +217,10 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
     return sys_update_cursor_background(arg0);
 
   case SYS_gwrite:
-    return sys_gwrite(arg0, arg1, arg2, arg3, arg4);
+    return sys_gwrite(arg0, arg1, arg2, (void*) arg3, arg4);
 
   case SYS_gexec:
-    return sys_gexec(arg0, arg1);
+    return sys_gexec((char*) arg0, (char**) arg1);
 
   default:
     return 0;

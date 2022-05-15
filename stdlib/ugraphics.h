@@ -48,7 +48,7 @@ int64_t update_cursor_background(int32_t color);
  * \param size   number of characters to print. Must be less than the number of characters in buffer
  * \returns 1
  */
-int64_t gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, intptr_t buffer, size_t size);
+int64_t gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, void* buffer, size_t size);
 
 /**
  * In graphics mode, make the screen all black and then load and execute a program specified by file.
