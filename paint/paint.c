@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <ugraphics.h>
 
-#define NUM_COLORS 12
+#define NUM_COLORS 41
 
 // TODO: print active color in hexadecimal
 
@@ -26,9 +26,37 @@ void color_selection(uint32_t* color_values) {
   }
 }
 
+void setup_color_selection_pane(uint32_t active_color, uint32_t* color_values) {
+  // Draw the GRADIENT (:
+  uint32_t gradient_color = 0x707570;
+  for(int i = 0; i < SCREEN_WIDTH+1; i += 13) {
+    draw_rectangle(i, 0, 13, 97, gradient_color);
+    gradient_color += 0x010101;
+  }
+
+  // Draw separator for color selector pane
+  draw_rectangle(0, 97, SCREEN_WIDTH+1, 3, WHITE);
+
+  // Draw clear screen button
+  draw_rectangle(900, 25, 80, 50, 0x000000);
+  gwrite(920, 46, WHITE, "CLEAR", 5);
+
+  // Draw the color selection rectangles
+  color_selection(color_values);
+
+  draw_rectangle(25, 25, 50, 40, active_color);
+
+  // Write hexadecimal representation
+  char* active_color_chars = malloc(sizeof(char) * 20);
+  gwrite(25, 67, WHITE, itoa_x(active_color, active_color_chars, 6), 6);
+}
+
 void _start() {
 
-  uint32_t color_values[NUM_COLORS] = {0xFF0000, 0xFF8000, 0xFFFF00, 0x80FF00, 0x00FF00, 0x00FF80, 0x00FFFF, 0x0080FF, 0x0000FF, 0x8000FF, 0xFF00FF, 0xFF0080};
+  uint32_t color_values[NUM_COLORS] = {0x800000, 0xFF0000, 0xFF8080, 0x804000, 0xFF8000, 0xFFC000, 0x808000, 0xFFFF00, 0xFFFF80, 0x408000, 0x80FF00, 0xC0FF80, 
+                                       0x008000, 0x00FF00, 0x80FF80, 0x008040, 0x00FF80, 0x80FFC0, 0x008080, 0x00FFFF, 0x80FFFF, 0x004080, 0x0080FF, 0x80C0FF, 
+                                       0x000080, 0x0000FF, 0x8080FF, 0x400080, 0x8000FF, 0xC080FF, 0x800080, 0xFF00FF, 0xFF80FF, 0x800040, 0xFF0080, 0xFF80C0,
+                                       0x000000, 0x404040, 0x808080, 0xC0C0C0, 0xFFFFFF};
 
   // Make space for the data from the mouse
   mouse_data_t* user_mouse = malloc(sizeof(mouse_data_t));
@@ -42,21 +70,10 @@ void _start() {
 
   uint32_t active_color = 0xFF0000;
 
-  // Draw the color selection rectangles
-  color_selection(color_values);
-
-  draw_rectangle(25, 25, 50, 40, active_color);
-
-  // Write hexadecimal representation
-  char* active_color_chars = malloc(sizeof(char) * 20);
-  gwrite(25, 67, WHITE, itoa_x(active_color, active_color_chars, 6), 6);
+  setup_color_selection_pane(active_color, color_values);
 
   // Loop until the user presses q
   while(arr[0] != 'q') {
-
-    // for (int i = 0; i < 5; i++) {
-    //   draw_rectangle(40, 40, 40, 40, active_color);
-    // }
 
     // Get mouse data
     readmouse((uintptr_t) user_mouse);
@@ -75,6 +92,13 @@ void _start() {
         // Write hexadecimal representation
         char* active_color_chars = malloc(sizeof(char) * 20);
         gwrite(25, 67, WHITE, itoa_x(active_color, active_color_chars, 6), 6);
+      }
+
+      // If the mouse is on the clear button, clear the drawing space and re-draw the color selector
+      if(user_mouse->x_pos >= 900 && user_mouse->x_pos <= 980) {
+        draw_rectangle(0, 100, SCREEN_WIDTH, SCREEN_HEIGHT - 100, 0x000000);
+
+        setup_color_selection_pane(active_color, color_values);
       }
     }
 
