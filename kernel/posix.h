@@ -86,12 +86,15 @@ int64_t sys_exit(int status);
 void module_setup(struct stivale2_struct_tag_modules *modules);
 
 /**
- * Draw a rctangle at the specified location on the screen
- * \param x_pos x-coordinate (in pixels) of the pixel
- * \param y_pos y-coordinate (in pixels) of the pixel
- * \param r     red component of the color
- * \param g     green component of the color
- * \param b     blue component of the color
+ * Draw a rectangle with specified position, dimension, and color
+ * Note that for specifying position, the coordinate system starts at (0, 0) in the top left corner of the screen.
+ * The x-component increases as you move rightwards across the screen.
+ * The y-component increases as you move down the screen.
+ * \param x_pos  x-coordinate (in pixels) of the top left corner of the rectangle
+ * \param y_pos  y-coordinate (in pixels) of the top left corner of the rectangle
+ * \param width  width of the rectangle in pixels
+ * \param height height of the rectangle in pixels 
+ * \param color  color of the rectangle as a hexadecimal color code
  * \returns 1
  */
 int64_t sys_draw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t height, uint32_t color);

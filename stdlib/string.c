@@ -128,10 +128,10 @@ int atoi(const char* str) {
 
 /**
  * Mimics the standard C function atoi but with hexadecimal functionality
- * Convert the initial portion of str to a hex integer representation,
+ * Convert the initial portion of str to a hexadecimal representation,
  * provided that initial portion consists of numbers.
  * \param str a null-terminated string
- * \returns the integer representation of the initial portion of str, until a 
+ * \returns the hexadecimal representation of the initial portion of str, until a 
  *          non-numeral character is encountered.
  *          If str does not begin with numbers, returns 0
  */
@@ -153,12 +153,16 @@ int atoi_x(const char* str) {
 
 /**
  * Mimics the nonstandard C function itoa but with hexadecimal functionality
- * Convert a hex integer to a string representation, 
- * provided that initial portion consists of numbers.
- * \param value 
- * \returns 
+ * Convert an integer to a string containing its hexadecimal representation 
+ * with the specified number of digits
+ * \param value      the nonnegative integer value to convert to a string
+ * \param arr        character array to put the string represetntation in
+ * \param num_digits number of digits to include in the string. Must be at least as many
+ *                   digits as appear in value. If num_digits is greater than the number
+ *                   of digits in value, then leading zeroes are added.  
+ * \returns arr, a string contaning a hexadecimal representation of value
  */
-char* itoa_x(uint64_t value, char* arr) {
+char* itoa_x(uint64_t value, char* arr, int num_digits) {
   // char* arr;
   char arr_backwards[20];
   size_t i;
@@ -170,8 +174,8 @@ char* itoa_x(uint64_t value, char* arr) {
       arr_backwards[i] = cval - 10 + 'A';
     }
     value = value/16;
-    if (value == 0){
-      break;
+    if (value == 0 && i >= num_digits - 1){
+      break;  
     }
   }
 

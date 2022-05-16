@@ -49,7 +49,7 @@ void _start() {
 
   // Write hexadecimal representation
   char* active_color_chars = malloc(sizeof(char) * 20);
-  gwrite(25, 67, WHITE, itoa_x(active_color, active_color_chars), 6);
+  gwrite(25, 67, WHITE, itoa_x(active_color, active_color_chars, 6), 6);
 
   // Loop until the user presses q
   while(arr[0] != 'q') {
@@ -74,7 +74,7 @@ void _start() {
 
         // Write hexadecimal representation
         char* active_color_chars = malloc(sizeof(char) * 20);
-        gwrite(25, 67, WHITE, itoa_x(active_color, active_color_chars), 6);
+        gwrite(25, 67, WHITE, itoa_x(active_color, active_color_chars, 6), 6);
       }
     }
 
