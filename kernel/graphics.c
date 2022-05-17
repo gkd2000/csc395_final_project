@@ -54,10 +54,10 @@ void kdraw_rectangle(uint32_t x_pos, uint32_t y_pos, uint32_t width, uint32_t he
 
   // Truncate the rectangle if necessary to be completely on the screen
   if(x_pos + width >= global_framebuffer->framebuffer_width) {
-    width = global_framebuffer->framebuffer_width - x_pos - 1;
+    width = global_framebuffer->framebuffer_width - x_pos;
   }
   if(y_pos + height >= global_framebuffer->framebuffer_height) {
-    height = global_framebuffer->framebuffer_height - y_pos - 1;
+    height = global_framebuffer->framebuffer_height - y_pos;
   }
 
   // Draw the rectangle. Outer loop advances down the rows, inner loop advances across columns

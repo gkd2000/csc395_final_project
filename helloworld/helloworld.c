@@ -17,6 +17,7 @@ void _start() {
   // printf("Hello world %d\n", 12342);
 
   //-----------------------------------------------------------------------
+  // draw_rectangle(190, 190, 100, 50, WHITE);
 
   // Graphics mode hello world
   gwrite(200, 200, WHITE, "Hello world!", 12);

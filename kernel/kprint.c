@@ -142,12 +142,14 @@ void gkprint_c(uint8_t c, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
   // Masks corresponding to each column of an 8x8 character
   int mask[8]={1,2,4,8,16,32,64,128};
 
+  // Variable to store whether the current bit is on or off in the font
+  int multiplier;
+
   // Iterate over the 8x8 square where the character will go, filling in pixels 
   for(int w = 0; w < 8; w++) {
-    // int char_h = 8;
     for(int h = 0; h < 8; h++) {
-      draw_pixel(w+x_pos, h+y_pos, (letters[c][h] & mask[w]) * red, (letters[c][h] & mask[w]) * green, (letters[c][h] & mask[w]) * blue);
-      // char_h++;
+      multiplier = (letters[c][h] & mask[w]) >> w;
+      draw_pixel(w+x_pos, h+y_pos, multiplier * red, multiplier * green, multiplier * blue);
     }
   }
 }

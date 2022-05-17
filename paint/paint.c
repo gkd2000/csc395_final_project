@@ -18,14 +18,17 @@ typedef struct mouse_data {
     bool middle_click;
 } mouse_data_t;
 
+// Display all of the colors that we have available (hardcoded in the color_values array)
 void color_selection(uint32_t* color_values) {
-  //The current color display will NOT be updated in this function, as it is updated at different times
+  // The current color display will NOT be updated in this function, as it is updated at different times
 
   for(int i = 0; i < NUM_COLORS; i++) {
     draw_rectangle(80 + i * 20, 25, 15, 50,  color_values[i]);
   }
 }
 
+// Set up the top part of the screen where the user can see the current color, pick new
+// colors, and clear the screen
 void setup_color_selection_pane(uint32_t active_color, uint32_t* color_values) {
   // Draw the GRADIENT (:
   uint32_t gradient_color = 0x707570;
@@ -39,16 +42,17 @@ void setup_color_selection_pane(uint32_t active_color, uint32_t* color_values) {
 
   // Draw clear screen button
   draw_rectangle(900, 25, 80, 50, 0x000000);
-  gwrite(920, 46, WHITE, "CLEAR", 5);
+  gwrite(920, 46, 0xC0C0C0, "CLEAR", 5);
 
   // Draw the color selection rectangles
   color_selection(color_values);
 
+  // Draw the current/active color
   draw_rectangle(25, 25, 50, 40, active_color);
 
-  // Write hexadecimal representation
+  // Write hexadecimal representation of the current color
   char* active_color_chars = malloc(sizeof(char) * 20);
-  gwrite(25, 67, WHITE, itoa_x(active_color, active_color_chars, 6), 6);
+  gwrite(26, 67, WHITE, itoa_x(active_color, active_color_chars, 6), 6);
 }
 
 void _start() {
