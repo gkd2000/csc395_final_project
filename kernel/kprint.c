@@ -142,13 +142,15 @@ void gkprint_c(uint8_t c, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
   // Masks corresponding to each column of an 8x8 character
   int mask[8]={1,2,4,8,16,32,64,128};
 
-  // Variable to store whether the current bit is on or off in the font
+  // Variable to store whether the current bit in the font bitmask is on or off
   int multiplier;
 
   // Iterate over the 8x8 square where the character will go, filling in pixels 
   for(int w = 0; w < 8; w++) {
     for(int h = 0; h < 8; h++) {
+      // Find the entry in the bitmask (will be 0 or 1)
       multiplier = (letters[c][h] & mask[w]) >> w;
+      // Draw the pixel to the screen in the given color if multiplier is 1, or black if multiplier is 0
       draw_pixel(w+x_pos, h+y_pos, multiplier * red, multiplier * green, multiplier * blue);
     }
   }
@@ -181,6 +183,7 @@ void gkprint_d(uint64_t value, uint32_t x_pos, uint32_t y_pos, uint32_t color) {
     }
   }
 
+  // Print the digits we recorded
   for(size_t i = counter; i < 20; i++) {
     if (arr[i] >= 0 && arr[i] <= 9) {
       gkprint_c(48 + arr[i], x_pos + (i - counter) * 8, y_pos, color);

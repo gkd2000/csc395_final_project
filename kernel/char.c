@@ -144,19 +144,6 @@ char kgetc(bool blocking) {
   return c;
 }
 
-// OLD kgetc
-/*char kgetc() {
-  char c;
-  // Loop until there is something in the buffer
-  while(count == 0);
-
-  // There's something in the buffer! Get it
-  c = char_buffer[start];
-  start = (start + 1) % BUFFER_SIZE;
-  count--;
-  return c;
-}*/
-
 /**
  * Read a line of characters from the keyboard. Read characters until the buffer fills or a newline
  * character is read. If input ends with a newline, the newline character is stored in output. The

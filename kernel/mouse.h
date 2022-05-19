@@ -48,7 +48,6 @@ typedef struct mouse_bytes {
 
 mouse_data_t* data;
 mouse_bytes_t* mousebytes;
-bool restore_background; //> Probably take this out, unused right now, but part of an alternative solution to overwriting saved_pixels
 
 /**
  * Source: https://forum.osdev.org/viewtopic.php?f=1&t=49913&hilit=mouse, user elrond06

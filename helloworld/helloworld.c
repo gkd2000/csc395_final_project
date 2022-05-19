@@ -24,7 +24,7 @@ void _start() {
   char buffer[1];
 
   // Loop until the user quits the program (with the 'q' key)
-  while(buffer[0] != 'q') {
+  while(buffer[0] != 'q' && buffer[0] != 'Q') {
     read(STDIN, buffer, 1);
   }
   exit(0);

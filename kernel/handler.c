@@ -137,14 +137,6 @@ __attribute__((interrupt)) void control_protection_exception_handler_ec(interrup
 
 // Handler for a keyboard event
 __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx) {
-  // x_start += 8;
-  // if(x_start == 1016) {
-  //   x_start = 0;
-  //   y_start += 8;
-  // }
-  // gkprint_c('k', x_start, y_start, WHITE);
-
-  
 
   // Read the character and prepare to accept new inputs
   char c = getchar(inb(0x60));
@@ -158,31 +150,17 @@ __attribute__((interrupt)) void irq1_interrupt_handler(interrupt_context_t *ctx)
   
 }
 
-int num_mouse_interrupts = 0;
-
 // Handler for mouse event
 __attribute__((interrupt)) void irq12_interrupt_handler(interrupt_context_t *ctx) {
 
-  // x_start += 8;
-  // if(x_start == 1016) {
-  //   x_start = 0;
-  //   y_start += 8;
-  // }
-
-  // Read the data and prepare to accept new inputs
+  // Read the data and send it to be processed
   uint8_t c = inb(0x60);
   store_mouse_data(c);
   
+  // Prepare to accept new inputs
   outb(PIC1_COMMAND, PIC_EOI);
   outb(PIC2_COMMAND, PIC_EOI);
-  // char d = getchar(inb(0x60));
-  // outb(PIC1_COMMAND, PIC_EOI);
-  // outb(PIC2_COMMAND, PIC_EOI);
-  // char e = getchar(inb(0x60));
-  // outb(PIC1_COMMAND, PIC_EOI);
-  // outb(PIC2_COMMAND, PIC_EOI);
 }
-
 
 /**
  * Handler for a system call.

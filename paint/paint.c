@@ -6,10 +6,10 @@
 #include <unistd.h>
 #include <ugraphics.h>
 
-#define NUM_COLORS 41
+// Number of colors in the palette at the top of the screen
+#define NUM_COLORS 41 
 
-// TODO: print active color in hexadecimal
-
+// Structure to store processed mouse data, identical to the kernel's structure for the same purpose
 typedef struct mouse_data {
     int32_t x_pos;
     int32_t y_pos;
@@ -57,10 +57,12 @@ void setup_color_selection_pane(uint32_t active_color, uint32_t* color_values) {
 
 void _start() {
 
-  uint32_t color_values[NUM_COLORS] = {0x800000, 0xFF0000, 0xFF8080, 0x804000, 0xFF8000, 0xFFC000, 0x808000, 0xFFFF00, 0xFFFF80, 0x408000, 0x80FF00, 0xC0FF80, 
-                                       0x008000, 0x00FF00, 0x80FF80, 0x008040, 0x00FF80, 0x80FFC0, 0x008080, 0x00FFFF, 0x80FFFF, 0x004080, 0x0080FF, 0x80C0FF, 
-                                       0x000080, 0x0000FF, 0x8080FF, 0x400080, 0x8000FF, 0xC080FF, 0x800080, 0xFF00FF, 0xFF80FF, 0x800040, 0xFF0080, 0xFF80C0,
-                                       0x000000, 0x404040, 0x808080, 0xC0C0C0, 0xFFFFFF};
+  // 
+  uint32_t color_values[NUM_COLORS] = {0x800000, 0xFF0000, 0xFF8080, 0x804000, 0xFF8000, 0xFFC000, 0x808000, 0xFFFF00, 0xFFFF80, // red, orange, and yellow
+                                       0x408000, 0x80FF00, 0xC0FF80, 0x008000, 0x00FF00, 0x80FF80, 0x008040, 0x00FF80, 0x80FFC0, // greens
+                                       0x008080, 0x00FFFF, 0x80FFFF, 0x004080, 0x0080FF, 0x80C0FF, 0x000080, 0x0000FF, 0x8080FF, // blues
+                                       0x400080, 0x8000FF, 0xC080FF, 0x800080, 0xFF00FF, 0xFF80FF, 0x800040, 0xFF0080, 0xFF80C0, // purple, magenta, pink
+                                       0x000000, 0x404040, 0x808080, 0xC0C0C0, 0xFFFFFF}; // white, grey, black
 
   // Make space for the data from the mouse
   mouse_data_t* user_mouse = malloc(sizeof(mouse_data_t));
@@ -72,24 +74,31 @@ void _start() {
   char arr[1];
   read(STDIN_NONBLOCKING, arr, 1);
 
+  // Initialize active color to red
   uint32_t active_color = 0xFF0000;
 
+  // Draw the color palette
   setup_color_selection_pane(active_color, color_values);
 
   // Loop until the user presses q
-  while(arr[0] != 'q') {
+  while(arr[0] != 'q' && arr[0] != 'Q') {
 
     // Get mouse data
     readmouse((uintptr_t) user_mouse);
 
-    // If the mouse is clicked, draw behind the cursor (currently in red but maybe we can support other colors soon)
+    // Check if the mouse is clicked
     if(user_mouse->left_click && user_mouse->y_pos > 100) {
+      // We're on the canvas. Draw behind the cursor in the active color
       update_cursor_background(active_color);
-    } else if(user_mouse->left_click && user_mouse->y_pos <= 75 && user_mouse->y_pos >= 25) { // If we are in the color selection area, select a color!
+    } else if(user_mouse->left_click && user_mouse->y_pos <= 75 && user_mouse->y_pos >= 25) { 
+      //  We are in the color selection area, so select a color!
+
+      // Compute the index of the color array corresponding to where the click occurred 
       int potential_index = (user_mouse->x_pos - 80) / 20;
 
-      // If the proposed index is within bounds of the array, set the active color to the value within the array
+      // If the proposed index is within bounds of the array, switch to the appropriate color 
       if(potential_index >= 0 && potential_index < NUM_COLORS) {
+        // Set the active color to the value within the array
         active_color = color_values[potential_index];
         draw_rectangle(25, 25, 50, 40, active_color);
 
@@ -111,5 +120,6 @@ void _start() {
     
   }
 
+  // We have read a 'q' keypress from the user. Exit.
   exit(0);
 }

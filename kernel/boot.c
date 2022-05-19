@@ -111,10 +111,7 @@ void term_setup(struct stivale2_struct *hdr) {
 
 void _start(struct stivale2_struct *hdr) {
   // We've booted! Let's start processing tags passed to use from the bootloader
-  // term_setup(hdr);
   global_hdr = hdr;
-
-  
 
   // Set up the interrupt descriptor table and global descriptor table
   idt_setup();
@@ -129,101 +126,24 @@ void _start(struct stivale2_struct *hdr) {
   //Set up framebuffer
   struct stivale2_struct_tag_framebuffer *framebuffer = find_tag(hdr, STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID);
   global_framebuffer = framebuffer;
-  
-  // TODO: Try to map something
-  // if(vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, framebuffer->framebuffer_addr + virtual->addr, true, true, false)) {
-  //   pixel = (unsigned char*) (framebuffer->framebuffer_addr + virtual->addr);
-  // } else {
-  //   pixel = (unsigned char*) framebuffer->framebuffer_addr;
-  // }
-
-  // Potential way to debug: have an if statement that assigns pixel as on line 130, which crashes
-  // the kernel. then we'll know the outcome of the if.
-
-  // This line causes a page fault or something else that restarts the kernel
-  // unsigned char* pixel = (unsigned char*) (framebuffer->framebuffer_addr + virtual->addr);
-
-  // unsigned char* pixel = (unsigned char*)0xA0000;
-
-
-  // for(int i = 0; i < framebuffer->framebuffer_width; i++) {
-  //   for(int j = 0; j < framebuffer->framebuffer_height; j++) {
-  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * 
-  //           (framebuffer->framebuffer_width * (framebuffer->framebuffer_bpp / 8)))] = 2;
-  //   }
-  // }
-
-  // for(int i = 10; i < 40; i++) {
-  //   for(int j = 10; j < 20; j++) {
-  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch)] = 0;
-  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 1] = 0;
-  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 2] = 255;
-  //   }
-  // }
-// hello
-  // for(int i = 40; i < 50; i++) {
-  //   for(int j = 10; j < 40; j++) {
-  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch)] = 0;
-  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 1] = 255;
-  //     pixel[i * (framebuffer->framebuffer_bpp / 8) + (j * framebuffer->framebuffer_pitch) + 2] = 0;
-  //   }
-  // }
-
-  // while(1){}
-
-  // unsigned char* location = (unsigned char*)0xA0000 + 320 * 10 /* y */ + 10 /* x */;
-  // *location = 4;
 
   // Set up the free list and enable write protection
   freelist_init(virtual, physical);
-
-  // Initialize the terminal
-  term_init();
   
+  // Initialize the PIC
   pic_init();
-  pic_unmask_irq(1);
-  pic_unmask_irq(2);
-  pic_unmask_irq(12);
-
-  //outb(0x64, 0x20);
+  pic_unmask_irq(1);  //> Unmask for keyboard interrupts
+  pic_unmask_irq(2);  //> Unmask to access the secondary PIC
+  pic_unmask_irq(12); //> Unmask for mouse interrupts (on the secondary PIC)
 
   // Unmap the lower half of memory
   uintptr_t root = read_cr3() & 0xFFFFFFFFFFFFF000;
   unmap_lower_half(root);
-
-  // int red = 255;
-  // int green = 255;
-  // int blue = 255;
-  // for(int i = 0; i < 600; i++) {
-  //   for(int j = 0; j < 600; j++) {
-  //     // if(j % 3 == 0) {
-  //     //   red -= 1;
-  //     // } else if(j % 3 == 1) {
-  //     //   green -= 1;
-  //     // } else {
-  //     //   blue -= 1;
-  //     // }
-  //     draw_pixel(i, j, red, green, blue);
-  //   }
-  //   if(red > 0) {
-  //     red--;
-  //   } else if(green > 0) {
-  //     green--;
-  //   } else {
-  //     blue--;
-  //   }
-  // }
-
-  // Print dimensions of the screen in pixels
-  // gkprint_c('W', 286, 150, WHITE);
-  // gkprint_c('H', 286, 158, WHITE);
-  // gkprint_d(framebuffer->framebuffer_width, 300, 150, WHITE);
-  // gkprint_d(framebuffer->framebuffer_height, 300, 158, WHITE);
-
-  // draw_rectangle(150, 150, 50, 50, 0xFF0000);
-  // draw_rectangle(1000, 700, 100, 100, 0x3498eb);
   
+  // Initialize the cursor and its associated fields
   initialize_cursor();
+
+  // Set up the mouse to send interrupts on IRQ12
   initialize_mouse();
 
   // Get information about the modules we've asked the bootloader to load
@@ -231,7 +151,12 @@ void _start(struct stivale2_struct *hdr) {
   // Save information about the modules to be accessed later when we make an exec system call
   module_setup(modules);
 
-  // sys_exec("paint", NULL);
+  // Launch the init program
+  for (int i = 0; i < modules->module_count; i++) {
+    if (!strcmp(modules->modules[i].string, "init")) {
+      run_program(modules->modules[i].begin);
+    }
+  }
 
   // Test for mmap (lines 125 - 143). The code generates a page fault if mmap is not called.
   // Map to a specified address
@@ -270,13 +195,6 @@ void _start(struct stivale2_struct *hdr) {
   // Generates a page fault when accessed from user mode (commented lines of helloworld)
   intptr_t higher_half_addr = 0xffff800000001000;
   vm_map(root, higher_half_addr, 0, 1, 0); */
-
-  // Launch the init program
-  for (int i = 0; i < modules->module_count; i++) {
-    if (!strcmp(modules->modules[i].string, "init")) {
-      run_program(modules->modules[i].begin);
-    }
-  }
 
   halt();
 }

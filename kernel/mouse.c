@@ -1,11 +1,5 @@
 #include "mouse.h"
 
-// We think the drawing is so sporadic because things are slow, but we aren't sure
-// TODO: optimize looping in save_background
-//       change what the newest system call does so we aren't writing to saved_pixels twice. then maybe it won't be as slow
-
-int test_x = 50;
-int test_y = 50;
 int mouse_counter; //> Keep track of which byte in the 3-byte sequence we are receiving from the mouse
 
 // Array for the pixels that were most recently overwritten to draw the cursor. One index per pixel, with
@@ -102,7 +96,7 @@ void initialize_mouse() {
   mouse_read(); //> Read the ACK byte
 }
 
-// Stuff below here is stuff we wrote
+// Functions below here were written by us
 
 /**
  * Update the saved_pixels array, which stores what will be drawn in place of the
@@ -154,51 +148,11 @@ void save_background(int32_t x_start, int32_t y_start) {
   }
 }
 
-/*
-void overwrite_background(int32_t x_start, int32_t y_start) {
-  // unsigned char* framebuffer_start = (unsigned char*) global_framebuffer->framebuffer_addr;
-  int index;
-  // Idea: reverse the order of the for loops. Then in the inner for loop we can just increment index, and then in the 
-  // outer for loop we increment index by the amount of pixels in a row, and then subtract however many we need to get to the 
-  // left of the cursor (because just adding the row will put us at the right)
-  for(int i = 0; i < CURSOR_WIDTH; i++) {
-    for(int j = 0; j < CURSOR_HEIGHT; j++) {
-      // index = (x_start + i) * (global_framebuffer->framebuffer_bpp / 8) + ((y_start + j) * global_framebuffer->framebuffer_pitch);
-      uint32_t blue = 0;
-      uint32_t green = 0;
-      uint32_t red = 255;
-      uint32_t color = blue | green | red;
-      saved_pixels[i + j * CURSOR_WIDTH] = color;
-    }
-  }
-}*/
-
-/**
- * For logging purposes. Print the RGB color code given at the specified vertical offset. Overwrites 
- * whatever was there before so that stray digits don't stick around
- */
-void print_color_code(uint8_t red, uint8_t green, uint8_t blue, int vert_offset) {
-  gkprint_d(vert_offset, 700, 200 + (vert_offset * 8), WHITE);
-  gkprint_c(' ', 758, 200 + (vert_offset * 8), WHITE);
-  gkprint_c(' ', 766, 200 + (vert_offset * 8), WHITE);
-  gkprint_d(red, 750, 200 + (vert_offset * 8), WHITE);
-  gkprint_c(' ', 808, 200 + (vert_offset * 8), WHITE);
-  gkprint_c(' ', 816, 200 + (vert_offset * 8), WHITE);
-  gkprint_d(green, 800, 200 + (vert_offset * 8), WHITE);
-  gkprint_c(' ', 856, 200 + (vert_offset * 8), WHITE);
-  gkprint_c(' ', 866, 200 + (vert_offset * 8), WHITE);
-  gkprint_d(blue, 850, 200 + (vert_offset * 8), WHITE);
-}
-
 /**
  * Move the cursor to a new location on the screen determined by the mouse's position, and
  * restore the background previously obscured by the cursor.
  */
 void update_cursor() {
-  // Print for logging
-  // gkprint_c('r', 750, 185, WHITE);
-  // gkprint_c('g', 800, 185, WHITE);
-  // gkprint_c('b', 850, 185, WHITE);
 
   // Store the current x and y position of the cursor
   int x_pos = data->x_pos;
@@ -211,16 +165,11 @@ void update_cursor() {
   // Loop over the saved_pixels array to restore the background where the cursor currently is
   for(int i = 0; i < CURSOR_WIDTH; i++) {
     for(int j = 0; j < CURSOR_HEIGHT; j++) {
+      // Decompose hex into RGB
       blue = saved_pixels[i + j * CURSOR_WIDTH] & 0x0000FF;
       green = (saved_pixels[i + j * CURSOR_WIDTH] & 0x00FF00) >> 8;
       red = (saved_pixels[i + j * CURSOR_WIDTH] & 0xFF0000) >> 16;
-      // print_color_code(red, green, blue, i + j * CURSOR_WIDTH);
-      // gkprint_d(i + j * CURSOR_WIDTH, 700, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
-      // gkprint_c(' ', 758, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
-      // gkprint_c(' ', 766, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
-      // gkprint_d(red, 750, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
-      // gkprint_d(green, 800, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
-      // gkprint_d(blue, 850, 200 + ((i + j * CURSOR_WIDTH) * 8), WHITE);
+      // Draw to the screen
       draw_pixel(i + x_pos, j + y_pos, red, green, blue);
     }
   }
@@ -255,15 +204,6 @@ void update_cursor() {
     data->y_pos = global_framebuffer->framebuffer_height - (CURSOR_HEIGHT + 1);
   }
 
-  // gkprint_d(data->x_pos, 500, 300, WHITE);
-  // gkprint_d(data->y_pos, 500, 308, WHITE);
-
-  // if(restore_background) {
-  //   save_background(data->x_pos, data->y_pos);
-  // } else {
-  //   overwrite_background(data->x_pos, data->y_pos);
-  // }
-
   // Save the pixels that occur at the new mouse position (where we're about to move the cursor to)
   save_background(data->x_pos, data->y_pos);
 
@@ -294,7 +234,6 @@ void initialize_cursor() {
   data->middle_click = false;
 
   mouse_counter = 0; //> Keeps track of which byte in a 3-byte sequence we're receiving
-  restore_background = true; //> 
 
   // Save the background where the cursor will be initially drawn 
   save_background(data->x_pos, data->y_pos);
@@ -303,8 +242,6 @@ void initialize_cursor() {
   kdraw_rectangle(data->x_pos, data->y_pos, CURSOR_WIDTH, CURSOR_HEIGHT, WHITE);
 }
 
-// Idea: don't store click data to mousebytes (unprocessed mouse data). Instead, put it directly in data (processed one), since
-// we don't have to process clicks further than that.
 /**
  * Given a byte from the mouse, store it in the appropriate place in the struct which holds raw mouse data.
  * \param packet a byte read from the mouse (one in a 3-byte sequence)
