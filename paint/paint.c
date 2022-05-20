@@ -57,7 +57,7 @@ void setup_color_selection_pane(uint32_t active_color, uint32_t* color_values) {
 
 void _start() {
 
-  // 
+  // Colors displayed in the palette
   uint32_t color_values[NUM_COLORS] = {0x800000, 0xFF0000, 0xFF8080, 0x804000, 0xFF8000, 0xFFC000, 0x808000, 0xFFFF00, 0xFFFF80, // red, orange, and yellow
                                        0x408000, 0x80FF00, 0xC0FF80, 0x008000, 0x00FF00, 0x80FF80, 0x008040, 0x00FF80, 0x80FFC0, // greens
                                        0x008080, 0x00FFFF, 0x80FFFF, 0x004080, 0x0080FF, 0x80C0FF, 0x000080, 0x0000FF, 0x8080FF, // blues

@@ -252,91 +252,36 @@ void store_mouse_data(uint8_t packet) {
       // First byte in 3-byte sequence
       mousebytes->left = packet & 0x1; //> Is the mouse being left-clicked?
       data->left_click = mousebytes->left;
-      // if(mousebytes->left == 1) {
-      //   // gkprint_c('L', 200, 200, WHITE);
-      //   data->left_click = true;
-      // } else {
-      //   // gkprint_c('N', 200, 200, WHITE);
-      //   data->left_click = false;
-      // }
+
       mousebytes->right = (packet & 0x2) >> 1; //> Is the mouse being right-clicked?
       data->right_click = mousebytes->right;
-      // if(mousebytes->right == 1) {
-      //   // gkprint_c('R', 200, 208, WHITE);
-      //   data->right_click = true;
-      // } else {
-      //   // gkprint_c('S', 200, 208, WHITE);
-      //   data->right_click = false;
-      // }
+
       mousebytes->middle = (packet & 0x4) >> 2; //> Is the mouse being middle-clicked?
       data->middle_click = mousebytes->middle;
-      // if(mousebytes->middle == 1) {
-      //   // gkprint_c('M', 200, 216, WHITE);
-      //   data->middle_click = true;
-      // } else {
-      //   // gkprint_c('O', 200, 216, WHITE);
-      //   data->middle_click = false;
-      // }
 
       // Testing unused bit - it should ALWAYS be 1. If the unused bit is not 1, skip bytes until we are back in alignment
       if(((packet & 0x8) >> 3) == 0) {
-        //Error checking
-        // gkprint_c('E', 500, 200, WHITE);
-        // gkprint_c('R', 508, 200, WHITE);
-        // gkprint_c('R', 516, 200, WHITE);
-
         return;
       }
 
       mousebytes->x_sb = (packet & 0x10) >> 4; //> Indicates sign (positive or negative) of direction of x-movement
-      // gkprint_d(mousebytes->x_sb, 500, 500, WHITE);
-      // for(int i = 600; i < 600 + CURSOR_WIDTH; i++) {
-      //   for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
-      //     if(mousebytes->x_sb == 1) {
-      //       draw_pixel(i, j, 0, 255, 0);
-      //     } else {
-      //       draw_pixel(i, j, 0, 0, 255);
-      //     }
-      //   }
-      // }
+
       mousebytes->y_sb = (packet & 0x20) >> 5; //> Indicates sign (positive or negative) of direction of y-movement
-      // gkprint_d(mousebytes->y_sb, 508, 500, WHITE);
-      // for(int i = 650; i < 650 + CURSOR_WIDTH; i++) {
-      //   for(int j = 600 + 50; j < 600 + 40 + CURSOR_HEIGHT; j++) {
-      //     if(mousebytes->y_sb == 1) {
-      //       draw_pixel(i+40, j+40, 255, 0, 0);
-      //     } else {
-      //       draw_pixel(i+40, j+40, 255, 0, 255);
-      //     }
-      //   }
-      // }
-      // mousebytes->x_overflow = packet & 0x40;
 
-      // mousebytes->y_overflow = packet & 0x80;
-
+      // Increment to keep track of which byte we're receiving
       mouse_counter++;
       break;
     case 1 :
       // Second byte in 3-byte sequence
       mousebytes->x_move = packet;
-      // gkprint_c(' ', 508, 600, WHITE);
-      // gkprint_c(' ', 516, 600, WHITE);
-      // gkprint_d(mousebytes->x_move, 500, 600, WHITE);
       mouse_counter++;
       break;
     case 2 :
       // Third byte in 3-byte sequence
       mousebytes->y_move = packet;
-      // gkprint_c(' ', 508, 608, WHITE);
-      // gkprint_c(' ', 516, 608, WHITE);
-      // gkprint_d(mousebytes->y_move, 500, 608, WHITE);
+      // Reset the counter; the next byte should be the first of three
       mouse_counter = 0;
-      // for(int i = test_x; i < test_x + CURSOR_WIDTH; i++) {
-      //   for(int j = test_y; j < test_y + CURSOR_HEIGHT; j++) {
-      //     draw_pixel(i, j, 0, 0, 255);
-      //   }
-      // }
-      // test_x += 5;
+
       // We have received a complete packet of data from the mouse! Process it
       update_cursor();
       break;

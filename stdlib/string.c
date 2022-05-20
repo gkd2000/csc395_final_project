@@ -136,15 +136,19 @@ int atoi(const char* str) {
  *          If str does not begin with numbers, returns 0
  */
 int atoi_x(const char* str) {
-  int res = 0;
+  int res = 0; // Stores the result
   for (int i = 0; i < strlen(str); i++) {
     if (str[i]>='0' && str[i] <= '9') {
-      res = res*16+str[i]-'0';
+      // Numeral digit: add it as a digit at the end of res
+      res = (res * 16) + (str[i] - '0');
     } else if(str[i]>='a' && str[i] <= 'f') {
-      res = res*16+str[i]-'a';
+      // Letter digit: add the corresponding value to res * 16 
+      res = (res * 16) + (str[i] - 'a');
     } else if(str[i]>='A' && str[i] <= 'F') {
-      res = res*16+str[i]-'A';
+      // Letter digit: add the corresponding value to res * 16 
+      res = (res * 16) + (str[i] - 'A');
     } else {
+      // Next entry in str is not a hexadecimal digit. Return what we have
       return res;
     }
   }
@@ -162,23 +166,29 @@ int atoi_x(const char* str) {
  *                   of digits in value, then leading zeroes are added.  
  * \returns arr, a string contaning a hexadecimal representation of value
  */
-char* itoa_x(uint64_t value, char* arr, int num_digits) {
-  // char* arr;
-  char arr_backwards[20];
+char* itoa_x(uint64_t value, char* arr, int num_digits) { 
+  char arr_backwards[20]; //> Will store the correct string, but backwards
   size_t i;
+  
+  // Get the digits of value in hexadecimal, from least to most significant, and put them in arr_backwards
   for (i = 0; i < 20; i++) {
-    int cval = value%16;
+    int cval = value % 16; // Get the least significant digit
     if(cval >= 0 && cval <= 9) {
+      // Current digit is a numeral
       arr_backwards[i] = cval + '0';
     } else {
+      // Current digit is a letter (A through F)
       arr_backwards[i] = cval - 10 + 'A';
     }
-    value = value/16;
+    // Divide to get rid of the digit we just processed
+    value = value / 16;
+    // Check if we have processed all the digits in value and written the proper number of leading zeroes
     if (value == 0 && i >= num_digits - 1){
       break;  
     }
   }
 
+  // Fill arr with the correctly ordered elements of arr_backwards
   for(int j = 0; j <= i; j++) {
     arr[j] = arr_backwards[i - j];
   }

@@ -228,6 +228,7 @@ int64_t sys_update_cursor_background(int32_t color) {
 int64_t sys_gwrite(uint32_t x_pos, uint32_t y_pos, uint32_t color, void* buffer, size_t size) {
   char* arr = (char*) buffer;
 
+  // Iterate through the given buffer, printing as we go
   for(size_t i = 0; i < size; i++) {
     gkprint_c(arr[i], x_pos + (8*i), y_pos, color);
   }
